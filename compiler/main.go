@@ -1,10 +1,10 @@
 package main
 
 import (
-	// Ajusta si tu módulo se llama diferente
 	"compiler/Errores"
 	compiler "compiler/parser"
 	"fmt"
+	"os"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -17,52 +17,82 @@ func (v *EvalVisitor) Visit(tree antlr.ParseTree) interface{} {
 	return tree.Accept(v)
 }
 
+// Visit the root program node
 func (v *EvalVisitor) VisitPrograma(ctx *compiler.ProgramaContext) interface{} {
-	return v.Visit(ctx.Expr())
-}
-
-func (v *EvalVisitor) VisitAddSub(ctx *compiler.AddSubContext) interface{} {
-	left := v.Visit(ctx.Expr(0)).(int)
-	right := v.Visit(ctx.Expr(1)).(int)
-
-	switch ctx.GetOp().GetTokenType() {
-	case compiler.VLexerOP_SUMA:
-		return left + right
-	case compiler.VLexerOP_RESTA:
-		return left - right
+	for _, stmt := range ctx.AllStmt() {
+		v.Visit(stmt)
 	}
-	return 0
+	return nil
 }
 
-func (v *EvalVisitor) VisitMulDiv(ctx *compiler.MulDivContext) interface{} {
-	left := v.Visit(ctx.Expr(0)).(int)
-	right := v.Visit(ctx.Expr(1)).(int)
+// Implementaciones mínimas para evitar nil pointer
 
-	switch ctx.GetOp().GetTokenType() {
-	case compiler.VLexerOP_MULT:
-		return left * right
-	case compiler.VLexerOP_DIV:
-		return left / right
-	}
-	return 0
+func (v *EvalVisitor) VisitStmtDecl(ctx *compiler.StmtDeclContext) interface{} {
+	fmt.Println("→ Declaración detectada.")
+	return nil
 }
 
-func (v *EvalVisitor) VisitInt(ctx *compiler.IntContext) interface{} {
-	var value int
-	fmt.Sscanf(ctx.GetText(), "%d", &value)
-	return value
+func (v *EvalVisitor) VisitStmtAssign(ctx *compiler.StmtAssignContext) interface{} {
+	fmt.Println("→ Asignación detectada.")
+	return nil
 }
 
-func (v *EvalVisitor) VisitParens(ctx *compiler.ParensContext) interface{} {
-	return v.Visit(ctx.Expr())
+func (v *EvalVisitor) VisitStmtFuncCall(ctx *compiler.StmtFuncCallContext) interface{} {
+	fmt.Println("→ Llamada a función detectada.")
+	return nil
+}
+
+func (v *EvalVisitor) VisitStmtIf(ctx *compiler.StmtIfContext) interface{} {
+	fmt.Println("→ Sentencia if detectada.")
+	return nil
+}
+
+func (v *EvalVisitor) VisitStmtFor(ctx *compiler.StmtForContext) interface{} {
+	fmt.Println("→ Bucle for detectado.")
+	return nil
+}
+
+func (v *EvalVisitor) VisitStmtFuncDecl(ctx *compiler.StmtFuncDeclContext) interface{} {
+	fmt.Println("→ Función declarada.")
+	return nil
+}
+
+func (v *EvalVisitor) VisitStmtStructDecl(ctx *compiler.StmtStructDeclContext) interface{} {
+	fmt.Println("→ Struct declarado.")
+	return nil
+}
+
+func (v *EvalVisitor) VisitStmtFlow(ctx *compiler.StmtFlowContext) interface{} {
+	fmt.Println("→ Sentencia de flujo (return, break, continue) detectada.")
+	return nil
+}
+
+func (v *EvalVisitor) VisitPrintCall(ctx *compiler.PrintCallContext) interface{} {
+	fmt.Println("→ print() detectado.")
+	return nil
+}
+
+func (v *EvalVisitor) VisitPrintLnCall(ctx *compiler.PrintLnCallContext) interface{} {
+	fmt.Println("→ println() detectado.")
+	return nil
 }
 
 func main() {
-	input := antlr.NewInputStream("100 + 4 * (2 - 1) @ ")
+	if len(os.Args) < 2 {
+		fmt.Println("Uso: go run main.go <archivo.vch>")
+		return
+	}
+	archivo := os.Args[1]
+	contenido, err := os.ReadFile(archivo)
+	if err != nil {
+		fmt.Println("Error al leer archivo:", err)
+		return
+	}
+
+	input := antlr.NewInputStream(string(contenido))
 
 	errorLexico := Errores.NewErrorLexico()
 	lexer := compiler.NewVLexer(input)
-
 	lexer.RemoveErrorListeners()
 	lexer.AddErrorListener(errorLexico)
 
@@ -73,26 +103,21 @@ func main() {
 	parser.RemoveErrorListeners()
 	parser.SetErrorHandler(Errores.NewErrorPersonalizado())
 	parser.AddErrorListener(syntaxError)
-	parser.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 
 	tree := parser.Programa()
 
+	fmt.Println("\n--- Árbol Sintáctico ---")
+	fmt.Println(tree.ToStringTree(nil, parser))
+
 	visitor := &EvalVisitor{}
-	result := visitor.Visit(tree)
+	visitor.Visit(tree)
 
-	fmt.Println("Resultado:", result)
-
-	// Imprimir los errores léxicos detectados
 	fmt.Println("\n--- Errores Léxicos Detectados ---")
 	errores := errorLexico.TablaErrores.GetErrors()
 	if len(errores) > 0 {
 		for i, err := range errores {
-			fmt.Printf("No. %d:\n", i+1)
-			fmt.Printf("  Línea: %d\n", err.Linea)
-			fmt.Printf("  Columna: %d\n", err.Columna)
-			fmt.Printf("  Mensaje: %s\n", err.Descripcion)
-			fmt.Printf("  Tipo: %s\n", err.Tipo)
-			fmt.Println()
+			fmt.Printf("No. %d:\n  Línea: %d\n  Columna: %d\n  Mensaje: %s\n  Tipo: %s\n\n",
+				i+1, err.Linea, err.Columna, err.Descripcion, err.Tipo)
 		}
 	} else {
 		fmt.Println("No se detectaron errores léxicos")
