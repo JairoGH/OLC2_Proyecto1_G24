@@ -1,4 +1,4 @@
-// Code generated from parser/vLexer.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from parser/VLexer.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
 package compiler
 
@@ -14,7 +14,7 @@ var _ = fmt.Printf
 var _ = sync.Once{}
 var _ = unicode.IsLetter
 
-type vLexer struct {
+type VLexer struct {
 	*antlr.BaseLexer
 	channelNames []string
 	modeNames    []string
@@ -290,19 +290,19 @@ func vlexerLexerInit() {
 	}
 }
 
-// vLexerInit initializes any static state used to implement vLexer. By default the
+// VLexerInit initializes any static state used to implement VLexer. By default the
 // static state used to implement the lexer is lazily initialized during the first call to
-// NewvLexer(). You can call this function if you wish to initialize the static state ahead
+// NewVLexer(). You can call this function if you wish to initialize the static state ahead
 // of time.
 func VLexerInit() {
 	staticData := &VLexerLexerStaticData
 	staticData.once.Do(vlexerLexerInit)
 }
 
-// NewvLexer produces a new lexer instance for the optional input antlr.CharStream.
-func NewvLexer(input antlr.CharStream) *vLexer {
+// NewVLexer produces a new lexer instance for the optional input antlr.CharStream.
+func NewVLexer(input antlr.CharStream) *VLexer {
 	VLexerInit()
-	l := new(vLexer)
+	l := new(VLexer)
 	l.BaseLexer = antlr.NewBaseLexer(input)
 	staticData := &VLexerLexerStaticData
 	l.Interpreter = antlr.NewLexerATNSimulator(l, staticData.atn, staticData.decisionToDFA, staticData.PredictionContextCache)
@@ -311,79 +311,79 @@ func NewvLexer(input antlr.CharStream) *vLexer {
 	l.RuleNames = staticData.RuleNames
 	l.LiteralNames = staticData.LiteralNames
 	l.SymbolicNames = staticData.SymbolicNames
-	l.GrammarFileName = "vLexer.g4"
+	l.GrammarFileName = "VLexer.g4"
 	// TODO: l.EOF = antlr.TokenEOF
 
 	return l
 }
 
-// vLexer tokens.
+// VLexer tokens.
 const (
-	vLexerRW_MAIN           = 1
-	vLexerRW_FN             = 2
-	vLexerRW_MUT            = 3
-	vLexerRW_STRUCT         = 4
-	vLexerRW_IF             = 5
-	vLexerRW_ELSE           = 6
-	vLexerRW_SWITCH         = 7
-	vLexerRW_CASE           = 8
-	vLexerRW_DEFAULT        = 9
-	vLexerRW_FOR            = 10
-	vLexerRW_IN             = 11
-	vLexerRW_BREAK          = 12
-	vLexerRW_CONTINUE       = 13
-	vLexerRW_RETURN         = 14
-	vLexerRW_TRUE           = 15
-	vLexerRW_FALSE          = 16
-	vLexerRW_NIL            = 17
-	vLexerRW_INT            = 18
-	vLexerRW_FLOAT64        = 19
-	vLexerRW_STRING         = 20
-	vLexerRW_BOOL           = 21
-	vLexerRW_RUNE           = 22
-	vLexerRW_PRINT          = 23
-	vLexerRW_PRINTLN        = 24
-	vLexerRW_ATOI           = 25
-	vLexerRW_PARSEFLOAT     = 26
-	vLexerRW_TYPEOF         = 27
-	vLexerRW_APPEND         = 28
-	vLexerRW_LEN            = 29
-	vLexerRW_JOIN           = 30
-	vLexerRW_INDEXOF        = 31
-	vLexerOP_SUMA           = 32
-	vLexerOP_RESTA          = 33
-	vLexerOP_MULT           = 34
-	vLexerOP_DIV            = 35
-	vLexerOP_MOD            = 36
-	vLexerOP_ASSIGN         = 37
-	vLexerOP_ADD_ASSIGN     = 38
-	vLexerOP_SUB_ASSIGN     = 39
-	vLexerOP_IGUAL          = 40
-	vLexerOP_DIFERENTE      = 41
-	vLexerOP_MENORQ         = 42
-	vLexerOP_MAYORQ         = 43
-	vLexerOP_MENORIGUAL     = 44
-	vLexerOP_MAYORIGUAL     = 45
-	vLexerOP_AND            = 46
-	vLexerOP_OR             = 47
-	vLexerOP_NOT            = 48
-	vLexerOP_DECLARATION    = 49
-	vLexerPUNTO             = 50
-	vLexerCOMA              = 51
-	vLexerPUNTO_Y_COMA      = 52
-	vLexerDOS_PUNTOS        = 53
-	vLexerPAR_IZQ           = 54
-	vLexerPAR_DER           = 55
-	vLexerLLAVE_IZQ         = 56
-	vLexerLLAVE_DER         = 57
-	vLexerCORCHETE_IZQ      = 58
-	vLexerCORCHETE_DER      = 59
-	vLexerINT_LITERAL       = 60
-	vLexerFLOAT_LITERAL     = 61
-	vLexerSTRING_LITERAL    = 62
-	vLexerRUNE_LITERAL      = 63
-	vLexerID                = 64
-	vLexerWS                = 65
-	vLexerCOMMENT           = 66
-	vLexerMULTILINE_COMMENT = 67
+	VLexerRW_MAIN           = 1
+	VLexerRW_FN             = 2
+	VLexerRW_MUT            = 3
+	VLexerRW_STRUCT         = 4
+	VLexerRW_IF             = 5
+	VLexerRW_ELSE           = 6
+	VLexerRW_SWITCH         = 7
+	VLexerRW_CASE           = 8
+	VLexerRW_DEFAULT        = 9
+	VLexerRW_FOR            = 10
+	VLexerRW_IN             = 11
+	VLexerRW_BREAK          = 12
+	VLexerRW_CONTINUE       = 13
+	VLexerRW_RETURN         = 14
+	VLexerRW_TRUE           = 15
+	VLexerRW_FALSE          = 16
+	VLexerRW_NIL            = 17
+	VLexerRW_INT            = 18
+	VLexerRW_FLOAT64        = 19
+	VLexerRW_STRING         = 20
+	VLexerRW_BOOL           = 21
+	VLexerRW_RUNE           = 22
+	VLexerRW_PRINT          = 23
+	VLexerRW_PRINTLN        = 24
+	VLexerRW_ATOI           = 25
+	VLexerRW_PARSEFLOAT     = 26
+	VLexerRW_TYPEOF         = 27
+	VLexerRW_APPEND         = 28
+	VLexerRW_LEN            = 29
+	VLexerRW_JOIN           = 30
+	VLexerRW_INDEXOF        = 31
+	VLexerOP_SUMA           = 32
+	VLexerOP_RESTA          = 33
+	VLexerOP_MULT           = 34
+	VLexerOP_DIV            = 35
+	VLexerOP_MOD            = 36
+	VLexerOP_ASSIGN         = 37
+	VLexerOP_ADD_ASSIGN     = 38
+	VLexerOP_SUB_ASSIGN     = 39
+	VLexerOP_IGUAL          = 40
+	VLexerOP_DIFERENTE      = 41
+	VLexerOP_MENORQ         = 42
+	VLexerOP_MAYORQ         = 43
+	VLexerOP_MENORIGUAL     = 44
+	VLexerOP_MAYORIGUAL     = 45
+	VLexerOP_AND            = 46
+	VLexerOP_OR             = 47
+	VLexerOP_NOT            = 48
+	VLexerOP_DECLARATION    = 49
+	VLexerPUNTO             = 50
+	VLexerCOMA              = 51
+	VLexerPUNTO_Y_COMA      = 52
+	VLexerDOS_PUNTOS        = 53
+	VLexerPAR_IZQ           = 54
+	VLexerPAR_DER           = 55
+	VLexerLLAVE_IZQ         = 56
+	VLexerLLAVE_DER         = 57
+	VLexerCORCHETE_IZQ      = 58
+	VLexerCORCHETE_DER      = 59
+	VLexerINT_LITERAL       = 60
+	VLexerFLOAT_LITERAL     = 61
+	VLexerSTRING_LITERAL    = 62
+	VLexerRUNE_LITERAL      = 63
+	VLexerID                = 64
+	VLexerWS                = 65
+	VLexerCOMMENT           = 66
+	VLexerMULTILINE_COMMENT = 67
 )

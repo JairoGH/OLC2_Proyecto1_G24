@@ -1,40 +1,28 @@
-// Code generated from parser/vGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
-package compiler // vGrammar
+package compiler // VGrammar
 import "github.com/antlr4-go/antlr/v4"
 
-type BasevGrammarVisitor struct {
+type BaseVGrammarVisitor struct {
 	*antlr.BaseParseTreeVisitor
 }
 
-func (v *BasevGrammarVisitor) VisitPrograma(ctx *ProgramaContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitPrograma(ctx *ProgramaContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BasevGrammarVisitor) VisitFuncionPrincipal(ctx *FuncionPrincipalContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitMulDiv(ctx *MulDivContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BasevGrammarVisitor) VisitBloque(ctx *BloqueContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitAddSub(ctx *AddSubContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BasevGrammarVisitor) VisitSentencia(ctx *SentenciaContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitParens(ctx *ParensContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BasevGrammarVisitor) VisitDeclaracion(ctx *DeclaracionContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BasevGrammarVisitor) VisitAsignacion(ctx *AsignacionContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BasevGrammarVisitor) VisitIfStatement(ctx *IfStatementContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BasevGrammarVisitor) VisitExpresion(ctx *ExpresionContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitInt(ctx *IntContext) interface{} {
 	return v.VisitChildren(ctx)
 }

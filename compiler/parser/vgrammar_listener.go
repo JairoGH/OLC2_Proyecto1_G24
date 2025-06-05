@@ -1,57 +1,39 @@
-// Code generated from parser/vGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
-package compiler // vGrammar
+package compiler // VGrammar
 import "github.com/antlr4-go/antlr/v4"
 
-// vGrammarListener is a complete listener for a parse tree produced by vGrammar.
-type vGrammarListener interface {
+// VGrammarListener is a complete listener for a parse tree produced by VGrammar.
+type VGrammarListener interface {
 	antlr.ParseTreeListener
 
 	// EnterPrograma is called when entering the programa production.
 	EnterPrograma(c *ProgramaContext)
 
-	// EnterFuncionPrincipal is called when entering the funcionPrincipal production.
-	EnterFuncionPrincipal(c *FuncionPrincipalContext)
+	// EnterMulDiv is called when entering the MulDiv production.
+	EnterMulDiv(c *MulDivContext)
 
-	// EnterBloque is called when entering the bloque production.
-	EnterBloque(c *BloqueContext)
+	// EnterAddSub is called when entering the AddSub production.
+	EnterAddSub(c *AddSubContext)
 
-	// EnterSentencia is called when entering the sentencia production.
-	EnterSentencia(c *SentenciaContext)
+	// EnterParens is called when entering the Parens production.
+	EnterParens(c *ParensContext)
 
-	// EnterDeclaracion is called when entering the declaracion production.
-	EnterDeclaracion(c *DeclaracionContext)
-
-	// EnterAsignacion is called when entering the asignacion production.
-	EnterAsignacion(c *AsignacionContext)
-
-	// EnterIfStatement is called when entering the ifStatement production.
-	EnterIfStatement(c *IfStatementContext)
-
-	// EnterExpresion is called when entering the expresion production.
-	EnterExpresion(c *ExpresionContext)
+	// EnterInt is called when entering the Int production.
+	EnterInt(c *IntContext)
 
 	// ExitPrograma is called when exiting the programa production.
 	ExitPrograma(c *ProgramaContext)
 
-	// ExitFuncionPrincipal is called when exiting the funcionPrincipal production.
-	ExitFuncionPrincipal(c *FuncionPrincipalContext)
+	// ExitMulDiv is called when exiting the MulDiv production.
+	ExitMulDiv(c *MulDivContext)
 
-	// ExitBloque is called when exiting the bloque production.
-	ExitBloque(c *BloqueContext)
+	// ExitAddSub is called when exiting the AddSub production.
+	ExitAddSub(c *AddSubContext)
 
-	// ExitSentencia is called when exiting the sentencia production.
-	ExitSentencia(c *SentenciaContext)
+	// ExitParens is called when exiting the Parens production.
+	ExitParens(c *ParensContext)
 
-	// ExitDeclaracion is called when exiting the declaracion production.
-	ExitDeclaracion(c *DeclaracionContext)
-
-	// ExitAsignacion is called when exiting the asignacion production.
-	ExitAsignacion(c *AsignacionContext)
-
-	// ExitIfStatement is called when exiting the ifStatement production.
-	ExitIfStatement(c *IfStatementContext)
-
-	// ExitExpresion is called when exiting the expresion production.
-	ExitExpresion(c *ExpresionContext)
+	// ExitInt is called when exiting the Int production.
+	ExitInt(c *IntContext)
 }

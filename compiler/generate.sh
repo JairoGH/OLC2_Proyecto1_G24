@@ -16,6 +16,6 @@ java -Xmx500M -cp "$JAR" org.antlr.v4.Tool \
   -visitor \
   -package compiler \
   -o . \
-  parser/vGrammar.g4 parser/vLexer.g4
+  parser/VLexer.g4 parser/VGrammar.g4
 
 echo "[INFO] Generación completada."

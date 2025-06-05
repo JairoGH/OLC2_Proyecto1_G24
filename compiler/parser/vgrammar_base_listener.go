@@ -1,69 +1,51 @@
-// Code generated from parser/vGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
-package compiler // vGrammar
+package compiler // VGrammar
 import "github.com/antlr4-go/antlr/v4"
 
-// BasevGrammarListener is a complete listener for a parse tree produced by vGrammar.
-type BasevGrammarListener struct{}
+// BaseVGrammarListener is a complete listener for a parse tree produced by VGrammar.
+type BaseVGrammarListener struct{}
 
-var _ vGrammarListener = &BasevGrammarListener{}
+var _ VGrammarListener = &BaseVGrammarListener{}
 
 // VisitTerminal is called when a terminal node is visited.
-func (s *BasevGrammarListener) VisitTerminal(node antlr.TerminalNode) {}
+func (s *BaseVGrammarListener) VisitTerminal(node antlr.TerminalNode) {}
 
 // VisitErrorNode is called when an error node is visited.
-func (s *BasevGrammarListener) VisitErrorNode(node antlr.ErrorNode) {}
+func (s *BaseVGrammarListener) VisitErrorNode(node antlr.ErrorNode) {}
 
 // EnterEveryRule is called when any rule is entered.
-func (s *BasevGrammarListener) EnterEveryRule(ctx antlr.ParserRuleContext) {}
+func (s *BaseVGrammarListener) EnterEveryRule(ctx antlr.ParserRuleContext) {}
 
 // ExitEveryRule is called when any rule is exited.
-func (s *BasevGrammarListener) ExitEveryRule(ctx antlr.ParserRuleContext) {}
+func (s *BaseVGrammarListener) ExitEveryRule(ctx antlr.ParserRuleContext) {}
 
 // EnterPrograma is called when production programa is entered.
-func (s *BasevGrammarListener) EnterPrograma(ctx *ProgramaContext) {}
+func (s *BaseVGrammarListener) EnterPrograma(ctx *ProgramaContext) {}
 
 // ExitPrograma is called when production programa is exited.
-func (s *BasevGrammarListener) ExitPrograma(ctx *ProgramaContext) {}
+func (s *BaseVGrammarListener) ExitPrograma(ctx *ProgramaContext) {}
 
-// EnterFuncionPrincipal is called when production funcionPrincipal is entered.
-func (s *BasevGrammarListener) EnterFuncionPrincipal(ctx *FuncionPrincipalContext) {}
+// EnterMulDiv is called when production MulDiv is entered.
+func (s *BaseVGrammarListener) EnterMulDiv(ctx *MulDivContext) {}
 
-// ExitFuncionPrincipal is called when production funcionPrincipal is exited.
-func (s *BasevGrammarListener) ExitFuncionPrincipal(ctx *FuncionPrincipalContext) {}
+// ExitMulDiv is called when production MulDiv is exited.
+func (s *BaseVGrammarListener) ExitMulDiv(ctx *MulDivContext) {}
 
-// EnterBloque is called when production bloque is entered.
-func (s *BasevGrammarListener) EnterBloque(ctx *BloqueContext) {}
+// EnterAddSub is called when production AddSub is entered.
+func (s *BaseVGrammarListener) EnterAddSub(ctx *AddSubContext) {}
 
-// ExitBloque is called when production bloque is exited.
-func (s *BasevGrammarListener) ExitBloque(ctx *BloqueContext) {}
+// ExitAddSub is called when production AddSub is exited.
+func (s *BaseVGrammarListener) ExitAddSub(ctx *AddSubContext) {}
 
-// EnterSentencia is called when production sentencia is entered.
-func (s *BasevGrammarListener) EnterSentencia(ctx *SentenciaContext) {}
+// EnterParens is called when production Parens is entered.
+func (s *BaseVGrammarListener) EnterParens(ctx *ParensContext) {}
 
-// ExitSentencia is called when production sentencia is exited.
-func (s *BasevGrammarListener) ExitSentencia(ctx *SentenciaContext) {}
+// ExitParens is called when production Parens is exited.
+func (s *BaseVGrammarListener) ExitParens(ctx *ParensContext) {}
 
-// EnterDeclaracion is called when production declaracion is entered.
-func (s *BasevGrammarListener) EnterDeclaracion(ctx *DeclaracionContext) {}
+// EnterInt is called when production Int is entered.
+func (s *BaseVGrammarListener) EnterInt(ctx *IntContext) {}
 
-// ExitDeclaracion is called when production declaracion is exited.
-func (s *BasevGrammarListener) ExitDeclaracion(ctx *DeclaracionContext) {}
-
-// EnterAsignacion is called when production asignacion is entered.
-func (s *BasevGrammarListener) EnterAsignacion(ctx *AsignacionContext) {}
-
-// ExitAsignacion is called when production asignacion is exited.
-func (s *BasevGrammarListener) ExitAsignacion(ctx *AsignacionContext) {}
-
-// EnterIfStatement is called when production ifStatement is entered.
-func (s *BasevGrammarListener) EnterIfStatement(ctx *IfStatementContext) {}
-
-// ExitIfStatement is called when production ifStatement is exited.
-func (s *BasevGrammarListener) ExitIfStatement(ctx *IfStatementContext) {}
-
-// EnterExpresion is called when production expresion is entered.
-func (s *BasevGrammarListener) EnterExpresion(ctx *ExpresionContext) {}
-
-// ExitExpresion is called when production expresion is exited.
-func (s *BasevGrammarListener) ExitExpresion(ctx *ExpresionContext) {}
+// ExitInt is called when production Int is exited.
+func (s *BaseVGrammarListener) ExitInt(ctx *IntContext) {}

@@ -1,33 +1,24 @@
-// Code generated from parser/vGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
-package compiler // vGrammar
+package compiler // VGrammar
 import "github.com/antlr4-go/antlr/v4"
 
-// A complete Visitor for a parse tree produced by vGrammar.
-type vGrammarVisitor interface {
+// A complete Visitor for a parse tree produced by VGrammar.
+type VGrammarVisitor interface {
 	antlr.ParseTreeVisitor
 
-	// Visit a parse tree produced by vGrammar#programa.
+	// Visit a parse tree produced by VGrammar#programa.
 	VisitPrograma(ctx *ProgramaContext) interface{}
 
-	// Visit a parse tree produced by vGrammar#funcionPrincipal.
-	VisitFuncionPrincipal(ctx *FuncionPrincipalContext) interface{}
+	// Visit a parse tree produced by VGrammar#MulDiv.
+	VisitMulDiv(ctx *MulDivContext) interface{}
 
-	// Visit a parse tree produced by vGrammar#bloque.
-	VisitBloque(ctx *BloqueContext) interface{}
+	// Visit a parse tree produced by VGrammar#AddSub.
+	VisitAddSub(ctx *AddSubContext) interface{}
 
-	// Visit a parse tree produced by vGrammar#sentencia.
-	VisitSentencia(ctx *SentenciaContext) interface{}
+	// Visit a parse tree produced by VGrammar#Parens.
+	VisitParens(ctx *ParensContext) interface{}
 
-	// Visit a parse tree produced by vGrammar#declaracion.
-	VisitDeclaracion(ctx *DeclaracionContext) interface{}
-
-	// Visit a parse tree produced by vGrammar#asignacion.
-	VisitAsignacion(ctx *AsignacionContext) interface{}
-
-	// Visit a parse tree produced by vGrammar#ifStatement.
-	VisitIfStatement(ctx *IfStatementContext) interface{}
-
-	// Visit a parse tree produced by vGrammar#expresion.
-	VisitExpresion(ctx *ExpresionContext) interface{}
+	// Visit a parse tree produced by VGrammar#Int.
+	VisitInt(ctx *IntContext) interface{}
 }
