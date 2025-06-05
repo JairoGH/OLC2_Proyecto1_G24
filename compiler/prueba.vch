@@ -1,8 +1,6 @@
 fn main() { #
-    mut a := 10;
-    mut b := 20;
-    mut c := a + b;
-
+    mut var1 int = 10;
+    mut var2 string;
     print("Resultado:", c);
 
     if c > 15 {
@@ -18,5 +16,5 @@ fn main() { #
 }
 @
 fn newFuncion() int {
-    printlnI("Entrando a newFuncion");
+    println("Entrando a newFuncion");
 }
