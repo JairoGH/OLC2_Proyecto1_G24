@@ -26,7 +26,6 @@ func (v *EvalVisitor) VisitPrograma(ctx *compiler.ProgramaContext) interface{} {
 }
 
 // Implementaciones mínimas para evitar nil pointer
-
 func (v *EvalVisitor) VisitStmtDecl(ctx *compiler.StmtDeclContext) interface{} {
 	fmt.Println("→ Declaración detectada.")
 	return nil
@@ -39,7 +38,7 @@ func (v *EvalVisitor) VisitStmtAssign(ctx *compiler.StmtAssignContext) interface
 
 func (v *EvalVisitor) VisitStmtFuncCall(ctx *compiler.StmtFuncCallContext) interface{} {
 	fmt.Println("→ Llamada a función detectada.")
-	return nil
+	return v.Visit(ctx.Func_call())
 }
 
 func (v *EvalVisitor) VisitStmtIf(ctx *compiler.StmtIfContext) interface{} {
@@ -54,9 +53,11 @@ func (v *EvalVisitor) VisitStmtFor(ctx *compiler.StmtForContext) interface{} {
 
 func (v *EvalVisitor) VisitStmtFuncDecl(ctx *compiler.StmtFuncDeclContext) interface{} {
 	fmt.Println("→ Función declarada.")
+	for _, stmt := range ctx.Func_decl().AllStmt() {
+		v.Visit(stmt)
+	}
 	return nil
 }
-
 func (v *EvalVisitor) VisitStmtStructDecl(ctx *compiler.StmtStructDeclContext) interface{} {
 	fmt.Println("→ Struct declarado.")
 	return nil
@@ -74,6 +75,43 @@ func (v *EvalVisitor) VisitPrintCall(ctx *compiler.PrintCallContext) interface{}
 
 func (v *EvalVisitor) VisitPrintLnCall(ctx *compiler.PrintLnCallContext) interface{} {
 	fmt.Println("→ println() detectado.")
+	return nil
+}
+
+// Expresiones y literales
+func (v *EvalVisitor) VisitExprAdd(ctx *compiler.ExprAddContext) interface{} {
+	fmt.Println("→ Suma encontrada.")
+	v.Visit(ctx.Expr(0))
+	v.Visit(ctx.Expr(1))
+	return nil
+}
+
+func (v *EvalVisitor) VisitExprLiteral(ctx *compiler.ExprLiteralContext) interface{} {
+	fmt.Printf("→ Literal: %s\n", ctx.GetText())
+	return nil
+}
+
+func (v *EvalVisitor) VisitExprId(ctx *compiler.ExprIdContext) interface{} {
+	fmt.Printf("→ Identificador: %s\n", ctx.GetText())
+	return nil
+}
+
+func (v *EvalVisitor) VisitExprGreater(ctx *compiler.ExprGreaterContext) interface{} {
+	fmt.Println("→ Comparación > encontrada.")
+	v.Visit(ctx.Expr(0))
+	v.Visit(ctx.Expr(1))
+	return nil
+}
+
+func (v *EvalVisitor) VisitExprParen(ctx *compiler.ExprParenContext) interface{} {
+	return v.Visit(ctx.Expr())
+}
+
+func (v *EvalVisitor) VisitFunctionCall(ctx *compiler.FunctionCallContext) interface{} {
+	fmt.Printf("→ Llamada a función general: %s()\n", ctx.ID().GetText())
+	for _, arg := range ctx.AllExpr() {
+		v.Visit(arg)
+	}
 	return nil
 }
 
