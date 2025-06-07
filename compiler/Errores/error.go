@@ -1,52 +1,51 @@
-package Errores
+package errores
 
 import (
-	error "compiler/Instrucciones"
+	"compiler/Instrucciones"
 
 	"github.com/antlr4-go/antlr/v4"
 )
 
 type SyntaxError struct {
 	*antlr.DefaultErrorListener
-	TablaErrores *error.TablaError
+	TablaError *instrucciones.TablaError
 }
 
-func NewSyntaxError(tablaErrores *error.TablaError) *SyntaxError {
+func NewSyntaxError(TablaError *instrucciones.TablaError) *SyntaxError {
 	return &SyntaxError{
-		TablaErrores: tablaErrores,
+		TablaError: TablaError,
 	}
 }
 
+func (e *SyntaxError) SyntaxError(_ antlr.Recognizer, _ interface{}, linea, columna int, descripcion string, _ antlr.RecognitionException) {
 
-func (e *SyntaxError) SyntaxError(_ antlr.Recognizer, _ interface{}, linea, columna int, msg string, _ antlr.RecognitionException) {
-
-	e.TablaErrores.AddError(
+	e.TablaError.AddError(
 		linea,
 		columna,
-		msg,
-		error.ErrorSintactico,
+		descripcion,
+		instrucciones.ErrorSintactico,
 	)
 
 }
 
-type ErrorLexico struct {
+type LexicalErrorListener struct {
 	*antlr.DefaultErrorListener
-	TablaErrores *error.TablaError
+	TablaError *instrucciones.TablaError
 }
 
-func NewErrorLexico() *ErrorLexico {
-	return &ErrorLexico{
-		TablaErrores: error.NewErrorTable(),
+func NewErrorLexico() *LexicalErrorListener {
+	return &LexicalErrorListener{
+		TablaError: instrucciones.NewTablaError(),
 	}
 }
 
-func (e *ErrorLexico) SyntaxError(_ antlr.Recognizer, _ interface{}, linea, columna int, msg string, _ antlr.RecognitionException) {
+func (e *LexicalErrorListener) SyntaxError(_ antlr.Recognizer, _ interface{}, linea, columna int, descripcion string, _ antlr.RecognitionException) {
 
-	e.TablaErrores.AddError(
+	e.TablaError.AddError(
 		linea,
 		columna,
-		msg,
-		error.ErrorLexico,
+		descripcion,
+		instrucciones.ErrorLexico,
 	)
 
 }

@@ -1,4 +1,4 @@
-package tipos
+package tiposDeDato
 
 type ValorCaracter struct {
 	InternalValor string

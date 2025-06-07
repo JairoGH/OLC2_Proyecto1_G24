@@ -1,4 +1,4 @@
-package tipos
+package tiposDeDato
 
 type ValorCadena struct {
 	InternalValor string

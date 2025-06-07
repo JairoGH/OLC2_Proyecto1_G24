@@ -10,40 +10,41 @@ const (
 )
 
 type Error struct {
-	Linea       int
-	Columna     int
-	Descripcion string
-	Tipo        string
+	Line   int
+	Columna int
+	Descripcion    string
+	Tipo   string
 }
+
+
 
 type TablaError struct {
-	Errors []Error
+	Errores []Error
 }
 
-func (et *TablaError) AddError(linea int, colunma int, descr string, tipo string) {
-	et.Errors = append(et.Errors, Error{linea, colunma, descr, tipo})
+func (et *TablaError) AddError(Linea int, Columna int, descripcion string, TipoError string) {
+	et.Errores = append(et.Errores, Error{Linea, Columna, descripcion, TipoError})
 }
 
-func (et *TablaError) NewLErrorLexico(linea int, colunma int, descr string) {
-	et.AddError(linea, colunma, descr, ErrorLexico)
+func (et *TablaError) NewLErrorLexico(Linea int, Columna int, descripcion string) {
+	et.AddError(Linea, Columna, descripcion, ErrorLexico)
 }
 
-func (et *TablaError) NewErrorSintactico(linea int, colunma int, descr string) {
-	et.AddError(linea, colunma, descr, ErrorSintactico)
+func (et *TablaError) NewErrorSintactico(Linea int, Columna int, descripcion string) {
+	et.AddError(Linea, Columna, descripcion, ErrorSintactico)
 }
 
-func (et *TablaError) NewErrorSemantico(token antlr.Token, descr string) {
-	et.AddError(token.GetLine(), token.GetColumn(), descr, ErrorSemantico)
+func (et *TablaError) NewErrorSemantico(token antlr.Token, descripcion string) {
+	et.AddError(token.GetLine(), token.GetColumn(), descripcion, ErrorSemantico)
 }
 
-func (et *TablaError) NewErrorEjecucion(linea int, colunma int, descr string) {
-	et.AddError(linea, colunma, descr, ErrorEjecucion)
+func (et *TablaError) NewErrorEjecucion(Linea int, Columna int, descripcion string) {
+	et.AddError(Linea, Columna, descripcion, ErrorEjecucion)
 }
 
 func (et *TablaError) GetErrors() []Error {
-	return et.Errors
+	return et.Errores
 }
-
-func NewErrorTable() *TablaError {
+func NewTablaError() *TablaError {
 	return &TablaError{}
 }

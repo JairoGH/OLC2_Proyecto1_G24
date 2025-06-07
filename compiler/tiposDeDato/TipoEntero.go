@@ -1,4 +1,4 @@
-package tipos
+package tiposDeDato
 
 type ValorEntero struct {
 	InternalValor int

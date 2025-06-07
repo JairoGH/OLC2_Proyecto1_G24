@@ -1,4 +1,4 @@
-package tipos
+package tiposDeDato
 
 const (
 	TIPO_ENTERO           = "int"

@@ -1,4 +1,4 @@
-package tipos
+package tiposDeDato
 
 type ValorDecimal struct {
 	InternalValor float64
