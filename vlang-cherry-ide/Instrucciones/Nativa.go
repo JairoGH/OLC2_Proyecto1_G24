@@ -25,238 +25,224 @@ func (b FuncionNativa) Copy() tiposDeDato.ValorInterno {
 
 // Funcion para Imprimir - MODIFICADA para aceptar vectores, matrices y structs
 func Imprimir(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.ValorInterno, bool, string) {
-    var output string
+	var output string
 
-    for i, arg := range args {
-        switch arg.Value.Type() {
-        case tiposDeDato.TIPO_BOOLEAN:
-            output += strconv.FormatBool(arg.Value.Value().(bool))
-        case tiposDeDato.TIPO_ENTERO:
-            output += strconv.Itoa(arg.Value.Value().(int))
-        case tiposDeDato.TIPO_DECIMAL:
-            output += strconv.FormatFloat(arg.Value.Value().(float64), 'f', 4, 64)
-        case tiposDeDato.TIPO_CADENA:
-            output += arg.Value.Value().(string)
-        case tiposDeDato.TIPO_CARACTER:
-            output += arg.Value.Value().(string)
-        case tiposDeDato.TIPO_NULO:
-            output += "nil"
-        default:
-            // Verificar si es un struct (TipoObjeto)
-            if obj, ok := arg.Value.(*TipoObjeto); ok {
-                output += formatStruct(obj)
-            } else if EsTipoVector(arg.Value.Type()) || strings.HasPrefix(arg.Value.Type(), "[]") {
-                // Manejar vectores y matrices
-                if vector, ok := arg.Value.(*TipoVector); ok {
-                    output += "["
-                    for j, elemento := range vector.InternalValor {
-                        if j > 0 {
-                            output += ", "
-                        }
-                        // Recursivamente formatear cada elemento
-                        switch elemento.Type() {
-                        case tiposDeDato.TIPO_BOOLEAN:
-                            output += strconv.FormatBool(elemento.Value().(bool))
-                        case tiposDeDato.TIPO_ENTERO:
-                            output += strconv.Itoa(elemento.Value().(int))
-                        case tiposDeDato.TIPO_DECIMAL:
-                            output += strconv.FormatFloat(elemento.Value().(float64), 'f', 4, 64)
-                        case tiposDeDato.TIPO_CADENA:
-                            output += "\"" + elemento.Value().(string) + "\""
-                        case tiposDeDato.TIPO_CARACTER:
-                            output += "'" + elemento.Value().(string) + "'"
-                        case tiposDeDato.TIPO_NULO:
-                            output += "nil"
-                        default:
-                            if subVector, ok := elemento.(*TipoVector); ok {
-                                // Manejar matrices multidimensionales
-                                output += "["
-                                for k, subElemento := range subVector.InternalValor {
-                                    if k > 0 {
-                                        output += ", "
-                                    }
-                                    switch subElemento.Type() {
-                                    case tiposDeDato.TIPO_BOOLEAN:
-                                        output += strconv.FormatBool(subElemento.Value().(bool))
-                                    case tiposDeDato.TIPO_ENTERO:
-                                        output += strconv.Itoa(subElemento.Value().(int))
-                                    case tiposDeDato.TIPO_DECIMAL:
-                                        output += strconv.FormatFloat(subElemento.Value().(float64), 'f', 4, 64)
-                                    case tiposDeDato.TIPO_CADENA:
-                                        output += "\"" + subElemento.Value().(string) + "\""
-                                    case tiposDeDato.TIPO_CARACTER:
-                                        output += "'" + subElemento.Value().(string) + "'"
-                                    default:
-                                        output += "nil"
-                                    }
-                                }
-                                output += "]"
-                            } else if obj, ok := elemento.(*TipoObjeto); ok {
-                                output += formatStruct(obj)
-                            } else {
-                                output += "nil"
-                            }
-                        }
-                    }
-                    output += "]"
-                } else {
-                    return tiposDeDato.NuloPorDefecto, false, "La función print no puede imprimir el tipo: " + arg.Value.Type()
-                }
-            } else {
-                return tiposDeDato.NuloPorDefecto, false, "La función print no puede imprimir el tipo: " + arg.Value.Type()
-            }
-        }
+	for i, arg := range args {
+		switch arg.Value.Type() {
+		case tiposDeDato.TIPO_BOOLEAN:
+			output += strconv.FormatBool(arg.Value.Value().(bool))
+		case tiposDeDato.TIPO_ENTERO:
+			output += strconv.Itoa(arg.Value.Value().(int))
+		case tiposDeDato.TIPO_DECIMAL:
+			output += strconv.FormatFloat(arg.Value.Value().(float64), 'f', 4, 64)
+		case tiposDeDato.TIPO_CADENA:
+			output += arg.Value.Value().(string)
+		case tiposDeDato.TIPO_NULO:
+			output += "nil"
+		default:
+			// Verificar si es un struct (TipoObjeto)
+			if obj, ok := arg.Value.(*TipoObjeto); ok {
+				output += formatStruct(obj)
+			} else if EsTipoVector(arg.Value.Type()) || strings.HasPrefix(arg.Value.Type(), "[]") {
+				// Manejar vectores y matrices
+				if vector, ok := arg.Value.(*TipoVector); ok {
+					output += "["
+					for j, elemento := range vector.InternalValor {
+						if j > 0 {
+							output += ", "
+						}
+						// Recursivamente formatear cada elemento
+						switch elemento.Type() {
+						case tiposDeDato.TIPO_BOOLEAN:
+							output += strconv.FormatBool(elemento.Value().(bool))
+						case tiposDeDato.TIPO_ENTERO:
+							output += strconv.Itoa(elemento.Value().(int))
+						case tiposDeDato.TIPO_DECIMAL:
+							output += strconv.FormatFloat(elemento.Value().(float64), 'f', 4, 64)
+						case tiposDeDato.TIPO_CADENA:
+							output += "\"" + elemento.Value().(string) + "\""
+						case tiposDeDato.TIPO_NULO:
+							output += "nil"
+						default:
+							if subVector, ok := elemento.(*TipoVector); ok {
+								// Manejar matrices multidimensionales
+								output += "["
+								for k, subElemento := range subVector.InternalValor {
+									if k > 0 {
+										output += ", "
+									}
+									switch subElemento.Type() {
+									case tiposDeDato.TIPO_BOOLEAN:
+										output += strconv.FormatBool(subElemento.Value().(bool))
+									case tiposDeDato.TIPO_ENTERO:
+										output += strconv.Itoa(subElemento.Value().(int))
+									case tiposDeDato.TIPO_DECIMAL:
+										output += strconv.FormatFloat(subElemento.Value().(float64), 'f', 4, 64)
+									case tiposDeDato.TIPO_CADENA:
+										output += "\"" + subElemento.Value().(string) + "\""
+									default:
+										output += "nil"
+									}
+								}
+								output += "]"
+							} else if obj, ok := elemento.(*TipoObjeto); ok {
+								output += formatStruct(obj)
+							} else {
+								output += "nil"
+							}
+						}
+					}
+					output += "]"
+				} else {
+					return tiposDeDato.NuloPorDefecto, false, "La función print no puede imprimir el tipo: " + arg.Value.Type()
+				}
+			} else {
+				return tiposDeDato.NuloPorDefecto, false, "La función print no puede imprimir el tipo: " + arg.Value.Type()
+			}
+		}
 
-        // Add a space between each Argumento
-        if i < len(args)-1 {
-            output += " "
-        }
-    }
+		// Add a space between each Argumento
+		if i < len(args)-1 {
+			output += " "
+		}
+	}
 
-    context.Console.Print(output)
-    return tiposDeDato.NuloPorDefecto, true, ""
+	context.Console.Print(output)
+	return tiposDeDato.NuloPorDefecto, true, ""
 }
 
 // Funcion para Imprimir con salto de línea - MODIFICADA para aceptar vectores, matrices y structs
 func ImprimirLn(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.ValorInterno, bool, string) {
-    var output string
+	var output string
 
-    for i, arg := range args {
-        switch arg.Value.Type() {
-        case tiposDeDato.TIPO_BOOLEAN:
-            output += strconv.FormatBool(arg.Value.Value().(bool))
-        case tiposDeDato.TIPO_ENTERO:
-            output += strconv.Itoa(arg.Value.Value().(int))
-        case tiposDeDato.TIPO_DECIMAL:
-            output += strconv.FormatFloat(arg.Value.Value().(float64), 'f', 4, 64)
-        case tiposDeDato.TIPO_CADENA:
-            output += arg.Value.Value().(string)
-        case tiposDeDato.TIPO_CARACTER:
-            output += arg.Value.Value().(string)
-        case tiposDeDato.TIPO_NULO:
-            output += "nil"
-        default:
-            // Verificar si es un struct (TipoObjeto)
-            if obj, ok := arg.Value.(*TipoObjeto); ok {
-                output += formatStruct(obj)
-            } else if EsTipoVector(arg.Value.Type()) || strings.HasPrefix(arg.Value.Type(), "[]") {
-                // Manejar vectores y matrices
-                if vector, ok := arg.Value.(*TipoVector); ok {
-                    output += "["
-                    for j, elemento := range vector.InternalValor {
-                        if j > 0 {
-                            output += ", "
-                        }
-                        // Recursivamente formatear cada elemento
-                        switch elemento.Type() {
-                        case tiposDeDato.TIPO_BOOLEAN:
-                            output += strconv.FormatBool(elemento.Value().(bool))
-                        case tiposDeDato.TIPO_ENTERO:
-                            output += strconv.Itoa(elemento.Value().(int))
-                        case tiposDeDato.TIPO_DECIMAL:
-                            output += strconv.FormatFloat(elemento.Value().(float64), 'f', 4, 64)
-                        case tiposDeDato.TIPO_CADENA:
-                            output += "\"" + elemento.Value().(string) + "\""
-                        case tiposDeDato.TIPO_CARACTER:
-                            output += "'" + elemento.Value().(string) + "'"
-                        case tiposDeDato.TIPO_NULO:
-                            output += "nil"
-                        default:
-                            if subVector, ok := elemento.(*TipoVector); ok {
-                                // Manejar matrices multidimensionales
-                                output += "["
-                                for k, subElemento := range subVector.InternalValor {
-                                    if k > 0 {
-                                        output += ", "
-                                    }
-                                    switch subElemento.Type() {
-                                    case tiposDeDato.TIPO_BOOLEAN:
-                                        output += strconv.FormatBool(subElemento.Value().(bool))
-                                    case tiposDeDato.TIPO_ENTERO:
-                                        output += strconv.Itoa(subElemento.Value().(int))
-                                    case tiposDeDato.TIPO_DECIMAL:
-                                        output += strconv.FormatFloat(subElemento.Value().(float64), 'f', 4, 64)
-                                    case tiposDeDato.TIPO_CADENA:
-                                        output += "\"" + subElemento.Value().(string) + "\""
-                                    case tiposDeDato.TIPO_CARACTER:
-                                        output += "'" + subElemento.Value().(string) + "'"
-                                    default:
-                                        output += "nil"
-                                    }
-                                }
-                                output += "]"
-                            } else if obj, ok := elemento.(*TipoObjeto); ok {
-                                output += formatStruct(obj)
-                            } else {
-                                output += "nil"
-                            }
-                        }
-                    }
-                    output += "]"
-                } else {
-                    return tiposDeDato.NuloPorDefecto, false, "La función println no puede imprimir el tipo: " + arg.Value.Type()
-                }
-            } else {
-                return tiposDeDato.NuloPorDefecto, false, "La función println no puede imprimir el tipo: " + arg.Value.Type()
-            }
-        }
+	for i, arg := range args {
+		switch arg.Value.Type() {
+		case tiposDeDato.TIPO_BOOLEAN:
+			output += strconv.FormatBool(arg.Value.Value().(bool))
+		case tiposDeDato.TIPO_ENTERO:
+			output += strconv.Itoa(arg.Value.Value().(int))
+		case tiposDeDato.TIPO_DECIMAL:
+			output += strconv.FormatFloat(arg.Value.Value().(float64), 'f', 4, 64)
+		case tiposDeDato.TIPO_CADENA:
+			output += arg.Value.Value().(string)
+		case tiposDeDato.TIPO_NULO:
+			output += "nil"
+		default:
+			// Verificar si es un struct (TipoObjeto)
+			if obj, ok := arg.Value.(*TipoObjeto); ok {
+				output += formatStruct(obj)
+			} else if EsTipoVector(arg.Value.Type()) || strings.HasPrefix(arg.Value.Type(), "[]") {
+				// Manejar vectores y matrices
+				if vector, ok := arg.Value.(*TipoVector); ok {
+					output += "["
+					for j, elemento := range vector.InternalValor {
+						if j > 0 {
+							output += ", "
+						}
+						// Recursivamente formatear cada elemento
+						switch elemento.Type() {
+						case tiposDeDato.TIPO_BOOLEAN:
+							output += strconv.FormatBool(elemento.Value().(bool))
+						case tiposDeDato.TIPO_ENTERO:
+							output += strconv.Itoa(elemento.Value().(int))
+						case tiposDeDato.TIPO_DECIMAL:
+							output += strconv.FormatFloat(elemento.Value().(float64), 'f', 4, 64)
+						case tiposDeDato.TIPO_CADENA:
+							output += "\"" + elemento.Value().(string) + "\""
+						case tiposDeDato.TIPO_NULO:
+							output += "nil"
+						default:
+							if subVector, ok := elemento.(*TipoVector); ok {
+								// Manejar matrices multidimensionales
+								output += "["
+								for k, subElemento := range subVector.InternalValor {
+									if k > 0 {
+										output += ", "
+									}
+									switch subElemento.Type() {
+									case tiposDeDato.TIPO_BOOLEAN:
+										output += strconv.FormatBool(subElemento.Value().(bool))
+									case tiposDeDato.TIPO_ENTERO:
+										output += strconv.Itoa(subElemento.Value().(int))
+									case tiposDeDato.TIPO_DECIMAL:
+										output += strconv.FormatFloat(subElemento.Value().(float64), 'f', 4, 64)
+									case tiposDeDato.TIPO_CADENA:
+										output += "\"" + subElemento.Value().(string) + "\""
+									default:
+										output += "nil"
+									}
+								}
+								output += "]"
+							} else if obj, ok := elemento.(*TipoObjeto); ok {
+								output += formatStruct(obj)
+							} else {
+								output += "nil"
+							}
+						}
+					}
+					output += "]"
+				} else {
+					return tiposDeDato.NuloPorDefecto, false, "La función println no puede imprimir el tipo: " + arg.Value.Type()
+				}
+			} else {
+				return tiposDeDato.NuloPorDefecto, false, "La función println no puede imprimir el tipo: " + arg.Value.Type()
+			}
+		}
 
-        // Add a space between each Argumento
-        if i < len(args)-1 {
-            output += " "
-        }
-    }
+		// Add a space between each Argumento
+		if i < len(args)-1 {
+			output += " "
+		}
+	}
 
-    // Añadir salto de línea al final
-    output += "\n"
-    context.Console.Print(output)
-    return tiposDeDato.NuloPorDefecto, true, ""
+	// Añadir salto de línea al final
+	output += "\n"
+	context.Console.Print(output)
+	return tiposDeDato.NuloPorDefecto, true, ""
 }
 
 // Función auxiliar para formatear structs
 func formatStruct(obj *TipoObjeto) string {
-    if obj == nil || obj.InternalScope == nil {
-        return "nil"
-    }
+	if obj == nil || obj.InternalScope == nil {
+		return "nil"
+	}
 
-    result := obj.ConcretType + "{"
-    first := true
-    
-    // Iterar sobre las variables del scope interno del struct
-    for name, variable := range obj.InternalScope.variables {
-        if !first {
-            result += ", "
-        }
-        first = false
-        
-        result += name + ": "
-        
-        // Formatear el valor según su tipo
-        switch variable.Value.Type() {
-        case tiposDeDato.TIPO_CADENA:
-            result += "\"" + variable.Value.Value().(string) + "\""
-        case tiposDeDato.TIPO_ENTERO:
-            result += strconv.Itoa(variable.Value.Value().(int))
-        case tiposDeDato.TIPO_DECIMAL:
-            result += strconv.FormatFloat(variable.Value.Value().(float64), 'f', 2, 64)
-        case tiposDeDato.TIPO_BOOLEAN:
-            result += strconv.FormatBool(variable.Value.Value().(bool))
-        case tiposDeDato.TIPO_CARACTER:
-            result += "'" + variable.Value.Value().(string) + "'"
-        case tiposDeDato.TIPO_NULO:
-            result += "nil"
-        default:
-            // Si es otro struct anidado
-            if nestedObj, ok := variable.Value.(*TipoObjeto); ok {
-                result += formatStruct(nestedObj)
-            } else {
-                result += "nil"
-            }
-        }
-    }
-    
-    result += "}"
-    return result
+	result := obj.ConcretType + "{"
+	first := true
+
+	// Iterar sobre las variables del scope interno del struct
+	for name, variable := range obj.InternalScope.variables {
+		if !first {
+			result += ", "
+		}
+		first = false
+
+		result += name + ": "
+
+		// Formatear el valor según su tipo
+		switch variable.Value.Type() {
+		case tiposDeDato.TIPO_CADENA:
+			result += "\"" + variable.Value.Value().(string) + "\""
+		case tiposDeDato.TIPO_ENTERO:
+			result += strconv.Itoa(variable.Value.Value().(int))
+		case tiposDeDato.TIPO_DECIMAL:
+			result += strconv.FormatFloat(variable.Value.Value().(float64), 'f', 2, 64)
+		case tiposDeDato.TIPO_BOOLEAN:
+			result += strconv.FormatBool(variable.Value.Value().(bool))
+		case tiposDeDato.TIPO_NULO:
+			result += "nil"
+		default:
+			// Si es otro struct anidado
+			if nestedObj, ok := variable.Value.(*TipoObjeto); ok {
+				result += formatStruct(nestedObj)
+			} else {
+				result += "nil"
+			}
+		}
+	}
+
+	result += "}"
+	return result
 }
 
 // Funcion Entero
@@ -463,67 +449,55 @@ func IndexOf(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.Val
 }
 
 // Función Join - agregar después de la función IndexOf
-func Join(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.ValorInterno, bool, string) {
-
+func Join(ctx *InstruccionesContexto, args []*Argumento) (tiposDeDato.ValorInterno, bool, string) {
 	if len(args) != 2 {
-		return tiposDeDato.NuloPorDefecto, false, "La función join requiere exactamente 2 argumentos: join(vector, separador)"
+		return tiposDeDato.NuloPorDefecto, false,
+			"La función join requiere exactamente 2 argumentos: join(vector, separador)"
 	}
 
 	vectorArg := args[0].Value
 	separatorArg := args[1].Value
 
-	// DEBUG: Verificar qué tipos estamos recibiendo
 	if vectorArg == nil {
 		return tiposDeDato.NuloPorDefecto, false, "El primer argumento de join es nil"
 	}
-
 	if separatorArg == nil {
 		return tiposDeDato.NuloPorDefecto, false, "El segundo argumento de join es nil"
 	}
 
-	// Verificar que el primer argumento sea un vector
+	// Debe ser un vector
 	vector, ok := vectorArg.(*TipoVector)
 	if !ok {
-		return tiposDeDato.NuloPorDefecto, false, "El primer argumento de join debe ser un vector (tipo recibido: " + vectorArg.Type() + ")"
+		return tiposDeDato.NuloPorDefecto, false,
+			"El primer argumento de join debe ser un vector (tipo: " + vectorArg.Type() + ")"
 	}
 
-	// RESTRICCIÓN: Solo acepta vectores de tipo []string
+	// Sólo vectores de []string
 	if vector.FullType != "[]string" {
-		return tiposDeDato.NuloPorDefecto, false, "La función join solo acepta vectores de tipo []string (tipo recibido: " + vector.FullType + ")"
+		return tiposDeDato.NuloPorDefecto, false,
+			"La función join solo acepta vectores de tipo []string (tipo recibido: " + vector.FullType + ")"
 	}
 
-	// Verificar que el separador sea una cadena O un carácter
-	var separatorStr string
-
-	if separator, ok := separatorArg.(*tiposDeDato.ValorCadena); ok {
-		separatorStr = separator.InternalValor
-	} else if separator, ok := separatorArg.(*tiposDeDato.ValorCaracter); ok {
-		separatorStr = separator.InternalValor
-	} else {
-		return tiposDeDato.NuloPorDefecto, false, "El segundo argumento de join debe ser una cadena o carácter (tipo recibido: " + separatorArg.Type() + ")"
+	// El separador debe ser cadena
+	sepCadena, ok := separatorArg.(*tiposDeDato.ValorCadena)
+	if !ok {
+		return tiposDeDato.NuloPorDefecto, false,
+			"El segundo argumento de join debe ser una cadena (tipo recibido: " + separatorArg.Type() + ")"
 	}
+	separatorStr := sepCadena.InternalValor
 
-	// Construir la cadena unida
-	var result string
-
+	// Construir resultado
+	var sb strings.Builder
 	for i, item := range vector.InternalValor {
-		// Como ya verificamos que es []string, podemos hacer cast directo
-		stringItem, ok := item.(*tiposDeDato.ValorCadena)
-		if !ok {
-			return tiposDeDato.NuloPorDefecto, false, "Error interno: elemento del vector no es string"
-		}
-
-		result += stringItem.InternalValor
-
-		// Agregar separador si no es el último elemento
+		// Cada elemento es ValorCadena
+		strItem := item.(*tiposDeDato.ValorCadena).InternalValor
+		sb.WriteString(strItem)
 		if i < len(vector.InternalValor)-1 {
-			result += separatorStr
+			sb.WriteString(separatorStr)
 		}
 	}
 
-	return &tiposDeDato.ValorCadena{
-		InternalValor: result,
-	}, true, ""
+	return &tiposDeDato.ValorCadena{InternalValor: sb.String()}, true, ""
 }
 
 // Función Append - MODIFICADA para soportar matrices multidimensionales
@@ -773,8 +747,6 @@ func TypeOf(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.Valo
 			tipo = "string"
 		case tiposDeDato.TIPO_BOOLEAN:
 			tipo = "bool"
-		case tiposDeDato.TIPO_CARACTER:
-			tipo = "char"
 		case tiposDeDato.TIPO_NULO:
 			tipo = "nil"
 		default:

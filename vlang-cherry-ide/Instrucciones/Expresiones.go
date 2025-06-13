@@ -130,12 +130,9 @@ var SumaExpresion = MetodoBinario{
 			},
 		},
 		{
-			TipoIzq:  tiposDeDato.TIPO_CARACTER,
 			TipoDcha: tiposDeDato.TIPO_CADENA,
 			ConvIzq: func(v tiposDeDato.ValorInterno) tiposDeDato.ValorInterno {
-				return &tiposDeDato.ValorCadena{
-					InternalValor: string(v.(*tiposDeDato.ValorCaracter).InternalValor),
-				}
+				return &tiposDeDato.ValorCadena{}
 			},
 			ConvDcha: nil,
 			Evaluar: func(left, right tiposDeDato.ValorInterno) (bool, string, tiposDeDato.ValorInterno) {
@@ -363,14 +360,6 @@ func ExpresionTipoIgual(Nombre string, eval funcionEvaluar) MetodoBinario {
 				ConvDcha: nil,
 				Evaluar:  nil,
 			},
-			{
-				TipoIzq:  tiposDeDato.TIPO_CARACTER,
-				TipoDcha: tiposDeDato.TIPO_CARACTER,
-				ConvIzq:  nil,
-				ConvDcha: nil,
-				Evaluar:  nil,
-			},
-
 			// Comparaciones cruzadas int == float64 (conversión implícita del entero a decimal)
 			{
 				TipoIzq:  tiposDeDato.TIPO_ENTERO,
@@ -448,17 +437,6 @@ var MenorExpresion = MetodoBinario{
 				}
 			},
 		},
-		{
-			TipoIzq:  tiposDeDato.TIPO_CARACTER,
-			TipoDcha: tiposDeDato.TIPO_CARACTER,
-			ConvIzq:  nil,
-			ConvDcha: nil,
-			Evaluar: func(left, right tiposDeDato.ValorInterno) (bool, string, tiposDeDato.ValorInterno) {
-				return true, "", &tiposDeDato.ValorBool{
-					InternalValor: left.(*tiposDeDato.ValorCaracter).InternalValor < right.(*tiposDeDato.ValorCaracter).InternalValor,
-				}
-			},
-		},
 	},
 }
 
@@ -497,17 +475,6 @@ var MenorQUeExpresion = MetodoBinario{
 			Evaluar: func(left, right tiposDeDato.ValorInterno) (bool, string, tiposDeDato.ValorInterno) {
 				return true, "", &tiposDeDato.ValorBool{
 					InternalValor: left.(*tiposDeDato.ValorCadena).InternalValor <= right.(*tiposDeDato.ValorCadena).InternalValor,
-				}
-			},
-		},
-		{
-			TipoIzq:  tiposDeDato.TIPO_CARACTER,
-			TipoDcha: tiposDeDato.TIPO_CARACTER,
-			ConvIzq:  nil,
-			ConvDcha: nil,
-			Evaluar: func(left, right tiposDeDato.ValorInterno) (bool, string, tiposDeDato.ValorInterno) {
-				return true, "", &tiposDeDato.ValorBool{
-					InternalValor: left.(*tiposDeDato.ValorCaracter).InternalValor <= right.(*tiposDeDato.ValorCaracter).InternalValor,
 				}
 			},
 		},
@@ -552,17 +519,6 @@ var MayorExpresion = MetodoBinario{
 				}
 			},
 		},
-		{
-			TipoIzq:  tiposDeDato.TIPO_CARACTER,
-			TipoDcha: tiposDeDato.TIPO_CARACTER,
-			ConvIzq:  nil,
-			ConvDcha: nil,
-			Evaluar: func(left, right tiposDeDato.ValorInterno) (bool, string, tiposDeDato.ValorInterno) {
-				return true, "", &tiposDeDato.ValorBool{
-					InternalValor: left.(*tiposDeDato.ValorCaracter).InternalValor > right.(*tiposDeDato.ValorCaracter).InternalValor,
-				}
-			},
-		},
 	},
 }
 
@@ -601,17 +557,6 @@ var MayorQueExpresion = MetodoBinario{
 			Evaluar: func(left, right tiposDeDato.ValorInterno) (bool, string, tiposDeDato.ValorInterno) {
 				return true, "", &tiposDeDato.ValorBool{
 					InternalValor: left.(*tiposDeDato.ValorCadena).InternalValor >= right.(*tiposDeDato.ValorCadena).InternalValor,
-				}
-			},
-		},
-		{
-			TipoIzq:  tiposDeDato.TIPO_CARACTER,
-			TipoDcha: tiposDeDato.TIPO_CARACTER,
-			ConvIzq:  nil,
-			ConvDcha: nil,
-			Evaluar: func(left, right tiposDeDato.ValorInterno) (bool, string, tiposDeDato.ValorInterno) {
-				return true, "", &tiposDeDato.ValorBool{
-					InternalValor: left.(*tiposDeDato.ValorCaracter).InternalValor >= right.(*tiposDeDato.ValorCaracter).InternalValor,
 				}
 			},
 		},

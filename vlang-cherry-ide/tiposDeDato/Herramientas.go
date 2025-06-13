@@ -24,12 +24,5 @@ func Casteo(TipoCasteo string, Valor ValorInterno) (ValorInterno, bool) {
 		}, true
 	}
 
-	// 2. Los caracteres pueden convertirse a cadenas
-	if TipoCasteo == TIPO_CADENA && Valor.Type() == TIPO_CARACTER {
-		return &ValorCadena{
-			InternalValor: string(Valor.(*ValorCaracter).InternalValor),
-		}, true
-	}
-
 	return nil, false
 }

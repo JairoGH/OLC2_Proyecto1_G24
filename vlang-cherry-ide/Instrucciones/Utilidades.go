@@ -7,15 +7,16 @@ import (
 )
 
 func CadenaAVector(s *tiposDeDato.ValorCadena) *TipoVector {
-
-	items := make([]tiposDeDato.ValorInterno, 0)
-
-	for _, c := range s.InternalValor {
-		items = append(items, &tiposDeDato.ValorCaracter{InternalValor: string(c)})
+	items := make([]tiposDeDato.ValorInterno, 0, len(s.InternalValor))
+	for _, rune := range s.InternalValor {
+		// cada rune lo convertimos en string de 1 carácter
+		items = append(items, &tiposDeDato.ValorCadena{
+			InternalValor: string(rune),
+		})
 	}
-
-	return NewTipoVector(items, "["+tiposDeDato.TIPO_CARACTER+"]", tiposDeDato.TIPO_CARACTER)
-
+	// Aquí indicamos que es un vector de cadenas
+	tag := "[" + tiposDeDato.TIPO_CADENA + "]"
+	return NewTipoVector(items, tag, tiposDeDato.TIPO_CADENA)
 }
 
 func EsTipoVector(_type string) bool {

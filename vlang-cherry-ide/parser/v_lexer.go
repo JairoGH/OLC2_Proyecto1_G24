@@ -1,4 +1,4 @@
-// Code generated from parser/VLexer.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from vlang-cherry-ide/parser/VLexer.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
 package parser
 

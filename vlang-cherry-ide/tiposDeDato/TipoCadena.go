@@ -9,7 +9,7 @@ func (s ValorCadena) Value() interface{} {
 }
 
 func (s ValorCadena) Type() string {
-	return TIPO_CADENA  
+	return TIPO_CADENA
 }
 
 func (s ValorCadena) Copy() ValorInterno {
