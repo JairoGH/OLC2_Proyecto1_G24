@@ -683,7 +683,7 @@ func (v *PatronVIsitor) VisitAsignacionAritmetica(ctx *parser.AsignacionAritmeti
 		strat, ok := ExpresionBinaria[op]
 
 		if !ok {
-			log.Fatal("Binary operator not found")
+			log.Fatal("Operador binario no encontrado: " + op)
 		}
 
 		ok, msg, varValue := strat.ValidarExp(leftValue, rightValue)
@@ -974,7 +974,7 @@ func (v *PatronVIsitor) VisitExpUnary(ctx *parser.ExpUnaryContext) interface{} {
 	strat, ok := ExpresionesUnarias[ctx.GetOp().GetText()]
 
 	if !ok {
-		log.Fatal("Unary operator not found")
+		log.Fatal("Operador Unario no encontrado: " + ctx.GetOp().GetText())
 	}
 
 	ok, msg, result := strat.ValidarExp(exp)
@@ -1008,7 +1008,7 @@ func (v *PatronVIsitor) VisitExpBinario(ctx *parser.ExpBinarioContext) interface
 	strat, ok := ExpresionBinaria[op]
 
 	if !ok {
-		log.Fatal("Binary operator not found")
+		log.Fatal("Operador binario no encontrado: " + op)
 	}
 
 	ok, msg, result := strat.ValidarExp(left, right)
@@ -1292,7 +1292,7 @@ func (v *PatronVIsitor) VisitForStmt(ctx *parser.ForStmtContext) interface{} {
 
 	if iterableVariable == nil {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-		log.Fatal("This should not happen")
+		log.Fatal("Esto no deberia pasar, variable no creada: " + varName)
 		return nil
 	}
 
@@ -1533,7 +1533,7 @@ func (v *PatronVIsitor) VisitLlamarFuncion(ctx *parser.LlamarFuncionContext) int
 		return funcObj.RetornarValor
 
 	default:
-		log.Fatal("Function type not found")
+		log.Fatal("Tipo de funcion no soportado: ", funcObj)
 	}
 
 	return tiposDeDato.NuloPorDefecto
@@ -1895,7 +1895,7 @@ func (v *PatronVIsitor) VisitStructInitField(ctx *parser.StructInitFieldContext)
 }
 
 func (v *PatronVIsitor) VisitMetodoStruct(ctx *parser.MetodoStructContext) interface{} {
-	fmt.Println("=== DEBUG: ENTRANDO A VisitMetodoStruct (nueva gramática) ===")
+	fmt.Println("=== DEBUG: ENTRANDO A VisitMetodoStruct ===")
 
 	if v.RegistroAmbito.AmbitoActual != v.RegistroAmbito.AmbitoGlobal {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Los métodos solo pueden ser declarados en el scope global")

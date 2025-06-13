@@ -91,7 +91,7 @@ func (v *VisitanteDcl) VisitFuncionDeclerada(ctx *parser.FuncionDecleradaContext
 
 	body := ctx.AllStmt()
 
-	function := &Funcion{ // pointer ?
+	function := &Funcion{ // pointer
 		Name:            funcName,
 		Parametros:      params,
 		ReturnType:      returnType,

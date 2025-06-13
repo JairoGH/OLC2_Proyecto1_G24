@@ -245,111 +245,7 @@ func formatStruct(obj *TipoObjeto) string {
 	return result
 }
 
-// Funcion Entero
-func Entero(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.ValorInterno, bool, string) {
-
-	if len(args) != 1 {
-		return tiposDeDato.NuloPorDefecto, false, "La función int solo acepta un Argumento"
-	}
-
-	argValue := args[0].Value
-
-	if !(argValue.Type() == tiposDeDato.TIPO_CADENA || argValue.Type() == tiposDeDato.TIPO_DECIMAL) {
-		return tiposDeDato.NuloPorDefecto, false, "La función Int solo acepta un Argumento de tipo string o float"
-	}
-
-	if argValue.Type() == tiposDeDato.TIPO_CADENA {
-		ValorDecimal, err := strconv.ParseFloat(argValue.Value().(string), 64)
-
-		if err != nil {
-			return tiposDeDato.NuloPorDefecto, false, "No se pudo convertir el valor a int"
-		}
-
-		return &tiposDeDato.ValorEntero{
-			InternalValor: int(ValorDecimal),
-		}, true, ""
-	}
-
-	if argValue.Type() == tiposDeDato.TIPO_DECIMAL {
-		// truncate the float
-
-		ValorDecimal := argValue.Value().(float64)
-
-		return &tiposDeDato.ValorEntero{
-			InternalValor: int(ValorDecimal),
-		}, true, ""
-	}
-
-	return tiposDeDato.NuloPorDefecto, false, "No se pudo convertir el valor a int"
-}
-
-// Funcion Decimal
-
-func Decimal(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.ValorInterno, bool, string) {
-
-	if len(args) != 1 {
-		return tiposDeDato.NuloPorDefecto, false, "La función float solo acepta un Argumento"
-	}
-
-	argValue := args[0].Value
-
-	if !(argValue.Type() == tiposDeDato.TIPO_CADENA) {
-		return tiposDeDato.NuloPorDefecto, false, "La función float solo acepta un Argumento de tipo string"
-	}
-
-	ValorDecimal, err := strconv.ParseFloat(argValue.Value().(string), 64)
-
-	if err != nil {
-		return tiposDeDato.NuloPorDefecto, false, "No se pudo convertir el valor a float"
-	}
-
-	return &tiposDeDato.ValorDecimal{
-		InternalValor: ValorDecimal,
-	}, true, ""
-}
-
-// Funcion Cadena
-
-func Cadena(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.ValorInterno, bool, string) {
-
-	if len(args) != 1 {
-		return tiposDeDato.NuloPorDefecto, false, "La función string solo acepta un Argumento"
-	}
-
-	argValue := args[0].Value
-
-	if !(argValue.Type() == tiposDeDato.TIPO_ENTERO || argValue.Type() == tiposDeDato.TIPO_DECIMAL || argValue.Type() == tiposDeDato.TIPO_BOOLEAN) {
-		return tiposDeDato.NuloPorDefecto, false, "La función string solo acepta un Argumento de tipo int, float o bool"
-	}
-
-	if argValue.Type() == tiposDeDato.TIPO_ENTERO {
-		ValorCadena := strconv.Itoa(argValue.Value().(int))
-
-		return &tiposDeDato.ValorCadena{
-			InternalValor: ValorCadena,
-		}, true, ""
-	}
-
-	if argValue.Type() == tiposDeDato.TIPO_DECIMAL {
-		ValorCadena := strconv.FormatFloat(argValue.Value().(float64), 'f', 4, 64)
-
-		return &tiposDeDato.ValorCadena{
-			InternalValor: ValorCadena,
-		}, true, ""
-	}
-
-	if argValue.Type() == tiposDeDato.TIPO_BOOLEAN {
-		ValorCadena := strconv.FormatBool(argValue.Value().(bool))
-
-		return &tiposDeDato.ValorCadena{
-			InternalValor: ValorCadena,
-		}, true, ""
-	}
-
-	return tiposDeDato.NuloPorDefecto, false, "No se pudo convertir el valor a string"
-}
-
-// Función Len - MODIFICADA para soportar matrices multidimensionales
+// Función Len
 func Len(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.ValorInterno, bool, string) {
 
 	if len(args) != 1 {
@@ -642,8 +538,6 @@ func TypeOf(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.Valo
 	var tipo string
 
 	// DEBUG: Información adicional para diagnosticar
-	//fmt.Printf("DEBUG TypeOf: valor tipo: %T, valor: %+v\n", valor, valor)
-
 	// Verificación adicional de seguridad
 	if valor == nil {
 		return &tiposDeDato.ValorCadena{
@@ -659,7 +553,6 @@ func TypeOf(context *InstruccionesContexto, args []*Argumento) (tiposDeDato.Valo
 		}
 
 		// DEBUG: Información del vector
-		//fmt.Printf("DEBUG Vector: ItemType='%s', FullType='%s', Size=%d\n", v.ItemType, v.FullType, len(v.InternalValor))
 
 		// Validar que el vector tenga información de tipo
 		if v.ItemType != "" {
@@ -776,18 +669,6 @@ var DefaultBuiltInFunctions = map[string]*FuncionNativa{
 	"println": {
 		Name: "println",
 		Exec: ImprimirLn,
-	},
-	"Int": {
-		Name: "Int",
-		Exec: Entero,
-	},
-	"Float": {
-		Name: "Float",
-		Exec: Decimal,
-	},
-	"String": {
-		Name: "String",
-		Exec: Cadena,
 	},
 	"atoi": {
 		Name: "atoi",

@@ -94,7 +94,7 @@ func (f *Funcion) Exec(visitor *PatronVIsitor, args []*Argumento, token antlr.To
 		if item, ok := recover().(*LlamadaFunciones); item != nil && ok {
 
 			if item != funcItem {
-				context.TablaError.NewErrorSemantico(token, "Return invalido")
+				context.TablaError.NewErrorSemantico(token, "Return Invalido")
 			}
 
 			// validate return type
@@ -141,75 +141,75 @@ func (f *Funcion) Exec(visitor *PatronVIsitor, args []*Argumento, token antlr.To
 
 func (f *Funcion) ValidarArgumentos(context *InstruccionesContexto, args []*Argumento, token antlr.Token) (bool, map[string]*Argumento) {
 
-    // validate arg count
-    if len(args) != len(f.Parametros) {
-        context.TablaError.NewErrorSemantico(token, "Numero de Argumentos invalido")
-        return false, nil
-    }
+	// validate arg count
+	if len(args) != len(f.Parametros) {
+		context.TablaError.NewErrorSemantico(token, "Numero de Argumentos invalido")
+		return false, nil
+	}
 
-    argsMap := make(map[string]*Argumento)
-    finalArgsMap := make(map[string]*Argumento)
+	argsMap := make(map[string]*Argumento)
+	finalArgsMap := make(map[string]*Argumento)
 
-    // Verificar si hay argumentos con nombres
-    hasNamedArgs := false
-    for _, arg := range args {
-        if arg.Name != "" {
-            argsMap[arg.Name] = arg
-            hasNamedArgs = true
-        }
-    }
+	// Verificar si hay argumentos con nombres
+	hasNamedArgs := false
+	for _, arg := range args {
+		if arg.Name != "" {
+			argsMap[arg.Name] = arg
+			hasNamedArgs = true
+		}
+	}
 
-    errorFound := false
+	errorFound := false
 
-    for i, param := range f.Parametros {
+	for i, param := range f.Parametros {
 
-        // determine param type
-        var argToValidate *Argumento = nil
+		// determine param type
+		var argToValidate *Argumento = nil
 
-        if !hasNamedArgs {
-            // Si no hay argumentos con nombres, usar argumentos posicionales
-            argToValidate = args[i]
-        } else if param.ExternName == "" {
-            // inner = arg name
-            argToValidate = argsMap[param.InnerName]
-        } else if param.ExternName == "_" {
-            // positional arg
-            argToValidate = args[i]
-        } else {
-            // extern = arg name
-            argToValidate = argsMap[param.ExternName]
-        }
+		if !hasNamedArgs {
+			// Si no hay argumentos con nombres, usar argumentos posicionales
+			argToValidate = args[i]
+		} else if param.ExternName == "" {
+			// inner = arg name
+			argToValidate = argsMap[param.InnerName]
+		} else if param.ExternName == "_" {
+			// positional arg
+			argToValidate = args[i]
+		} else {
+			// extern = arg name
+			argToValidate = argsMap[param.ExternName]
+		}
 
-        // validate arg exists
-        if argToValidate == nil {
-            context.TablaError.NewErrorSemantico(token, fmt.Sprintf("Argumento %s no especificado", param.InnerName))
-            errorFound = true
-            continue
-        }
+		// validate arg exists
+		if argToValidate == nil {
+			context.TablaError.NewErrorSemantico(token, fmt.Sprintf("Argumento %s no especificado", param.InnerName))
+			errorFound = true
+			continue
+		}
 
-        // validate type
-        if argToValidate.Value.Type() != param.Type && param.Type != tiposDeDato.TIPO_ANY {
-            context.TablaError.NewErrorSemantico(token, fmt.Sprintf("Tipo de Argumento %s invalido", param.InnerName))
-            errorFound = true
-            continue
-        }
+		// validate type
+		if argToValidate.Value.Type() != param.Type && param.Type != tiposDeDato.TIPO_ANY {
+			context.TablaError.NewErrorSemantico(token, fmt.Sprintf("Tipo de Argumento %s invalido", param.InnerName))
+			errorFound = true
+			continue
+		}
 
-        // validate pass by reference
-        if argToValidate.PassByReference != param.PassByReference {
-            context.TablaError.NewErrorSemantico(token, fmt.Sprintf("Argumento %s no es pasado por referencia", param.InnerName))
-            errorFound = true
-            continue
-        }
+		// validate pass by reference
+		if argToValidate.PassByReference != param.PassByReference {
+			context.TablaError.NewErrorSemantico(token, fmt.Sprintf("Argumento %s no es pasado por referencia", param.InnerName))
+			errorFound = true
+			continue
+		}
 
-        // add to final args map
-        finalArgsMap[param.InnerName] = argToValidate
-    }
+		// add to final args map
+		finalArgsMap[param.InnerName] = argToValidate
+	}
 
-    if errorFound {
-        return false, nil
-    }
+	if errorFound {
+		return false, nil
+	}
 
-    return true, finalArgsMap
+	return true, finalArgsMap
 }
 
 func (f *Funcion) ValidateReturn(context *InstruccionesContexto, val tiposDeDato.ValorInterno, token antlr.Token) {
@@ -269,7 +269,7 @@ func (m *MetodoStruct) Exec(visitor *PatronVIsitor, receiver *TipoObjeto, args [
 
 		if item, ok := recover().(*LlamadaFunciones); item != nil && ok {
 			if item != funcItem {
-				context.TablaError.NewErrorSemantico(token, "Return inválido")
+				context.TablaError.NewErrorSemantico(token, "Return Invalido")
 			}
 			m.ValidateReturn(context, item.RetornarValor, token)
 			return
@@ -295,7 +295,7 @@ func (m *MetodoStruct) Exec(visitor *PatronVIsitor, receiver *TipoObjeto, args [
 
 func (m *MetodoStruct) ValidarArgumentos(context *InstruccionesContexto, args []*Argumento, token antlr.Token) (bool, map[string]*Argumento) {
 	if len(args) != len(m.Parametros) {
-		context.TablaError.NewErrorSemantico(token, "Número de argumentos inválido")
+		context.TablaError.NewErrorSemantico(token, "Número de Argumento Invalido")
 		return false, nil
 	}
 
