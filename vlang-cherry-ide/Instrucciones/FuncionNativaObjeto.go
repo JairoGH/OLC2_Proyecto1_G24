@@ -6,13 +6,14 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+// FuncionNativaObjeto: representa una función nativa asociada a un objeto específico
+// con lógica de ejecución personalizada
 type FuncionNativaObjeto struct {
 	*Funcion
-	Object     *TipoObjeto
+	Objeto     *TipoObjeto
 	CustomExec func(builtinRef *FuncionNativaObjeto, visitor *PatronVIsitor, args map[string]*Argumento, token antlr.Token)
 }
 
-// implementing ValorInterno
 func (b FuncionNativaObjeto) Type() string {
 	return tiposDeDato.TIPO_FUNCION
 }
@@ -25,11 +26,12 @@ func (b FuncionNativaObjeto) Copy() tiposDeDato.ValorInterno {
 	return b
 }
 
+// Exec: ejecuta la función nativa del objeto validando argumentos y delegando
+// la ejecución a la función personalizada
 func (f *FuncionNativaObjeto) Exec(visitor *PatronVIsitor, args []*Argumento, token antlr.Token) {
 
-	context := visitor.GetReplContext()
+	context := visitor.GetInstruccionesContexto()
 
-	// validate args
 	argsOk, argsMap := f.ValidarArgumentos(context, args, token)
 
 	if !argsOk {
@@ -38,149 +40,129 @@ func (f *FuncionNativaObjeto) Exec(visitor *PatronVIsitor, args []*Argumento, to
 	}
 
 	f.CustomExec(f, visitor, argsMap, token)
-
 }
 
-// * Vector Built In Functions
+// Funciones nativas para vectores
 
-// 1. Append
-// vector.append(value)
-
-// Parameters:
-
-var appendParams = []*Parametros{
-	// Just one positional Argumento
+// agregarParametros: parámetros para la función append de vectores
+var agregarParametros = []*Parametros{
 	{
-		ExternName:      "_",
-		InnerName:       "_",
-		Type:            tiposDeDato.TIPO_ANY,
-		PassByReference: false,
-		Token:           nil,
+		NombreExterno:      "_",
+		NombreInterno:      "_",
+		Tipo:               tiposDeDato.TIPO_ANY,
+		PasarPorReferencia: false,
+		Token:              nil,
 	},
 }
 
+// EjecucionPersonalizada: agrega un elemento al final del vector validando tipos
 func EjecucionPersonalizada(builtinRef *FuncionNativaObjeto, visitor *PatronVIsitor, args map[string]*Argumento, token antlr.Token) {
 
 	builtinRef.RetornarValor = tiposDeDato.NuloPorDefecto
 
-	// get the vector
-	vector := builtinRef.Object.AuxObject.(*TipoVector)
-
-	// get the value
+	vector := builtinRef.Objeto.ObjetoAuxiliar.(*TipoVector)
 	arg := args["_"]
 
-	if vector.ItemType != arg.Value.Type() {
-		visitor.TablaError.NewErrorSemantico(arg.Token, "No se puede agregar un valor de tipo "+arg.Value.Type()+" a un vector de tipo "+vector.ItemType)
+	if vector.TipoElemento != arg.Valor.Type() {
+		visitor.TablaError.NewErrorSemantico(arg.Token, "No se puede agregar un valor de tipo "+arg.Valor.Type()+" a un vector de tipo "+vector.TipoElemento)
 		return
 	}
-	vector.InternalValor = append(vector.InternalValor, arg.Value)
-	vector.updateProps()
+
+	vector.ValorInterno = append(vector.ValorInterno, arg.Valor)
+	vector.actualizarPropiedades()
 }
 
-// 2. vector.remove(at: Int) -> nil
-
-// parameters:
-
-var removeParams = []*Parametros{
-	// at: Int
+// eliminarParametros: parámetros para la función remove de vectores
+var eliminarParametros = []*Parametros{
 	{
-		ExternName:      "at",
-		InnerName:       "at",
-		Type:            tiposDeDato.TIPO_ENTERO,
-		PassByReference: false,
-		Token:           nil,
+		NombreExterno:      "at",
+		NombreInterno:      "at",
+		Tipo:               tiposDeDato.TIPO_ENTERO,
+		PasarPorReferencia: false,
+		Token:              nil,
 	},
 }
 
+// RemoverEjecucion: elimina un elemento del vector en la posición especificada
 func RemoverEjecucion(builtinRef *FuncionNativaObjeto, visitor *PatronVIsitor, args map[string]*Argumento, token antlr.Token) {
 
 	builtinRef.RetornarValor = tiposDeDato.NuloPorDefecto
 
-	// get the vector
-	vector := builtinRef.Object.AuxObject.(*TipoVector)
-
-	// get the value
+	vector := builtinRef.Objeto.ObjetoAuxiliar.(*TipoVector)
 	arg := args["at"]
 
-	if arg.Value.Type() != tiposDeDato.TIPO_ENTERO {
+	if arg.Valor.Type() != tiposDeDato.TIPO_ENTERO {
 		visitor.TablaError.NewErrorSemantico(arg.Token, "El Argumento 'at' debe ser de tipo Int")
 		return
 	}
 
-	// out of bounds
-	if arg.Value.Value().(int) >= vector.Size() || arg.Value.Value().(int) < 0 {
+	// Validar límites del vector
+	if arg.Valor.Value().(int) >= vector.Size() || arg.Valor.Value().(int) < 0 {
 		visitor.TablaError.NewErrorSemantico(arg.Token, "El indice esta fuera de rango")
 		return
 	}
 
-	// remove the element
-	vector.InternalValor = append(vector.InternalValor[:arg.Value.Value().(int)], vector.InternalValor[arg.Value.Value().(int)+1:]...)
-	vector.updateProps()
+	vector.ValorInterno = append(vector.ValorInterno[:arg.Valor.Value().(int)], vector.ValorInterno[arg.Valor.Value().(int)+1:]...)
+	vector.actualizarPropiedades()
 }
 
-// 3. removeLast
-// vector.removeLast() -> nil
+// eliminarUltimosParametros: parámetros para la función removeLast (sin parámetros)
+var eliminarUltimosParametros = []*Parametros{}
 
-// parameters:
-
-var removeLastParams = []*Parametros{}
-
+// EliminarUltimaEjecucion: elimina el último elemento del vector
 func EliminarUltimaEjecucion(builtinRef *FuncionNativaObjeto, visitor *PatronVIsitor, args map[string]*Argumento, token antlr.Token) {
 
 	builtinRef.RetornarValor = tiposDeDato.NuloPorDefecto
 
-	// get the vector
-	vector := builtinRef.Object.AuxObject.(*TipoVector)
+	vector := builtinRef.Objeto.ObjetoAuxiliar.(*TipoVector)
 
 	if vector.Size() == 0 {
 		visitor.TablaError.NewErrorSemantico(token, "El vector esta vacio y no se puede remover el ultimo elemento")
 		return
 	}
 
-	// remove the last element
-	vector.InternalValor = vector.InternalValor[:vector.Size()-1]
-	vector.updateProps()
+	vector.ValorInterno = vector.ValorInterno[:vector.Size()-1]
+	vector.actualizarPropiedades()
 }
 
+// AgregarVectorNativo: registra todas las funciones y propiedades nativas de un vector
 func AgregarVectorNativo(vectorRef *TipoVector) {
 
 	vectorScope := NuevoVectorGlobal()
 
 	vectorInternalObject := &TipoObjeto{
-		InternalScope: vectorScope,
-		AuxObject:     vectorRef,
+		AmbitoInterno:  vectorScope,
+		ObjetoAuxiliar: vectorRef,
 	}
 
-	// Register built in functions
+	// Registrar funciones nativas
 	vectorScope.AgregarFuncion("append", &FuncionNativaObjeto{
 		Funcion: &Funcion{
-			Parametros: appendParams,
+			Parametros: agregarParametros,
 		},
-		Object:     vectorInternalObject,
+		Objeto:     vectorInternalObject,
 		CustomExec: EjecucionPersonalizada,
 	})
 
 	vectorScope.AgregarFuncion("remove", &FuncionNativaObjeto{
 		Funcion: &Funcion{
-			Parametros: removeParams,
+			Parametros: eliminarParametros,
 		},
-		Object:     vectorInternalObject,
+		Objeto:     vectorInternalObject,
 		CustomExec: RemoverEjecucion,
 	})
 
 	vectorScope.AgregarFuncion("removeLast", &FuncionNativaObjeto{
 		Funcion: &Funcion{
-			Parametros: removeLastParams,
+			Parametros: eliminarUltimosParametros,
 		},
-		Object:     vectorInternalObject,
+		Objeto:     vectorInternalObject,
 		CustomExec: EliminarUltimaEjecucion,
 	})
 
-	// make isEmpty a property
-	vectorScope.AgregarVariable("isEmpty", tiposDeDato.TIPO_BOOLEAN, vectorRef.IsEmpty, true, false, nil)
-
-	// make count a property
-	vectorScope.AgregarVariable("count", tiposDeDato.TIPO_ENTERO, vectorRef.SizeValue, true, false, nil)
+	// Registrar propiedades nativas
+	vectorScope.AgregarVariable("isEmpty", tiposDeDato.TIPO_BOOLEAN, vectorRef.EstaVacio, true, false, nil)
+	vectorScope.AgregarVariable("count", tiposDeDato.TIPO_ENTERO, vectorRef.ValorTamaño, true, false, nil)
 
 	vectorRef.TipoObjeto = vectorInternalObject
 }

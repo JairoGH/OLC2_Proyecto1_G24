@@ -4,10 +4,17 @@ int
 string
 float64
 
-DECLARACIONES DE VARIABLES
+//DECLARACIONES DE VARIABLES
 mut variable Tipo = valor
 mut variable := valor
 mut variable Tipo   // VALOR POR DEFECTO
+variable := valor
+
+EJEMPLOS
+mut var1 int = 200
+mut var2 := 120
+mut var3 int   // VALOR POR DEFECTO
+var4 := 100
 
 REASIGNACION
 variable  = valor

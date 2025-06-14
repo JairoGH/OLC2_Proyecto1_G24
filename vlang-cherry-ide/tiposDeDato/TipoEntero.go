@@ -1,17 +1,17 @@
 package tiposDeDato
 
 type ValorEntero struct {
-	InternalValor int
+	ValorInterno int
 }
 
 func (i ValorEntero) Value() interface{} {
-	return i.InternalValor
+	return i.ValorInterno
 }
 
 func (i ValorEntero) Type() string {
-	return TIPO_ENTERO 
+	return TIPO_ENTERO
 }
 
 func (i ValorEntero) Copy() ValorInterno {
-	return &ValorEntero{i.InternalValor}
+	return &ValorEntero{i.ValorInterno}
 }

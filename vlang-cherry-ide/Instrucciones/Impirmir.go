@@ -4,26 +4,33 @@ import (
 	"fmt"
 )
 
-type Console struct {
-	output string
+// Consola: maneja la salida de texto del programa, almacenando y mostrando
+// los resultados de las operaciones de impresión
+type Consola struct {
+	salida string 
 }
 
-func (c *Console) Print(s string) {
-	c.output += s + "\n"
+// Print: agrega texto al buffer de salida con salto de línea
+func (c *Consola) Print(s string) {
+	c.salida += s + "\n"
 }
 
-func (c *Console) Show() {
-	fmt.Println(c.output)
+// Show: muestra todo el contenido del buffer en la consola del sistema
+func (c *Consola) Show() {
+	fmt.Println(c.salida)
 }
 
-func (c *Console) Clear() {
-	c.output = ""
+// Clear: limpia completamente el buffer de salida
+func (c *Consola) Clear() {
+	c.salida = ""
 }
 
-func NewConsole() *Console {
-	return &Console{}
+// NewConsola: crea una nueva instancia de consola con buffer vacío
+func NewConsola() *Consola {
+	return &Consola{}
 }
 
-func (c *Console) GetOutput() string {
-	return c.output
+// GetSalida: retorna el contenido actual del buffer de salida
+func (c *Consola) GetSalida() string {
+	return c.salida
 }

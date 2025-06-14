@@ -2,17 +2,17 @@ package instrucciones
 
 import "main/tiposDeDato"
 
-// Implementar el  ValorInterno
-
+// TipoVector: representa un vector dinámico con funcionalidad de iteración
+// y métodos nativos integrados
 type TipoVector struct {
 	*TipoObjeto
 
-	InternalValor []tiposDeDato.ValorInterno
-	CurrentIndex  int
-	ItemType      string
-	FullType      string
-	SizeValue     *tiposDeDato.ValorEntero
-	IsEmpty       *tiposDeDato.ValorBool
+	ValorInterno []tiposDeDato.ValorInterno
+	IndiceActual int
+	TipoElemento string
+	TipoCompleto string
+	ValorTamaño  *tiposDeDato.ValorEntero
+	EstaVacio    *tiposDeDato.ValorBool
 }
 
 func (v TipoVector) Value() interface{} {
@@ -20,16 +20,18 @@ func (v TipoVector) Value() interface{} {
 }
 
 func (v TipoVector) Type() string {
-	return v.FullType
+	return v.TipoCompleto
 }
 
+// Size: retorna el número de elementos en el vector
 func (v TipoVector) Size() int {
-	return len(v.InternalValor)
+	return len(v.ValorInterno)
 }
 
-func (v TipoVector) ValidIndex(index int) bool {
+// IndiceValido: verifica si un índice está dentro del rango válido
+func (v TipoVector) IndiceValido(index int) bool {
 
-	if index < 0 || index >= len(v.InternalValor) {
+	if index < 0 || index >= len(v.ValorInterno) {
 		return false
 	}
 
@@ -37,54 +39,61 @@ func (v TipoVector) ValidIndex(index int) bool {
 
 }
 
+// Get: obtiene el elemento en la posición especificada
 func (v TipoVector) Get(index int) tiposDeDato.ValorInterno {
-	return v.InternalValor[index]
+	return v.ValorInterno[index]
 }
 
+// Next: avanza al siguiente elemento en la iteración
 func (v *TipoVector) Next() bool {
-	if v.CurrentIndex < len(v.InternalValor) {
-		v.CurrentIndex++
+	if v.IndiceActual < len(v.ValorInterno) {
+		v.IndiceActual++
 		return true
 	}
 	return false
 }
 
-func (v *TipoVector) Current() tiposDeDato.ValorInterno {
-	return v.InternalValor[v.CurrentIndex]
+// Actual: retorna el elemento actual en la iteración
+func (v *TipoVector) Actual() tiposDeDato.ValorInterno {
+	return v.ValorInterno[v.IndiceActual]
 }
 
+// Reset: reinicia el índice de iteración
 func (v *TipoVector) Reset() {
-	v.CurrentIndex = 0
+	v.IndiceActual = 0
 }
 
+// Copy: crea una copia profunda del vector
 func (v *TipoVector) Copy() tiposDeDato.ValorInterno {
 
-	internalCopy := make([]tiposDeDato.ValorInterno, len(v.InternalValor))
+	copiainterna := make([]tiposDeDato.ValorInterno, len(v.ValorInterno))
 
-	for i, item := range v.InternalValor {
-		internalCopy[i] = item.Copy()
+	for i, item := range v.ValorInterno {
+		copiainterna[i] = item.Copy()
 	}
 
-	return NewTipoVector(internalCopy, v.FullType, v.ItemType)
+	return NewTipoVector(copiainterna, v.TipoCompleto, v.TipoElemento)
 
 }
 
-func (v *TipoVector) updateProps() {
+// actualizarPropiedades: actualiza las propiedades de tamaño y estado vacío
+func (v *TipoVector) actualizarPropiedades() {
 
-	v.SizeValue.InternalValor = len(v.InternalValor)
-	v.IsEmpty.InternalValor = len(v.InternalValor) == 0
+	v.ValorTamaño.ValorInterno = len(v.ValorInterno)
+	v.EstaVacio.InternalValor = len(v.ValorInterno) == 0
 
 }
 
-func NewTipoVector(vectorItems []tiposDeDato.ValorInterno, fullType, itemType string) *TipoVector {
+// NewTipoVector: constructor que crea un nuevo vector con métodos nativos
+func NewTipoVector(elementosVector []tiposDeDato.ValorInterno, tipoCompleto, tipoElemento string) *TipoVector {
 	vector := &TipoVector{
-		TipoObjeto:    &TipoObjeto{},
-		InternalValor: vectorItems,
-		CurrentIndex:  0,
-		ItemType:      itemType,
-		FullType:      fullType,
-		SizeValue:     &tiposDeDato.ValorEntero{InternalValor: len(vectorItems)},
-		IsEmpty:       &tiposDeDato.ValorBool{InternalValor: len(vectorItems) == 0},
+		TipoObjeto:   &TipoObjeto{},
+		ValorInterno: elementosVector,
+		IndiceActual: 0,
+		TipoElemento: tipoElemento,
+		TipoCompleto: tipoCompleto,
+		ValorTamaño:  &tiposDeDato.ValorEntero{ValorInterno: len(elementosVector)},
+		EstaVacio:    &tiposDeDato.ValorBool{InternalValor: len(elementosVector) == 0},
 	}
 
 	AgregarVectorNativo(vector)
@@ -92,18 +101,20 @@ func NewTipoVector(vectorItems []tiposDeDato.ValorInterno, fullType, itemType st
 	return vector
 }
 
+// TipoVectorVacio: instancia global de vector vacío
 var TipoVectorVacio = &TipoVector{
-	TipoObjeto:    &TipoObjeto{},
-	InternalValor: []tiposDeDato.ValorInterno{},
-	CurrentIndex:  0,
-	ItemType:      tiposDeDato.TIPO_ANY,
-	FullType:      "[" + tiposDeDato.TIPO_ANY + "]",
-	SizeValue:     &tiposDeDato.ValorEntero{InternalValor: 0},
-	IsEmpty:       &tiposDeDato.ValorBool{InternalValor: true},
+	TipoObjeto:   &TipoObjeto{},
+	ValorInterno: []tiposDeDato.ValorInterno{},
+	IndiceActual: 0,
+	TipoElemento: tiposDeDato.TIPO_ANY,
+	TipoCompleto: "[" + tiposDeDato.TIPO_ANY + "]",
+	ValorTamaño:  &tiposDeDato.ValorEntero{ValorInterno: 0},
+	EstaVacio:    &tiposDeDato.ValorBool{InternalValor: true},
 }
 
+// VectorItemReference: referencia a un elemento específico del vector
 type VectorItemReference struct {
 	Vector *TipoVector
-	Index  int
-	Value  tiposDeDato.ValorInterno
+	Indice int
+	Valor  tiposDeDato.ValorInterno
 }

@@ -6,12 +6,14 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+// TipoObjeto: representa una instancia de un struct con su ámbito interno
+// y funcionalidad asociada
 type TipoObjeto struct {
-	InternalScope *AmbitoBase
-	AuxObject     interface{}
-	ConcretType   string
-	v             *PatronVIsitor
-	t             antlr.Token
+	AmbitoInterno  *AmbitoBase
+	ObjetoAuxiliar interface{}
+	TipoConcreto   string
+	Visitante      *PatronVIsitor
+	Token          antlr.Token
 }
 
 func (o TipoObjeto) Value() interface{} {
@@ -19,178 +21,182 @@ func (o TipoObjeto) Value() interface{} {
 }
 
 func (o TipoObjeto) Type() string {
-	if o.ConcretType != "" {
-		return o.ConcretType
+	if o.TipoConcreto != "" {
+		return o.TipoConcreto
 	}
 
 	return tiposDeDato.TIPO_OBJECTO
 }
 
+// Copy: crea una copia del objeto con todos sus campos
 func (o *TipoObjeto) Copy() tiposDeDato.ValorInterno {
 	args := make([]*Argumento, 0)
 
-	for _, prop := range o.InternalScope.variables {
+	for _, prop := range o.AmbitoInterno.Variables {
 		args = append(args, &Argumento{
-			Name:  prop.Name,
-			Value: prop.Value,
+			Nombre: prop.Nombre,
+			Valor:  prop.Valor,
 		})
 	}
 
-	return NewTipoObjeto(o.v, o.ConcretType, o.t, args, true)
+	return NewTipoObjeto(o.Visitante, o.TipoConcreto, o.Token, args, true)
 }
 
-func NewTipoObjeto(v *PatronVIsitor, targetStruct string, targetToken antlr.Token, args []*Argumento, allowReinitialize bool) tiposDeDato.ValorInterno {
+// NuevoTipoObjeto: constructor que crea una nueva instancia de struct validando
+// campos y argumentos del constructor
+func NewTipoObjeto(visitante *PatronVIsitor, targetStruct string, tokenObjetivo antlr.Token, args []*Argumento, allowReinitialize bool) tiposDeDato.ValorInterno {
 
-    // Check if struct exists
-    structTemplate, msg := v.RegistroAmbito.AmbitoGlobal.GetEstructura(targetStruct)
+	// Verificar si la estructura existe
+	plantillaStruct, msg := visitante.RegistroAmbito.AmbitoGlobal.GetEstructura(targetStruct)
 
-    if structTemplate == nil {
-        v.TablaError.NewErrorSemantico(targetToken, msg)
-        return tiposDeDato.NuloPorDefecto
-    }
+	if plantillaStruct == nil {
+		visitante.TablaError.NewErrorSemantico(tokenObjetivo, msg)
+		return tiposDeDato.NuloPorDefecto
+	}
 
-    internalScope := NuevoAmbitoGlobal()
+	ambitoInterno := NuevoAmbitoGlobal()
 
-    prevScope := v.RegistroAmbito.AmbitoActual
-    v.RegistroAmbito.AmbitoActual = internalScope
+	ambitoAnterior := visitante.RegistroAmbito.AmbitoActual
+	visitante.RegistroAmbito.AmbitoActual = ambitoInterno
 
-    defer func() {
-        // restore scope
-        v.RegistroAmbito.AmbitoActual = prevScope
-    }()
+	defer func() {
+		// Restaurar ámbito
+		visitante.RegistroAmbito.AmbitoActual = ambitoAnterior
+	}()
 
-    // MEJORADO: Add fields to internal scope con verificaciones
-    for _, field := range structTemplate.Fields {
-        if field != nil { // Verificar que field no sea nil
-            result := v.Visit(field)
-            if result == nil {
-                // Si hay error procesando el campo, continuar con el siguiente
-                continue
-            }
-        }
-    }
+	// Agregar campos al ámbito interno con verificaciones
+	for _, field := range plantillaStruct.Atributos {
+		if field != nil { // Verificar que field no sea nil
+			result := visitante.Visit(field)
+			if result == nil {
+				// Si hay error procesando el campo, continuar con el siguiente
+				continue
+			}
+		}
+	}
 
-    // Resto del código igual...
-    // create args map
-    argMap := make(map[string]*Argumento)
+	// Crear mapa de argumentos
+	mapaArgumentos := make(map[string]*Argumento)
 
-    for _, arg := range args {
-        // repeat arg
-        if _, ok := argMap[arg.Name]; ok {
-            v.TablaError.NewErrorSemantico(arg.Token, "El argumento "+arg.Name+" ya fue definido")
-            return tiposDeDato.NuloPorDefecto
-        }
+	for _, arg := range args {
+		// repeat arg
+		if _, ok := mapaArgumentos[arg.Nombre]; ok {
+			visitante.TablaError.NewErrorSemantico(arg.Token, "El argumento "+arg.Nombre+" ya fue definido")
+			return tiposDeDato.NuloPorDefecto
+		}
 
-        argMap[arg.Name] = arg
-    }
+		mapaArgumentos[arg.Nombre] = arg
+	}
 
-    // validate constructor args
-    wasConst := false
-    usedArgs := make(map[string]bool)
+	// Validar argumentos del constructor
+	eraConstante := false
+	argumentosUsados := make(map[string]bool)
 
-    for _, prop := range internalScope.variables {
-        arg, found := argMap[prop.Name]
+	for _, prop := range ambitoInterno.Variables {
+		arg, found := mapaArgumentos[prop.Nombre]
 
-        if !found {
-            if prop.Value == tiposDeDato.ValorNoIniPorDefecto {
-                v.TablaError.NewErrorSemantico(targetToken, "El campo "+prop.Name+" no fue inicializado en el constructor")
-                return tiposDeDato.NuloPorDefecto
-            }
+		if !found {
+			if prop.Valor == tiposDeDato.ValorNoIniPorDefecto {
+				visitante.TablaError.NewErrorSemantico(tokenObjetivo, "El campo "+prop.Nombre+" no fue inicializado en el constructor")
+				return tiposDeDato.NuloPorDefecto
+			}
 
-            continue
-        }
+			continue
+		}
 
-        // then the arg exists
-        if prop.IsConst {
-            if (prop.Value != tiposDeDato.ValorNoIniPorDefecto) && !allowReinitialize {
-                v.TablaError.NewErrorSemantico(targetToken, "El campo "+prop.Name+" es inmutable y ya fue inicializado")
-                return tiposDeDato.NuloPorDefecto
-            }
+		// El argumento existe
+		if prop.esConstante {
+			if (prop.Valor != tiposDeDato.ValorNoIniPorDefecto) && !allowReinitialize {
+				visitante.TablaError.NewErrorSemantico(tokenObjetivo, "El campo "+prop.Nombre+" es inmutable y ya fue inicializado")
+				return tiposDeDato.NuloPorDefecto
+			}
 
-            wasConst = true
-            prop.IsConst = false
-        }
+			eraConstante = true
+			prop.esConstante = false
+		}
 
-        var throwError bool = false
-        var msg string = ""
-        var assignValue tiposDeDato.ValorInterno = arg.Value
+		var lanzarError bool = false
+		var msg string = ""
+		var valorAsignar tiposDeDato.ValorInterno = arg.Valor
 
-        // pointer support
-        if arg.PassByReference {
-            if arg.VariableRef == nil {
-                msg = "No es posible pasar por referencia un valor que no este asociado a una variable"
-                throwError = true
-            }
+		// Soporte para punteros
+		if arg.esReferencia {
+			if arg.VariableRef == nil {
+				msg = "No es posible pasar por referencia un valor que no este asociado a una variable"
+				lanzarError = true
+			}
 
-            // create the pointer
-            assignValue = &TipoPuntero{
-                VariableAsociada: arg.VariableRef,
-            }
-        }
+			// Crear el puntero
+			valorAsignar = &TipoPuntero{
+				VariableAsociada: arg.VariableRef,
+			}
+		}
 
-        if !throwError {
-            throwError, msg = prop.AsignarVariable(assignValue, false)
-        }
+		if !lanzarError {
+			lanzarError, msg = prop.AsignarVariable(valorAsignar, false)
+		}
 
-        if wasConst {
-            prop.IsConst = true
-            wasConst = false
-        }
+		if eraConstante {
+			prop.esConstante = true
+			eraConstante = false
+		}
 
-        if !throwError {
-            v.TablaError.NewErrorSemantico(targetToken, msg)
-            return tiposDeDato.NuloPorDefecto
-        }
+		if !lanzarError {
+			visitante.TablaError.NewErrorSemantico(tokenObjetivo, msg)
+			return tiposDeDato.NuloPorDefecto
+		}
 
-        usedArgs[prop.Name] = true
-    }
+		argumentosUsados[prop.Nombre] = true
+	}
 
-    // validate unused args
-    for _, arg := range args {
-        if _, ok := usedArgs[arg.Name]; !ok {
-            v.TablaError.NewErrorSemantico(arg.Token, "El argumento "+arg.Name+" no es utilizado en el constructor")
-        }
-    }
+	// Validar argumentos no utilizados
+	for _, arg := range args {
+		if _, ok := argumentosUsados[arg.Nombre]; !ok {
+			visitante.TablaError.NewErrorSemantico(arg.Token, "El argumento "+arg.Nombre+" no es utilizado en el constructor")
+		}
+	}
 
-    // mutable related flags
-    for _, prop := range internalScope.variables {
-        prop.isProp = true
-    }
+	// Marcar propiedades como mutables
+	for _, prop := range ambitoInterno.Variables {
+		prop.esPropiedad = true
+	}
 
-    // self object
-    selfObject := &TipoObjeto{
-        InternalScope: internalScope,
-        ConcretType:   tiposDeDato.TIPO_PROPIO,
-    }
+	// Objeto self
+	selfObject := &TipoObjeto{
+		AmbitoInterno: ambitoInterno,
+		TipoConcreto:  tiposDeDato.TIPO_PROPIO,
+	}
 
-    instanceInternalScope := NuevoAmbitoGlobal()
+	ambitoInternoInstancia := NuevoAmbitoGlobal()
 
-    instanceInternalScope.AgregarVariable("self", tiposDeDato.TIPO_PROPIO, selfObject, true, false, nil)
+	ambitoInternoInstancia.AgregarVariable("self", tiposDeDato.TIPO_PROPIO, selfObject, true, false, nil)
 
-    // make functions use the instance scope
-    for _, function := range internalScope.functions {
-        f, ok := function.(*Funcion)
+	// Hacer que las funciones usen el ámbito de la instancia
+	for _, function := range ambitoInterno.Funciones {
+		f, ok := function.(*Funcion)
 
-        if !ok {
-            continue
-        }
+		if !ok {
+			continue
+		}
 
-        f.DefaultScope = instanceInternalScope
-    }
+		f.AmbitoDefault = ambitoInternoInstancia
+	}
 
-    // create instance
-    return &TipoObjeto{
-        InternalScope: internalScope,
-        ConcretType:   targetStruct,
-        v:             v,
-        t:             targetToken,
-    }
+	// Crear instancia
+	return &TipoObjeto{
+		AmbitoInterno: ambitoInterno,
+		TipoConcreto:  targetStruct,
+		Visitante:     visitante,
+		Token:         tokenObjetivo,
+	}
 }
 
-func ArgumentoValidoEstructura(arg []*Argumento) bool {
-	for _, a := range arg {
+// ArgumentoValidoEstructura: verifica que todos los argumentos tengan nombre
+// (requerido para constructores de structs)
+func ArgumentoValidoEstructura(argumentos []*Argumento) bool {
+	for _, a := range argumentos {
 
-		if a.Name == "" {
+		if a.Nombre == "" {
 			return false
 		}
 	}

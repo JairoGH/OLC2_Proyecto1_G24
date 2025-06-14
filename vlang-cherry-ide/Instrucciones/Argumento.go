@@ -7,9 +7,9 @@ import (
 )
 
 type Argumento struct {
-	Name            string
-	Value           tiposDeDato.ValorInterno
-	PassByReference bool
-	Token           antlr.Token
-	VariableRef     *Variable
+	Nombre       string
+	Valor        tiposDeDato.ValorInterno
+	esReferencia bool
+	Token        antlr.Token
+	VariableRef  *Variable
 }

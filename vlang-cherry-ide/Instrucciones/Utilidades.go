@@ -6,45 +6,45 @@ import (
 	"strings"
 )
 
+// CadenaAVector: convierte una cadena en un vector de caracteres individuales
 func CadenaAVector(s *tiposDeDato.ValorCadena) *TipoVector {
-	items := make([]tiposDeDato.ValorInterno, 0, len(s.InternalValor))
-	for _, rune := range s.InternalValor {
-		// cada rune lo convertimos en string de 1 carácter
+	items := make([]tiposDeDato.ValorInterno, 0, len(s.ValorInterno))
+	for _, rune := range s.ValorInterno {
 		items = append(items, &tiposDeDato.ValorCadena{
-			InternalValor: string(rune),
+			ValorInterno: string(rune),
 		})
 	}
-	// Aquí indicamos que es un vector de cadenas
+
 	tag := "[" + tiposDeDato.TIPO_CADENA + "]"
 	return NewTipoVector(items, tag, tiposDeDato.TIPO_CADENA)
 }
 
-func EsTipoVector(_type string) bool {
-
-	// Vector starts with only one [ and ends with only one ]
+// EsTipoVector: verifica si un tipo es vector (un solo nivel de corchetes)
+// Distingue entre [tipo] (vector) y [[tipo]] (matriz)
+func EsTipoVector(tipo string) bool {
+	// Vector: inicia con un solo [ y termina con un solo ]
 	formatoVector := "^\\[.*\\]$"
 
-	// Matrix starts with AT LEAST two [[ and ends with at least two ]]
+	// Matriz: inicia con al menos [[ y termina con al menos ]]
 	formatoMatriz := "^\\[\\[.*\\]\\](\\[.*\\]\\])*$"
 
-	// match vector pattern but not matrix pattern
-
-	match, _ := regexp.MatchString(formatoVector, _type)
-	match2, _ := regexp.MatchString(formatoMatriz, _type)
+	match, _ := regexp.MatchString(formatoVector, tipo)
+	match2, _ := regexp.MatchString(formatoMatriz, tipo)
 
 	return match && !match2
 }
 
+// EliminarCorchetes: remueve los corchetes de apertura y cierre de un tipo
 func EliminarCorchetes(s string) string {
 	return strings.Trim(s, "[]")
 }
 
-func EsTipoMatriz(_type string) bool {
-
-	// Matrix starts with AT LEAST two [[ and ends with at least two ]]
+// EsTipoMatriz: verifica si un tipo es matriz (múltiples niveles de corchetes)
+func EsTipoMatriz(tipo string) bool {
+	// Matriz: inicia con al menos [[ y termina con al menos ]]
 	formatoMatriz := "^\\[\\[.*\\]\\](\\[.*\\]\\])*$"
 
-	match, _ := regexp.MatchString(formatoMatriz, _type)
+	match, _ := regexp.MatchString(formatoMatriz, tipo)
 
 	return match
 }

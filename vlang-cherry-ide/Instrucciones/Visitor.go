@@ -13,22 +13,22 @@ import (
 
 type PatronVIsitor struct {
 	parser.BaseVGrammarVisitor
-	RegistroAmbito *RegistroAmbito
-	PilaLlamada    *PilaLlamada
-	Console        *Console
-	TablaError     *TablaError
-	StructNames    []string
+	RegistroAmbito     *RegistroAmbito
+	PilaLlamada        *PilaLlamada
+	Consola            *Consola
+	TablaError         *TablaError
+	NombresEstructuras []string
 }
 
-// defaultValueForType devuelve el ValorInterno por defecto para tipos primitivos
-func defaultValueForType(typeName string) tiposDeDato.ValorInterno {
+// valorPorDefectoParaTipo devuelve el ValorInterno por defecto para tipos primitivos
+func valorPorDefectoParaTipo(typeName string) tiposDeDato.ValorInterno {
 	switch typeName {
 	case tiposDeDato.TIPO_ENTERO:
-		return &tiposDeDato.ValorEntero{InternalValor: 0}
+		return &tiposDeDato.ValorEntero{ValorInterno: 0}
 	case tiposDeDato.TIPO_DECIMAL:
 		return &tiposDeDato.ValorDecimal{InternalValor: 0.0}
 	case tiposDeDato.TIPO_CADENA:
-		return &tiposDeDato.ValorCadena{InternalValor: ""}
+		return &tiposDeDato.ValorCadena{ValorInterno: ""}
 	case tiposDeDato.TIPO_BOOLEAN:
 		return &tiposDeDato.ValorBool{InternalValor: false}
 	default:
@@ -38,24 +38,24 @@ func defaultValueForType(typeName string) tiposDeDato.ValorInterno {
 
 func NewVisitor(VisitanteDcl *VisitanteDcl) *PatronVIsitor {
 	return &PatronVIsitor{
-		RegistroAmbito: VisitanteDcl.RegistroAmbito,
-		TablaError:     VisitanteDcl.TablaError,
-		StructNames:    VisitanteDcl.StructNames,
-		PilaLlamada:    NuevaLlamadaFuncion(),
-		Console:        NewConsole(),
+		RegistroAmbito:     VisitanteDcl.RegistroAmbito,
+		TablaError:         VisitanteDcl.TablaError,
+		NombresEstructuras: VisitanteDcl.NombresEstructuras,
+		PilaLlamada:        NuevaLlamadaFuncion(),
+		Consola:            NewConsola(),
 	}
 }
 
-func (v *PatronVIsitor) GetReplContext() *InstruccionesContexto {
+func (v *PatronVIsitor) GetInstruccionesContexto() *InstruccionesContexto {
 	return &InstruccionesContexto{
-		Console:        v.Console,
+		Consola:        v.Consola,
 		RegistroAmbito: v.RegistroAmbito,
 		PilaLlamada:    v.PilaLlamada,
 		TablaError:     v.TablaError,
 	}
 }
 
-func (v *PatronVIsitor) ValidType(_type string) bool {
+func (v *PatronVIsitor) TipoValido(_type string) bool {
 	return v.RegistroAmbito.AmbitoGlobal.ValidType(_type)
 }
 
@@ -80,27 +80,26 @@ func (v *PatronVIsitor) VisitProgram(ctx *parser.ProgramContext) interface{} {
 	if ctx.Main_func() != nil {
 		v.Visit(ctx.Main_func())
 	}
-
 	return nil
 }
 func (v *PatronVIsitor) VisitFuncionMain(ctx *parser.FuncionMainContext) interface{} {
 
 	// Push scope para main
-	v.RegistroAmbito.PushScope("main")
+	v.RegistroAmbito.PushAmbito("main")
 
 	for _, stmt := range ctx.AllStmt() {
 		v.Visit(stmt)
 	}
 
 	// Pop scope
-	v.RegistroAmbito.PopScope()
+	v.RegistroAmbito.PopAmbito()
 
 	return nil
 }
 
 func (v *PatronVIsitor) VisitStmt(ctx *parser.StmtContext) interface{} {
 	// 1) Declaraciones (decl_stmt) con sus 7 alternativas
-	if ds := ctx.Decl_stmt(); ds != nil {
+	if ds := ctx.Stmt_declaracion(); ds != nil {
 		switch decl := ds.(type) {
 		case *parser.DeclararInferenciaMutContext:
 			v.VisitDeclararInferenciaMut(decl) // mut x := expr
@@ -112,10 +111,9 @@ func (v *PatronVIsitor) VisitStmt(ctx *parser.StmtContext) interface{} {
 			v.VisitDeclararTipo(decl) // mut x type
 		case *parser.DeclararSinMutValorContext:
 			v.VisitDeclararSinMutValor(decl) // x type = expr
-		case *parser.DeclararSinMutTipoContext:
-			v.VisitDeclararSinMutTipo(decl) // x type
-		case *parser.DeclararVectorContext:
-			v.VisitDeclararVector(decl) // mut x = [type] [values...]
+
+		case *parser.DeclararSliceContext:
+			v.VisitDeclararSlice(decl) // mut x = [type] [values...]
 		default:
 			v.Visit(ds)
 		}
@@ -123,8 +121,8 @@ func (v *PatronVIsitor) VisitStmt(ctx *parser.StmtContext) interface{} {
 	}
 
 	// 2) Asignaciones +, -, *, /, % y accesos a vectores
-	if ctx.Assign_stmt() != nil {
-		v.Visit(ctx.Assign_stmt())
+	if ctx.Stmt_asignar() != nil {
+		v.Visit(ctx.Stmt_asignar())
 		return nil
 	}
 
@@ -138,18 +136,16 @@ func (v *PatronVIsitor) VisitStmt(ctx *parser.StmtContext) interface{} {
 		v.Visit(ctx.While_stmt())
 	case ctx.For_stmt() != nil:
 		v.Visit(ctx.For_stmt())
-	case ctx.Guard_stmt() != nil:
-		v.Visit(ctx.Guard_stmt())
-	case ctx.Transfer_stmt() != nil:
-		v.Visit(ctx.Transfer_stmt())
-	case ctx.Func_call() != nil:
-		v.Visit(ctx.Func_call())
-	case ctx.Func_dcl() != nil:
-		v.Visit(ctx.Func_dcl())
-	case ctx.Strct_dcl() != nil:
-		v.Visit(ctx.Strct_dcl())
-	case ctx.Vector_func() != nil:
-		v.Visit(ctx.Vector_func())
+	case ctx.Stmt_transferencia() != nil:
+		v.Visit(ctx.Stmt_transferencia())
+	case ctx.Llamar_funcion() != nil:
+		v.Visit(ctx.Llamar_funcion())
+	case ctx.Declarar_funcion() != nil:
+		v.Visit(ctx.Declarar_funcion())
+	case ctx.Declarar_struct() != nil:
+		v.Visit(ctx.Declarar_struct())
+	case ctx.Fun_slice() != nil:
+		v.Visit(ctx.Fun_slice())
 	default:
 		log.Fatal("Declaracion No Fue Encontrada: " + ctx.GetText())
 	}
@@ -159,29 +155,29 @@ func (v *PatronVIsitor) VisitStmt(ctx *parser.StmtContext) interface{} {
 
 // 1) mut ID type = expr
 func (v *PatronVIsitor) VisitDeclaraTipoValor(ctx *parser.DeclaraTipoValorContext) interface{} {
-	varName := ctx.ID().GetText()
-	varType := v.Visit(ctx.Type_()).(string)
-	varValue := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
+	nombreVariable := ctx.ID().GetText()
+	tipoVariable := v.Visit(ctx.Tipo()).(string)
+	valorVariable := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
 	// 1) Verificar mismatch de tipo
-	if varValue.Type() != varType {
+	if valorVariable.Type() != tipoVariable {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(),
 			fmt.Sprintf("No se puede asignar un valor de tipo %s a variable %s de tipo %s",
-				varValue.Type(), varName, varType))
+				valorVariable.Type(), nombreVariable, tipoVariable))
 		return nil
 	}
 
 	// copy object/vector
-	if obj, ok := varValue.(*TipoObjeto); ok {
-		varValue = obj.Copy()
+	if obj, ok := valorVariable.(*TipoObjeto); ok {
+		valorVariable = obj.Copy()
 	}
-	if EsTipoVector(varValue.Type()) {
-		varValue = varValue.Copy()
+	if EsTipoVector(valorVariable.Type()) {
+		valorVariable = valorVariable.Copy()
 	}
 
 	// insertar mutable + inicializada
 	variable, msg := v.RegistroAmbito.AgregarVariable(
-		varName, varType, varValue,
+		nombreVariable, tipoVariable, valorVariable,
 		false, /* mutable */
 		false, /* inicializada */
 		ctx.GetStart(),
@@ -193,21 +189,21 @@ func (v *PatronVIsitor) VisitDeclaraTipoValor(ctx *parser.DeclaraTipoValorContex
 }
 
 // vector x type = expr
-func (v *PatronVIsitor) VisitDeclararVector(ctx *parser.DeclararVectorContext) interface{} {
-	varName := ctx.ID().GetText()
+func (v *PatronVIsitor) VisitDeclararSlice(ctx *parser.DeclararSliceContext) interface{} {
+	nombreVariable := ctx.ID().GetText()
 
 	// Verificar que ctx.Type_() no sea nil
-	if ctx.Type_() == nil {
+	if ctx.Tipo() == nil {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Tipo no especificado en declaración de vector")
 		return nil
 	}
 
-	typeResult := v.Visit(ctx.Type_())
-	if typeResult == nil {
+	tipoResultado := v.Visit(ctx.Tipo())
+	if tipoResultado == nil {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Error al procesar el tipo del vector")
 		return nil
 	}
-	varType := typeResult.(string)
+	tipoVariable := tipoResultado.(string)
 
 	// Verificar que ctx.Expr() no sea nil
 	if ctx.Expr() == nil {
@@ -215,41 +211,41 @@ func (v *PatronVIsitor) VisitDeclararVector(ctx *parser.DeclararVectorContext) i
 		return nil
 	}
 
-	valueResult := v.Visit(ctx.Expr())
-	if valueResult == nil {
+	valorResultado := v.Visit(ctx.Expr())
+	if valorResultado == nil {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Error al procesar el valor del vector")
 		return nil
 	}
-	varValue := valueResult.(tiposDeDato.ValorInterno)
+	valorVariable := valorResultado.(tiposDeDato.ValorInterno)
 
 	// NUEVO: Manejar vectores vacíos especialmente
-	if varValue.Type() == "[]" {
+	if valorVariable.Type() == "[]" {
 		// Es un vector vacío, asignarle el tipo correcto
-		if vectorVal, ok := varValue.(*TipoVector); ok {
-			vectorVal.FullType = varType
-			vectorVal.ItemType = EliminarCorchetes(varType)
+		if vectorVal, ok := valorVariable.(*TipoVector); ok {
+			vectorVal.TipoCompleto = tipoVariable
+			vectorVal.TipoElemento = EliminarCorchetes(tipoVariable)
 		}
 	} else {
 		// Verificar que el tipo del vector coincida
-		if varValue.Type() != varType {
+		if valorVariable.Type() != tipoVariable {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(),
 				fmt.Sprintf("No se puede asignar un vector de tipo %s a variable %s de tipo %s",
-					varValue.Type(), varName, varType))
+					valorVariable.Type(), nombreVariable, tipoVariable))
 			return nil
 		}
 	}
 
 	// copy object
-	if obj, ok := varValue.(*TipoObjeto); ok {
-		varValue = obj.Copy()
+	if objeto, ok := valorVariable.(*TipoObjeto); ok {
+		valorVariable = objeto.Copy()
 	}
 
-	if EsTipoVector(varValue.Type()) {
-		varValue = varValue.Copy()
+	if EsTipoVector(valorVariable.Type()) {
+		valorVariable = valorVariable.Copy()
 	}
 
 	// CAMBIO: true para mutable y TRUE para inicializada
-	variable, msg := v.RegistroAmbito.AgregarVariable(varName, varType, varValue, false, true, ctx.GetStart())
+	variable, msg := v.RegistroAmbito.AgregarVariable(nombreVariable, tipoVariable, valorVariable, false, true, ctx.GetStart())
 
 	// Variable already exists
 	if variable == nil {
@@ -259,27 +255,23 @@ func (v *PatronVIsitor) VisitDeclararVector(ctx *parser.DeclararVectorContext) i
 	return nil
 }
 
-func isDeclConst(lexval string) bool {
-	return lexval == "let"
-}
-
 // mut x := expr  (inferencia mutable)
 func (v *PatronVIsitor) VisitDeclararInferenciaMut(ctx *parser.DeclararInferenciaMutContext) interface{} {
-	name := ctx.ID().GetText()
-	val := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
+	nombre := ctx.ID().GetText()
+	valor := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
 	// copia objetos/vectores
-	if obj, ok := val.(*TipoObjeto); ok {
-		val = obj.Copy()
+	if obj, ok := valor.(*TipoObjeto); ok {
+		valor = obj.Copy()
 	}
-	if EsTipoVector(val.Type()) {
-		val = val.Copy()
+	if EsTipoVector(valor.Type()) {
+		valor = valor.Copy()
 	}
 
-	typ := val.Type()
+	typ := valor.Type()
 	// insertar mutable + inicializada
 	variable, msg := v.RegistroAmbito.AgregarVariable(
-		name, typ, val,
+		nombre, typ, valor,
 		false, /* mutable */
 		false, /* inicializada */
 		ctx.GetStart(),
@@ -292,19 +284,19 @@ func (v *PatronVIsitor) VisitDeclararInferenciaMut(ctx *parser.DeclararInferenci
 
 // x := expr  (inferencia sin mut)
 func (v *PatronVIsitor) VisitDeclararInferencia(ctx *parser.DeclararInferenciaContext) interface{} {
-	name := ctx.ID().GetText()
-	val := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
+	nombre := ctx.ID().GetText()
+	valor := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
-	if obj, ok := val.(*TipoObjeto); ok {
-		val = obj.Copy()
+	if obj, ok := valor.(*TipoObjeto); ok {
+		valor = obj.Copy()
 	}
-	if EsTipoVector(val.Type()) {
-		val = val.Copy()
+	if EsTipoVector(valor.Type()) {
+		valor = valor.Copy()
 	}
 
-	typ := val.Type()
+	tipo := valor.Type()
 	variable, msg := v.RegistroAmbito.AgregarVariable(
-		name, typ, val,
+		nombre, tipo, valor,
 		false, /* mutable = false */
 		false, /* inicializada */
 		ctx.GetStart(),
@@ -316,14 +308,14 @@ func (v *PatronVIsitor) VisitDeclararInferencia(ctx *parser.DeclararInferenciaCo
 }
 
 func (v *PatronVIsitor) VisitDeclararTipo(ctx *parser.DeclararTipoContext) interface{} {
-	varName := ctx.ID().GetText()
-	varType := v.Visit(ctx.Type_()).(string)
+	nombreVariable := ctx.ID().GetText()
+	tipoVariable := v.Visit(ctx.Tipo()).(string)
 
 	// valor por defecto según tipo
-	defaultVal := defaultValueForType(varType)
+	defaultVal := valorPorDefectoParaTipo(tipoVariable)
 
 	variable, msg := v.RegistroAmbito.AgregarVariable(
-		varName, varType, defaultVal,
+		nombreVariable, tipoVariable, defaultVal,
 		false, /* mutable */
 		false, /* inicializada */
 		ctx.GetStart(),
@@ -334,44 +326,44 @@ func (v *PatronVIsitor) VisitDeclararTipo(ctx *parser.DeclararTipoContext) inter
 	return nil
 }
 
-func (v *PatronVIsitor) VisitListaItemsVector(ctx *parser.ListaItemsVectorContext) interface{} {
+func (v *PatronVIsitor) VisitListaSlice(ctx *parser.ListaSliceContext) interface{} {
 
-	var vectorItems []tiposDeDato.ValorInterno
+	var elementosVector []tiposDeDato.ValorInterno
 
 	if len(ctx.AllExpr()) == 0 {
-		return NewTipoVector(vectorItems, "[]", "")
+		return NewTipoVector(elementosVector, "[]", "")
 	}
 
 	for _, item := range ctx.AllExpr() {
-		vectorItems = append(vectorItems, v.Visit(item).(tiposDeDato.ValorInterno))
+		elementosVector = append(elementosVector, v.Visit(item).(tiposDeDato.ValorInterno))
 	}
 
-	if len(vectorItems) == 0 {
-		return NewTipoVector(vectorItems, "[]", "")
+	if len(elementosVector) == 0 {
+		return NewTipoVector(elementosVector, "[]", "")
 	}
 
-	itemType := vectorItems[0].Type()
+	tipoElementos := elementosVector[0].Type()
 
 	// NUEVO: Detectar si es una matriz (vector de vectores)
-	isMatrix := strings.HasPrefix(itemType, "[]")
+	esMatriz := strings.HasPrefix(tipoElementos, "[]")
 
-	for _, item := range vectorItems {
-		if item.Type() != itemType {
+	for _, item := range elementosVector {
+		if item.Type() != tipoElementos {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), "Todos los items de la colección deben ser del mismo tipo")
 			return tiposDeDato.NuloPorDefecto
 		}
 	}
 
-	if isMatrix {
+	if esMatriz {
 		// Es una matriz [][]tipo
-		baseType := strings.TrimPrefix(itemType, "[]") // extraer tipo base
-		matrixType := "[]" + itemType                  // [][]int
+		tipoBase := strings.TrimPrefix(tipoElementos, "[]") // extraer tipo base
+		tipoMatriz := "[]" + tipoElementos                  // [][]int
 
 		// Convertir vectores a matriz multidimensional
-		matrix := make([][]tiposDeDato.ValorInterno, len(vectorItems))
-		for i, item := range vectorItems {
+		matriz := make([][]tiposDeDato.ValorInterno, len(elementosVector))
+		for i, item := range elementosVector {
 			if vector, ok := item.(*TipoVector); ok {
-				matrix[i] = vector.InternalValor
+				matriz[i] = vector.ValorInterno
 			} else {
 				v.TablaError.NewErrorSemantico(ctx.GetStart(),
 					"Error interno: elemento de matriz no es vector")
@@ -379,28 +371,28 @@ func (v *PatronVIsitor) VisitListaItemsVector(ctx *parser.ListaItemsVectorContex
 			}
 		}
 
-		return NewTipoMatrizMulti(matrix, matrixType, itemType, baseType)
+		return NewTipoMatrizMulti(matriz, tipoMatriz, tipoElementos, tipoBase)
 	} else {
 		// Es un vector simple []tipo
-		_type := "[]" + itemType
-		return NewTipoVector(vectorItems, _type, itemType)
+		_type := "[]" + tipoElementos
+		return NewTipoVector(elementosVector, _type, tipoElementos)
 	}
 }
 
-func (v *PatronVIsitor) VisitType(ctx *parser.TypeContext) interface{} {
+func (v *PatronVIsitor) VisitTipo(ctx *parser.TipoContext) interface{} {
 	_type := ctx.GetText()
 
 	// Verificar si es matriz multidimensional [][]tipo
 	if strings.HasPrefix(_type, "[][]") && len(_type) > 4 {
 		// Extraer el tipo base (después de [][])
-		baseType := _type[4:] // eliminar [][]
+		tipoBase := _type[4:] // eliminar [][]
 
 		// Verificar si el tipo base es válido
-		if v.ValidType(baseType) {
+		if v.TipoValido(tipoBase) {
 			return _type // retornar [][]int, [][]string, etc.
 		}
 
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "El tipo "+baseType+" no es válido para una matriz")
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), "El tipo "+tipoBase+" no es válido para una matriz")
 		return tiposDeDato.TIPO_NULO
 	}
 
@@ -408,7 +400,7 @@ func (v *PatronVIsitor) VisitType(ctx *parser.TypeContext) interface{} {
 	if strings.HasPrefix(_type, "[]") && len(_type) > 2 {
 		internType := _type[2:] // eliminar []
 
-		if v.ValidType(internType) {
+		if v.TipoValido(internType) {
 			return _type // retornar []int, []string, etc.
 		}
 
@@ -417,7 +409,7 @@ func (v *PatronVIsitor) VisitType(ctx *parser.TypeContext) interface{} {
 	}
 
 	// Resto del código existente para tipos primitivos y formatos antiguos...
-	if v.ValidType(_type) {
+	if v.TipoValido(_type) {
 		return _type
 	}
 
@@ -427,235 +419,159 @@ func (v *PatronVIsitor) VisitType(ctx *parser.TypeContext) interface{} {
 	return tiposDeDato.TIPO_NULO
 }
 
-// Función auxiliar para verificar si un tipo es vector (ambos formatos)
-func esFormatoVector(tipo string) bool {
-	// Formato []tipo
-	if strings.HasPrefix(tipo, "[]") && len(tipo) > 2 {
-		return true
-	}
-	// Formato [tipo]
-	return EsTipoVector(tipo)
-}
-
-func (v *PatronVIsitor) VisitVector_type(ctx *parser.Vector_typeContext) interface{} {
+func (v *PatronVIsitor) VisitTipos_slices(ctx *parser.Tipos_slicesContext) interface{} {
 	return ctx.GetText()
 }
 
-func (v *PatronVIsitor) VisitRepeating(ctx *parser.RepeatingContext) interface{} {
+func (v *PatronVIsitor) VisitItemSlice(ctx *parser.ItemSliceContext) interface{} {
 
-	if ctx.ID(0).GetText() != "repeating" {
-		v.TablaError.NewErrorSemantico(ctx.ID(0).GetSymbol(), "La sintaxis de la función espera el parametro 'repeating'")
-		return tiposDeDato.NuloPorDefecto
-	}
+    nombreVariable := ctx.PatronId().GetText()
+    variable := v.RegistroAmbito.GetVariable(nombreVariable)
 
-	if ctx.ID(1).GetText() != "count" {
-		v.TablaError.NewErrorSemantico(ctx.ID(1).GetSymbol(), "La sintaxis de la función espera el parametro 'count'")
-		return tiposDeDato.NuloPorDefecto
-	}
+    if variable == nil {
+        v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+nombreVariable+" no encontrada")
+        return nil
+    }
 
-	reapeating_val := v.Visit(ctx.Expr(0)).(tiposDeDato.ValorInterno)
-	count_val := v.Visit(ctx.Expr(1)).(tiposDeDato.ValorInterno)
+    // Verificar que sea un vector o matriz (incluyendo formato [][]tipo)
+    if !(EsTipoVector(variable.Tipo) || EsTipoMatriz(variable.Tipo) ||
+        strings.HasPrefix(variable.Tipo, "[]")) {
+        v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+nombreVariable+" no es un vector o una matriz")
+        return nil
+    }
 
-	count, validCount := count_val.(*tiposDeDato.ValorEntero)
-	if !validCount {
-		v.TablaError.NewErrorSemantico(ctx.Expr(1).GetStart(), "El parametro count debe ser un entero")
-		return tiposDeDato.NuloPorDefecto
-	}
+    indices := []int{}
+    for _, expr := range ctx.AllExpr() {
+        val := v.Visit(expr).(tiposDeDato.ValorInterno)
+        if val.Type() != tiposDeDato.TIPO_ENTERO {
+            v.TablaError.NewErrorSemantico(ctx.GetStart(), "Los indices de acceso deben ser enteros")
+            return nil
+        }
+        indices = append(indices, val.Value().(int))
+    }
 
-	if ctx.Vector_type() != nil {
-		vector_type := ctx.Vector_type().GetText()
-		primitive_type := EliminarCorchetes(vector_type)
+    // ✅ NUEVO: Manejar TipoMatrizMulti primero
+    if matrizMulti, ok := variable.Valor.(*TipoMatrizMulti); ok {
+        if len(indices) == 2 {
+            // Acceso completo: matriz[fila][columna]
+            fila, columna := indices[0], indices[1]
+            if !matrizMulti.ValidIndex(fila, columna) {
+                v.TablaError.NewErrorSemantico(ctx.GetStart(),
+                    fmt.Sprintf("Índice fuera de rango: [%d][%d]. La matriz tiene %d filas",
+                        fila, columna, len(matrizMulti.ValorInterno)))
 
-		if primitive_type != reapeating_val.Type() {
-			v.TablaError.NewErrorSemantico(ctx.Expr(0).GetStart(), "El tipo del valor repetido debe ser "+primitive_type)
-			return tiposDeDato.NuloPorDefecto
-		}
+                // Retornar un valor que indique error pero que no rompa el programa
+                return &tiposDeDato.ValorEntero{ValorInterno: -1}
+            }
+            return &MatrizMultiItemReference{
+                Matriz:  matrizMulti,
+                Fila:    fila,
+                Columna: columna,
+                Valor:   matrizMulti.Get(fila, columna),
+            }
+        } else if len(indices) == 1 {
+            // ✅ ARREGLO: Acceso a fila: matriz[fila] -> retorna vector para que len() funcione
+            fila := indices[0]
+            if fila < 0 || fila >= len(matrizMulti.ValorInterno) {
+                v.TablaError.NewErrorSemantico(ctx.GetStart(),
+                    fmt.Sprintf("Índice de fila fuera de rango: %d", fila))
+                return &tiposDeDato.ValorEntero{ValorInterno: -1}
+            }
+            
+            // ✅ CLAVE: Crear un TipoVector para la fila y retornarlo como VectorItemReference
+            filaVector := NewTipoVector(matrizMulti.ValorInterno[fila], matrizMulti.TipoElemento, matrizMulti.TipoBase)
+            
+            return &VectorItemReference{
+                Vector: filaVector,
+                Indice: -1, // -1 indica que es una fila completa, no un elemento individual
+                Valor:  filaVector, // ✅ El valor ES el vector completo
+            }
+        } else {
+            v.TablaError.NewErrorSemantico(ctx.GetStart(), "Número incorrecto de índices para matriz multidimensional")
+            return nil
+        }
+    }
 
-		var vectorItems []tiposDeDato.ValorInterno
+    // Resto del código existente para vectores simples y matrices regulares
+    tipoStructs := tiposDeDato.TIPO_VECTOR
+    indice := v.Visit(ctx.Expr(0)).(tiposDeDato.ValorInterno)
 
-		for i := 0; i < count.InternalValor; i++ {
-			vectorItems = append(vectorItems, reapeating_val.Copy()) // ? indepedent values
-		}
+    if len(ctx.AllExpr()) != 1 {
+        tipoStructs = tiposDeDato.TIPO_MATRIZ
+    }
 
-		return NewTipoVector(vectorItems, vector_type, primitive_type)
+    if tipoStructs == tiposDeDato.TIPO_VECTOR {
+        switch valorVector := variable.Valor.(type) {
+        case *TipoVector:
+            valorIndice := indice.(*tiposDeDato.ValorEntero).ValorInterno
+            if !valorVector.IndiceValido(valorIndice) {
+                v.TablaError.NewErrorSemantico(ctx.GetStart(),
+                    fmt.Sprintf("Índice fuera de rango: %d. El vector tiene %d elementos (rango válido: 0-%d)",
+                        valorIndice, len(valorVector.ValorInterno), len(valorVector.ValorInterno)-1))
+                return &VectorItemReference{
+                    Vector: valorVector,
+                    Indice: valorIndice,
+                    Valor:  &tiposDeDato.ValorEntero{ValorInterno: -1},
+                }
+            }
+            return &VectorItemReference{
+                Vector: valorVector,
+                Indice: valorIndice,
+                Valor:  valorVector.Get(valorIndice),
+            }
+        default:
+            v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+nombreVariable+" no es un vector")
+            return nil
+        }
+    } else if tipoStructs == tiposDeDato.TIPO_MATRIZ {
+        switch TipoMatriz := variable.Valor.(type) {
+        case *TipoMatriz:
+            if !TipoMatriz.IndicesValidos(indices) {
+                v.TablaError.NewErrorSemantico(ctx.GetStart(),
+                    fmt.Sprintf("Índice fuera de rango: %v. La matriz tiene dimensiones válidas", indices))
+                return nil
+            }
+            return &ElementoMatriz{
+                Matriz: TipoMatriz,
+                Indice: indices,
+                Valor:  TipoMatriz.Get(indices),
+            }
+        default:
+            v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+nombreVariable+" no es una matriz")
+            return nil
+        }
+    }
 
-	} else if ctx.Matrix_type() != nil {
-
-		matrix_type := ctx.Matrix_type().GetText()
-
-		if !(EsTipoMatriz(reapeating_val.Type()) || EsTipoVector(reapeating_val.Type())) {
-			v.TablaError.NewErrorSemantico(ctx.Expr(0).GetStart(), "Para crear una matriz con valores repetidos, el valor debe ser un vector o una matriz, se obtuvo '"+reapeating_val.Type()+"'")
-			return tiposDeDato.NuloPorDefecto
-		}
-
-		if !tiposDeDato.PRIMITIVO(EliminarCorchetes(matrix_type)) {
-			v.TablaError.NewErrorSemantico(ctx.Expr(0).GetStart(), "Las matrices solo pueden contener tipos primitivos")
-			return tiposDeDato.NuloPorDefecto
-		}
-
-		// must be a lower order collection
-		if matrix_type != "["+reapeating_val.Type()+"]" {
-			v.TablaError.NewErrorSemantico(ctx.Expr(0).GetStart(), "Para conseguir un valor de tipo '"+matrix_type+"' no es posible contruirlo con un valores repetidos del tipo '"+reapeating_val.Type()+"'")
-			return tiposDeDato.NuloPorDefecto
-		}
-
-		var matrixItems []tiposDeDato.ValorInterno
-
-		for i := 0; i < count.InternalValor; i++ {
-			matrixItems = append(matrixItems, reapeating_val.Copy()) // ? indepedent values
-		}
-
-		return NewTipoMatriz(matrixItems, matrix_type, EliminarCorchetes(reapeating_val.Type()))
-	}
-	return tiposDeDato.NuloPorDefecto
-}
-
-func (v *PatronVIsitor) VisitRepeatingExp(ctx *parser.RepeatingExpContext) interface{} {
-	return v.Visit(ctx.Repeating())
-}
-
-func (v *PatronVIsitor) VisitVectorItem(ctx *parser.VectorItemContext) interface{} {
-
-	varName := ctx.Id_pattern().GetText()
-	variable := v.RegistroAmbito.GetVariable(varName)
-
-	if variable == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+varName+" no encontrada")
-		return nil
-	}
-
-	// Verificar que sea un vector o matriz (incluyendo formato [][]tipo)
-	if !(EsTipoVector(variable.Type) || EsTipoMatriz(variable.Type) ||
-		strings.HasPrefix(variable.Type, "[]")) {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+varName+" no es un vector o una matriz")
-		return nil
-	}
-
-	indexes := []int{}
-	for _, expr := range ctx.AllExpr() {
-		val := v.Visit(expr).(tiposDeDato.ValorInterno)
-		if val.Type() != tiposDeDato.TIPO_ENTERO {
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), "Los indices de acceso deben ser enteros")
-			return nil
-		}
-		indexes = append(indexes, val.Value().(int))
-	}
-
-	// NUEVO: Manejar TipoMatrizMulti primero
-	if matrizMulti, ok := variable.Value.(*TipoMatrizMulti); ok {
-		if len(indexes) == 2 {
-			// Acceso completo: matriz[fila][columna]
-			fila, columna := indexes[0], indexes[1]
-			if !matrizMulti.ValidIndex(fila, columna) {
-				v.TablaError.NewErrorSemantico(ctx.GetStart(),
-					fmt.Sprintf("Índice fuera de rango: [%d][%d]. La matriz tiene %d filas",
-						fila, columna, len(matrizMulti.InternalValor)))
-
-				// Retornar un valor que indique error pero que no rompa el programa
-				return &tiposDeDato.ValorEntero{InternalValor: -1}
-			}
-			return &MatrizMultiItemReference{
-				Matriz:  matrizMulti,
-				Fila:    fila,
-				Columna: columna,
-				Value:   matrizMulti.Get(fila, columna),
-			}
-		} else if len(indexes) == 1 {
-			// Acceso a fila: matriz[fila] -> retorna vector
-			fila := indexes[0]
-			if fila < 0 || fila >= len(matrizMulti.InternalValor) {
-				v.TablaError.NewErrorSemantico(ctx.GetStart(),
-					fmt.Sprintf("Índice de fila fuera de rango: %d", fila))
-				return &tiposDeDato.ValorEntero{InternalValor: -1}
-			}
-			// Retornar la fila como vector
-			return NewTipoVector(matrizMulti.InternalValor[fila], matrizMulti.ItemType, matrizMulti.BaseType)
-		} else {
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), "Número incorrecto de índices para matriz multidimensional")
-			return nil
-		}
-	}
-
-	// Resto del código existente para vectores simples y matrices regulares
-	structType := tiposDeDato.TIPO_VECTOR
-	index := v.Visit(ctx.Expr(0)).(tiposDeDato.ValorInterno)
-
-	if len(ctx.AllExpr()) != 1 {
-		structType = tiposDeDato.TIPO_MATRIZ
-	}
-
-	if structType == tiposDeDato.TIPO_VECTOR {
-		switch vectorValue := variable.Value.(type) {
-		case *TipoVector:
-			indexValue := index.(*tiposDeDato.ValorEntero).InternalValor
-			if !vectorValue.ValidIndex(indexValue) {
-				v.TablaError.NewErrorSemantico(ctx.GetStart(),
-					fmt.Sprintf("Índice fuera de rango: %d. El vector tiene %d elementos (rango válido: 0-%d)",
-						indexValue, len(vectorValue.InternalValor), len(vectorValue.InternalValor)-1))
-				return &VectorItemReference{
-					Vector: vectorValue,
-					Index:  indexValue,
-					Value:  &tiposDeDato.ValorEntero{InternalValor: -1},
-				}
-			}
-			return &VectorItemReference{
-				Vector: vectorValue,
-				Index:  indexValue,
-				Value:  vectorValue.Get(indexValue),
-			}
-		default:
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+varName+" no es un vector")
-			return nil
-		}
-	} else if structType == tiposDeDato.TIPO_MATRIZ {
-		switch TipoMatriz := variable.Value.(type) {
-		case *TipoMatriz:
-			if !TipoMatriz.IndicesValidos(indexes) {
-				v.TablaError.NewErrorSemantico(ctx.GetStart(),
-					fmt.Sprintf("Índice fuera de rango: %v. La matriz tiene dimensiones válidas", indexes))
-				return nil
-			}
-			return &ElementoMatriz{
-				Matriz: TipoMatriz,
-				Index:  indexes,
-				Value:  TipoMatriz.Get(indexes),
-			}
-		default:
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+varName+" no es una matriz")
-			return nil
-		}
-	}
-
-	return nil
+    return nil
 }
 
 func (v *PatronVIsitor) VisitAsignacionDirecta(ctx *parser.AsignacionDirectaContext) interface{} {
 
-	varName := v.Visit(ctx.Id_pattern()).(string)
-	varValue := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
+	nombreVariable := v.Visit(ctx.PatronId()).(string)
+	valorVariable := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
-	variable := v.RegistroAmbito.GetVariable(varName)
+	variable := v.RegistroAmbito.GetVariable(nombreVariable)
 
 	if variable == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+varName+" no encontrada")
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+nombreVariable+" no encontrada")
 	} else {
 
 		// copy object
-		if obj, ok := varValue.(*TipoObjeto); ok {
-			varValue = obj.Copy()
+		if obj, ok := valorVariable.(*TipoObjeto); ok {
+			valorVariable = obj.Copy()
 		}
 
-		if EsTipoVector(varValue.Type()) {
-			varValue = varValue.Copy()
+		if EsTipoVector(valorVariable.Type()) {
+			valorVariable = valorVariable.Copy()
 		}
 
-		canMutate := true
+		puedeModificarse := true
 
-		if v.RegistroAmbito.AmbitoActual.isStruct {
-			canMutate = v.RegistroAmbito.EsEntornoMutable()
+		if v.RegistroAmbito.AmbitoActual.EsEstructura {
+			puedeModificarse = v.RegistroAmbito.EsEntornoMutable()
 		}
 
-		ok, msg := variable.AsignarVariable(varValue, canMutate)
+		ok, msg := variable.AsignarVariable(valorVariable, puedeModificarse)
 
 		if !ok {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
@@ -667,16 +583,16 @@ func (v *PatronVIsitor) VisitAsignacionDirecta(ctx *parser.AsignacionDirectaCont
 }
 
 func (v *PatronVIsitor) VisitAsignacionAritmetica(ctx *parser.AsignacionAritmeticaContext) interface{} {
-	varName := v.Visit(ctx.Id_pattern()).(string)
+	nombreVariable := v.Visit(ctx.PatronId()).(string)
 
-	variable := v.RegistroAmbito.GetVariable(varName)
+	variable := v.RegistroAmbito.GetVariable(nombreVariable)
 
 	if variable == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+varName+" no encontrada")
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+nombreVariable+" no encontrada")
 	} else {
 
-		leftValue := variable.Value
-		rightValue := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
+		valorIzq := variable.Valor
+		valorDcha := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
 		op := string(ctx.GetOp().GetText()[0])
 
@@ -686,20 +602,20 @@ func (v *PatronVIsitor) VisitAsignacionAritmetica(ctx *parser.AsignacionAritmeti
 			log.Fatal("Operador binario no encontrado: " + op)
 		}
 
-		ok, msg, varValue := strat.ValidarExp(leftValue, rightValue)
+		ok, msg, valorVariable := strat.ValidarExp(valorIzq, valorDcha)
 
 		if !ok {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
 			return nil
 		}
 
-		canMutate := true
+		puedeModificarse := true
 
-		if v.RegistroAmbito.AmbitoActual.isStruct {
-			canMutate = v.RegistroAmbito.EsEntornoMutable()
+		if v.RegistroAmbito.AmbitoActual.EsEstructura {
+			puedeModificarse = v.RegistroAmbito.EsEntornoMutable()
 		}
 
-		ok, msg = variable.AsignarVariable(varValue, canMutate)
+		ok, msg = variable.AsignarVariable(valorVariable, puedeModificarse)
 
 		if !ok {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
@@ -709,56 +625,55 @@ func (v *PatronVIsitor) VisitAsignacionAritmetica(ctx *parser.AsignacionAritmeti
 	return nil
 }
 
-func (v *PatronVIsitor) VisitAsignacionVector(ctx *parser.AsignacionVectorContext) interface{} {
+func (v *PatronVIsitor) VisitAsignacionSlice(ctx *parser.AsignacionSliceContext) interface{} {
 
-	rightValue := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
+	valorDcha := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
-	switch itemRef := v.Visit(ctx.Vector_item()).(type) {
+	switch itemRef := v.Visit(ctx.Item_slice()).(type) {
 	case *VectorItemReference:
 
-		leftValue := itemRef.Value
+		valorIzq := itemRef.Valor
 
-		// check type, todo: improve cast -> ¿? idk what i was thinking
-		if rightValue.Type() != itemRef.Vector.ItemType {
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), "No se puede asignar un valor de tipo "+rightValue.Type()+" a un vector de tipo "+itemRef.Vector.ItemType)
+		if valorDcha.Type() != itemRef.Vector.TipoElemento {
+			v.TablaError.NewErrorSemantico(ctx.GetStart(), "No se puede asignar un valor de tipo "+valorDcha.Type()+" a un vector de tipo "+itemRef.Vector.TipoElemento)
 			return nil
 		}
 		op := string(ctx.GetOp().GetText()[0])
 
 		if op == "=" {
-			itemRef.Vector.InternalValor[itemRef.Index] = rightValue
+			itemRef.Vector.ValorInterno[itemRef.Indice] = valorDcha
 			return nil
 		}
 
 		strat, ok := ExpresionBinaria[op]
 
 		if !ok {
-			log.Fatal("Binary operator not found")
+			log.Fatal("Operador binario no encontrado: " + op)
 		}
 
-		ok, msg, varValue := strat.ValidarExp(leftValue, rightValue)
+		ok, msg, varValue := strat.ValidarExp(valorIzq, valorDcha)
 
 		if !ok {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
 			return nil
 		}
 
-		itemRef.Vector.InternalValor[itemRef.Index] = varValue
+		itemRef.Vector.ValorInterno[itemRef.Indice] = varValue
 
 		return nil
 	case *ElementoMatriz:
-		leftValue := itemRef.Value
+		valorIzq := itemRef.Valor
 
 		// check type, todo: improve cast -> ¿? idk what i was thinking
-		if rightValue.Type() != EliminarCorchetes(itemRef.Matriz.Type()) {
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), "No se puede asignar un valor de tipo "+rightValue.Type()+" a una matriz de tipo "+EliminarCorchetes(itemRef.Matriz.Type()))
+		if valorDcha.Type() != EliminarCorchetes(itemRef.Matriz.Type()) {
+			v.TablaError.NewErrorSemantico(ctx.GetStart(), "No se puede asignar un valor de tipo "+valorDcha.Type()+" a una matriz de tipo "+EliminarCorchetes(itemRef.Matriz.Type()))
 			return nil
 		}
 
 		op := string(ctx.GetOp().GetText()[0])
 
 		if op == "=" {
-			itemRef.Matriz.Set(itemRef.Index, rightValue)
+			itemRef.Matriz.Set(itemRef.Indice, valorDcha)
 			return nil
 		}
 
@@ -768,90 +683,90 @@ func (v *PatronVIsitor) VisitAsignacionVector(ctx *parser.AsignacionVectorContex
 			log.Fatal("Binary operator not found")
 		}
 
-		ok, msg, varValue := strat.ValidarExp(leftValue, rightValue)
+		ok, msg, valorVariable := strat.ValidarExp(valorIzq, valorDcha)
 
 		if !ok {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
 			return nil
 		}
 
-		itemRef.Matriz.Set(itemRef.Index, varValue)
+		itemRef.Matriz.Set(itemRef.Indice, valorVariable)
 		return nil
 	}
 
 	return nil
 }
 
-func (v *PatronVIsitor) VisitAssignVectorItem(ctx *parser.AssignVectorItemContext) interface{} {
+func (v *PatronVIsitor) VisitAsignacionSliceItem(ctx *parser.AsignacionSliceItemContext) interface{} {
 
 	// Obtener la referencia al elemento del vector/matriz
-	vectorItemRef := v.Visit(ctx.Vector_item())
-	if vectorItemRef == nil {
+	refItemVector := v.Visit(ctx.Item_slice())
+	if refItemVector == nil {
 		return nil
 	}
 
 	// NUEVO: Verificar si es un error (ValorEntero con -1)
-	if errorVal, ok := vectorItemRef.(*tiposDeDato.ValorEntero); ok && errorVal.InternalValor == -1 {
+	if errorVal, ok := refItemVector.(*tiposDeDato.ValorEntero); ok && errorVal.ValorInterno == -1 {
 		// Ya se reportó el error en VisitVectorItem, no hacer nada más
 		return nil
 	}
 
 	// Evaluar el nuevo valor a asignar
-	newValue := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
+	nuevoValor := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
-	switch itemRef := vectorItemRef.(type) {
+	switch refItem := refItemVector.(type) {
 	case *VectorItemReference:
 		// Caso: vector simple numeros[2] = valor
 
 		// Verificar compatibilidad de tipos
-		if newValue.Type() != itemRef.Vector.ItemType {
+		if nuevoValor.Type() != refItem.Vector.TipoElemento {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(),
 				fmt.Sprintf("No se puede asignar un valor de tipo %s a un elemento de tipo %s",
-					newValue.Type(), itemRef.Vector.ItemType))
+					nuevoValor.Type(), refItem.Vector.TipoElemento))
 			return nil
 		}
 
 		// Asignar el nuevo valor
-		itemRef.Vector.InternalValor[itemRef.Index] = newValue
+		refItem.Vector.ValorInterno[refItem.Indice] = nuevoValor
 		return nil
 
 	case *ElementoMatriz:
 		// Caso: matriz antigua TipoMatriz[indices] = valor
 
 		// Verificar compatibilidad de tipos para matriz
-		expectedType := EliminarCorchetes(itemRef.Matriz.Type())
-		if newValue.Type() != expectedType {
+		tipoActual := EliminarCorchetes(refItem.Matriz.Type())
+		if nuevoValor.Type() != tipoActual {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(),
 				fmt.Sprintf("No se puede asignar un valor de tipo %s a un elemento de matriz de tipo %s",
-					newValue.Type(), expectedType))
+					nuevoValor.Type(), tipoActual))
 			return nil
 		}
 
 		// Asignar el nuevo valor en la matriz
-		itemRef.Matriz.Set(itemRef.Index, newValue)
+		refItem.Matriz.Set(refItem.Indice, nuevoValor)
 		return nil
 
 	case *MatrizMultiItemReference:
 		// Caso: matriz multidimensional mtx2[0][1] = valor
 
 		// Verificar compatibilidad de tipos
-		if newValue.Type() != itemRef.Matriz.BaseType {
+		if nuevoValor.Type() != refItem.Matriz.TipoBase {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(),
 				fmt.Sprintf("No se puede asignar un valor de tipo %s a un elemento de matriz de tipo %s",
-					newValue.Type(), itemRef.Matriz.BaseType))
+					nuevoValor.Type(), refItem.Matriz.TipoBase))
 			return nil
 		}
 
 		// Verificar que los índices estén en rango ANTES de intentar asignar
-		if !itemRef.Matriz.ValidIndex(itemRef.Fila, itemRef.Columna) {
+		if !refItem.Matriz.ValidIndex(refItem.Fila, refItem.Columna) {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(),
 				fmt.Sprintf("Índice fuera de rango: [%d][%d]. La matriz tiene %d filas",
-					itemRef.Fila, itemRef.Columna, len(itemRef.Matriz.InternalValor)))
+					refItem.Fila, refItem.Columna, len(refItem.Matriz.ValorInterno)))
 			return nil
 		}
 
 		// Asignar el nuevo valor
-		itemRef.Matriz.Set(itemRef.Fila, itemRef.Columna, newValue)
+		refItem.Matriz.Set(refItem.Fila, refItem.Columna, nuevoValor)
 		return nil
 
 	default:
@@ -861,53 +776,61 @@ func (v *PatronVIsitor) VisitAssignVectorItem(ctx *parser.AssignVectorItemContex
 	}
 }
 
+func (v *PatronVIsitor) VisitVectorSimple(ctx *parser.VectorSimpleContext) interface{} {
+    return ctx.GetText()
+}
+
+func (v *PatronVIsitor) VisitMatrizDoble(ctx *parser.MatrizDobleContext) interface{} {
+    return ctx.GetText()
+}
+
 func (v *PatronVIsitor) VisitID_Patron(ctx *parser.ID_PatronContext) interface{} {
 	return ctx.GetText()
 }
 
 func (v *PatronVIsitor) VisitIntLiteral(ctx *parser.IntLiteralContext) interface{} {
 
-	intVal, _ := strconv.Atoi(ctx.GetText())
+	valorInt, _ := strconv.Atoi(ctx.GetText())
 
 	return &tiposDeDato.ValorEntero{
-		InternalValor: intVal,
+		ValorInterno: valorInt,
 	}
 
 }
 
 func (v *PatronVIsitor) VisitFloatLiteral(ctx *parser.FloatLiteralContext) interface{} {
 
-	floatVal, _ := strconv.ParseFloat(ctx.GetText(), 64)
+	valorFloat, _ := strconv.ParseFloat(ctx.GetText(), 64)
 
 	return &tiposDeDato.ValorDecimal{
-		InternalValor: floatVal,
+		InternalValor: valorFloat,
 	}
 
 }
 
 func (v *PatronVIsitor) VisitStringLiteral(ctx *parser.StringLiteralContext) interface{} {
 	// remove quotes
-	stringVal := ctx.GetText()[1 : len(ctx.GetText())-1]
+	valorString := ctx.GetText()[1 : len(ctx.GetText())-1]
 
 	// \" \\ \n \r \
-	stringVal = strings.ReplaceAll(stringVal, "\\\"", "\"")
-	stringVal = strings.ReplaceAll(stringVal, "\\\\", "\\")
-	stringVal = strings.ReplaceAll(stringVal, "\\n", "\n")
-	stringVal = strings.ReplaceAll(stringVal, "\\r", "\r")
+	valorString = strings.ReplaceAll(valorString, "\\\"", "\"")
+	valorString = strings.ReplaceAll(valorString, "\\\\", "\\")
+	valorString = strings.ReplaceAll(valorString, "\\n", "\n")
+	valorString = strings.ReplaceAll(valorString, "\\r", "\r")
 
 	// CAMBIO: Las cadenas con comillas dobles siempre son string
 	// Si quieres caracteres individuales, usa comillas simples (si las tienes implementadas)
 	return &tiposDeDato.ValorCadena{
-		InternalValor: stringVal,
+		ValorInterno: valorString,
 	}
 }
 
 func (v *PatronVIsitor) VisitBoolLiteral(ctx *parser.BoolLiteralContext) interface{} {
 
-	boolVal, _ := strconv.ParseBool(ctx.GetText())
+	valorBool, _ := strconv.ParseBool(ctx.GetText())
 
 	return &tiposDeDato.ValorBool{
-		InternalValor: boolVal,
+		InternalValor: valorBool,
 	}
 
 }
@@ -921,53 +844,66 @@ func (v *PatronVIsitor) VisitLiteralExp(ctx *parser.LiteralExpContext) interface
 }
 
 func (v *PatronVIsitor) VisitIdExp(ctx *parser.IdExpContext) interface{} {
-	varName := ctx.Id_pattern().GetText()
+	nombreVariable := ctx.PatronId().GetText()
 
-	variable := v.RegistroAmbito.GetVariable(varName)
+	variable := v.RegistroAmbito.GetVariable(nombreVariable)
 
 	if variable == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+varName+" no encontrada")
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+nombreVariable+" no encontrada")
 		return tiposDeDato.NuloPorDefecto
 	}
 
 	// ? pointer
-	return variable.Value
+	return variable.Valor
 }
 
 func (v *PatronVIsitor) VisitParentecisExp(ctx *parser.ParentecisExpContext) interface{} {
 	return v.Visit(ctx.Expr())
 }
 
-func (v *PatronVIsitor) VisitVectorItemExp(ctx *parser.VectorItemExpContext) interface{} {
+func (v *PatronVIsitor) VisitItemSliceExp(ctx *parser.ItemSliceExpContext) interface{} {
 
-	result := v.Visit(ctx.Vector_item())
+    resultado := v.Visit(ctx.Item_slice())
 
-	switch itemRef := result.(type) {
-	case *VectorItemReference:
-		return itemRef.Value
-	case *ElementoMatriz:
-		return itemRef.Value
-	case *MatrizMultiItemReference:
-		return itemRef.Value
-	case *tiposDeDato.ValorEntero:
-		// Caso de error (índice fuera de rango)
-		if itemRef.InternalValor == -1 {
-			return &tiposDeDato.ValorEntero{InternalValor: -1}
-		}
-		return itemRef
-	}
-	return tiposDeDato.NuloPorDefecto
+    switch refItem := resultado.(type) {
+    case *VectorItemReference:
+        // ✅ ARREGLO: Si es una referencia a fila completa (Indice == -1), retornar el vector
+        if refItem.Indice == -1 {
+            return refItem.Vector // Retorna el TipoVector para que len() funcione
+        }
+        // Si es un elemento individual, retornar el valor
+        return refItem.Valor
+        
+    case *ElementoMatriz:
+        return refItem.Valor
+        
+    case *MatrizMultiItemReference:
+        return refItem.Valor
+        
+    case *tiposDeDato.ValorEntero:
+        // Caso de error (índice fuera de rango)
+        if refItem.ValorInterno == -1 {
+            return &tiposDeDato.ValorEntero{ValorInterno: -1}
+        }
+        return refItem
+        
+    case *TipoVector:
+        return refItem
+        
+    default:
+        return tiposDeDato.NuloPorDefecto
+    }
 }
 
-func (v *PatronVIsitor) VisitFunctionCallExp(ctx *parser.FunctionCallExpContext) interface{} {
-	return v.Visit(ctx.Func_call())
+func (v *PatronVIsitor) VisitLlamarFuncionExp(ctx *parser.LlamarFuncionExpContext) interface{} {
+	return v.Visit(ctx.Llamar_funcion())
 }
 
-func (v *PatronVIsitor) VisitVectorExp(ctx *parser.VectorExpContext) interface{} {
-	return v.Visit(ctx.Vector_expr())
+func (v *PatronVIsitor) VisitSliceExp(ctx *parser.SliceExpContext) interface{} {
+	return v.Visit(ctx.Lista_slice())
 }
 
-func (v *PatronVIsitor) VisitExpUnary(ctx *parser.ExpUnaryContext) interface{} {
+func (v *PatronVIsitor) VisitUnarioExp(ctx *parser.UnarioExpContext) interface{} {
 
 	exp := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
@@ -977,33 +913,33 @@ func (v *PatronVIsitor) VisitExpUnary(ctx *parser.ExpUnaryContext) interface{} {
 		log.Fatal("Operador Unario no encontrado: " + ctx.GetOp().GetText())
 	}
 
-	ok, msg, result := strat.ValidarExp(exp)
+	ok, msg, resultado := strat.ValidarExp(exp)
 
 	if !ok {
 		v.TablaError.NewErrorSemantico(ctx.GetOp(), msg)
 		return tiposDeDato.NuloPorDefecto
 	}
 
-	return result
+	return resultado
 
 }
 
-func (v *PatronVIsitor) VisitExpBinario(ctx *parser.ExpBinarioContext) interface{} {
+func (v *PatronVIsitor) VisitBinarioExp(ctx *parser.BinarioExpContext) interface{} {
 
 	op := ctx.GetOp().GetText()
-	left := v.Visit(ctx.GetLeft()).(tiposDeDato.ValorInterno)
+	izq := v.Visit(ctx.GetLeft()).(tiposDeDato.ValorInterno)
 
-	earlyCheck, ok := RetornoAnticipado[op]
+	chequeoInicial, ok := RetornoAnticipado[op]
 
 	if ok {
-		ok, _, result := earlyCheck.ValidarExp(left)
+		ok, _, resultado := chequeoInicial.ValidarExp(izq)
 
 		if ok {
-			return result
+			return resultado
 		}
 	}
 
-	right := v.Visit(ctx.GetRight()).(tiposDeDato.ValorInterno)
+	dcha := v.Visit(ctx.GetRight()).(tiposDeDato.ValorInterno)
 
 	strat, ok := ExpresionBinaria[op]
 
@@ -1011,14 +947,14 @@ func (v *PatronVIsitor) VisitExpBinario(ctx *parser.ExpBinarioContext) interface
 		log.Fatal("Operador binario no encontrado: " + op)
 	}
 
-	ok, msg, result := strat.ValidarExp(left, right)
+	ok, msg, resultado := strat.ValidarExp(izq, dcha)
 
 	if !ok {
 		v.TablaError.NewErrorSemantico(ctx.GetOp(), msg)
 		return tiposDeDato.NuloPorDefecto
 	}
 
-	return result
+	return resultado
 }
 
 func (v *PatronVIsitor) VisitIFstmt(ctx *parser.IFstmtContext) interface{} {
@@ -1054,14 +990,14 @@ func (v *PatronVIsitor) VisitIFcadena(ctx *parser.IFcadenaContext) interface{} {
 	if condition.(*tiposDeDato.ValorBool).InternalValor {
 
 		// Push scope
-		v.RegistroAmbito.PushScope("if")
+		v.RegistroAmbito.PushAmbito("if")
 
 		for _, stmt := range ctx.AllStmt() {
 			v.Visit(stmt)
 		}
 
 		// Pop scope
-		v.RegistroAmbito.PopScope()
+		v.RegistroAmbito.PopAmbito()
 
 		return true
 	}
@@ -1072,14 +1008,14 @@ func (v *PatronVIsitor) VisitIFcadena(ctx *parser.IFcadenaContext) interface{} {
 func (v *PatronVIsitor) VisitElseStmt(ctx *parser.ElseStmtContext) interface{} {
 
 	// Push scope
-	v.RegistroAmbito.PushScope("else")
+	v.RegistroAmbito.PushAmbito("else")
 
 	for _, stmt := range ctx.AllStmt() {
 		v.Visit(stmt)
 	}
 
 	// Pop scope
-	v.RegistroAmbito.PopScope()
+	v.RegistroAmbito.PopAmbito()
 
 	return nil
 }
@@ -1088,12 +1024,12 @@ func (v *PatronVIsitor) VisitSwitchStmt(ctx *parser.SwitchStmtContext) interface
 
 	mainValue := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
-	v.RegistroAmbito.PushScope("switch")
+	v.RegistroAmbito.PushAmbito("switch")
 
 	// Push break switchItem to call stack [breakable]
 	switchItem := &LlamadaFunciones{
 		RetornarValor: tiposDeDato.NuloPorDefecto,
-		Type: []string{
+		Tipo: []string{
 			Detener,
 		},
 	}
@@ -1103,7 +1039,7 @@ func (v *PatronVIsitor) VisitSwitchStmt(ctx *parser.SwitchStmtContext) interface
 	// handle break statements from call stack
 	defer func() {
 
-		v.RegistroAmbito.PopScope()       // pop switch scope
+		v.RegistroAmbito.PopAmbito()      // pop switch scope
 		v.PilaLlamada.Limpiar(switchItem) // Limpiar item if it's still in call stack
 
 		if item, ok := recover().(*LlamadaFunciones); item != nil && ok {
@@ -1178,12 +1114,12 @@ func (v *PatronVIsitor) VisitWhileStmt(ctx *parser.WhileStmtContext) interface{}
 
 	condition := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 	// Push scope
-	whileScope := v.RegistroAmbito.PushScope("while")
+	whileScope := v.RegistroAmbito.PushAmbito("while")
 
 	// Push whileItem to call stack [breakable, continuable]
 	whileItem := &LlamadaFunciones{
 		RetornarValor: tiposDeDato.NuloPorDefecto,
-		Type: []string{
+		Tipo: []string{
 			Detener,
 			Continuar,
 		},
@@ -1193,7 +1129,7 @@ func (v *PatronVIsitor) VisitWhileStmt(ctx *parser.WhileStmtContext) interface{}
 
 	v.VisitInnerWhile(ctx, condition, whileScope, whileItem)
 
-	v.RegistroAmbito.PopScope()      // pop while scope
+	v.RegistroAmbito.PopAmbito()     // pop while scope
 	v.PilaLlamada.Limpiar(whileItem) // clean item if it's still in call stack
 
 	return nil
@@ -1253,7 +1189,7 @@ func (v *PatronVIsitor) VisitInnerWhile(ctx *parser.WhileStmtContext, condition 
 
 func (v *PatronVIsitor) VisitForStmt(ctx *parser.ForStmtContext) interface{} {
 
-	varName := ctx.ID().GetText()
+	nombreVariable := ctx.ID().GetText()
 	var iterableItem *TipoVector = TipoVectorVacio
 
 	if ctx.Range_() != nil {
@@ -1285,14 +1221,14 @@ func (v *PatronVIsitor) VisitForStmt(ctx *parser.ForStmtContext) interface{} {
 	}
 
 	// Push scope outer scope
-	outerForScope := v.RegistroAmbito.PushScope("outer_for")
+	outerForScope := v.RegistroAmbito.PushAmbito("outer_for")
 
 	// create the associated variable to the iterable
-	iterableVariable, msg := outerForScope.AgregarVariable(varName, iterableItem.ItemType, iterableItem.Current(), true, false, ctx.ID().GetSymbol())
+	iterableVariable, msg := outerForScope.AgregarVariable(nombreVariable, iterableItem.TipoElemento, iterableItem.Actual(), true, false, ctx.ID().GetSymbol())
 
 	if iterableVariable == nil {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-		log.Fatal("Esto no deberia pasar, variable no creada: " + varName)
+		log.Fatal("Esto no deberia pasar, variable no creada: " + nombreVariable)
 		return nil
 	}
 
@@ -1300,7 +1236,7 @@ func (v *PatronVIsitor) VisitForStmt(ctx *parser.ForStmtContext) interface{} {
 
 	forItem := &LlamadaFunciones{
 		RetornarValor: tiposDeDato.NuloPorDefecto,
-		Type: []string{
+		Tipo: []string{
 			Detener,
 			Continuar,
 		},
@@ -1309,13 +1245,13 @@ func (v *PatronVIsitor) VisitForStmt(ctx *parser.ForStmtContext) interface{} {
 	v.PilaLlamada.Push(forItem)
 
 	// Push inner for scope
-	innerForScope := v.RegistroAmbito.PushScope("inner_for")
+	innerForScope := v.RegistroAmbito.PushAmbito("inner_for")
 
 	v.VisitInnerFor(ctx, outerForScope, innerForScope, forItem, iterableItem, iterableVariable)
 
 	iterableItem.Reset()
-	v.RegistroAmbito.PopScope()    // pop inner for scope
-	v.RegistroAmbito.PopScope()    // pop outer for scope
+	v.RegistroAmbito.PopAmbito()   // pop inner for scope
+	v.RegistroAmbito.PopAmbito()   // pop outer for scope
 	v.PilaLlamada.Limpiar(forItem) // ? Limpiar item if it's still in call stack
 
 	return nil
@@ -1351,10 +1287,10 @@ func (v *PatronVIsitor) VisitInnerFor(ctx *parser.ForStmtContext, outerForScope 
 	}()
 
 	// iterableItem.Size()
-	for iterableItem.CurrentIndex < iterableItem.Size() {
+	for iterableItem.IndiceActual < iterableItem.Size() {
 
 		// update variable value
-		iterableVariable.Value = iterableItem.Current()
+		iterableVariable.Valor = iterableItem.Actual()
 
 		for _, stmt := range ctx.AllStmt() {
 			v.Visit(stmt)
@@ -1375,8 +1311,8 @@ func (v *PatronVIsitor) VisitRangoNum(ctx *parser.RangoNumContext) interface{} {
 		return tiposDeDato.NuloPorDefecto
 	}
 
-	left := leftExpr.(*tiposDeDato.ValorEntero).InternalValor
-	right := rightExpr.(*tiposDeDato.ValorEntero).InternalValor
+	left := leftExpr.(*tiposDeDato.ValorEntero).ValorInterno
+	right := rightExpr.(*tiposDeDato.ValorEntero).ValorInterno
 
 	if left > right {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), "El valor izquierdo del rango debe ser menor o igual al valor derecho")
@@ -1386,39 +1322,15 @@ func (v *PatronVIsitor) VisitRangoNum(ctx *parser.RangoNumContext) interface{} {
 
 	for i := left; i <= right; i++ {
 		values = append(values, &tiposDeDato.ValorEntero{
-			InternalValor: i,
+			ValorInterno: i,
 		})
 	}
 
 	return &TipoVector{
-		InternalValor: values,
-		CurrentIndex:  0,
-		ItemType:      tiposDeDato.TIPO_ENTERO,
+		ValorInterno: values,
+		IndiceActual: 0,
+		TipoElemento: tiposDeDato.TIPO_ENTERO,
 	}
-}
-
-func (v *PatronVIsitor) VisitGuardStmt(ctx *parser.GuardStmtContext) interface{} {
-
-	condition := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
-
-	if condition.Type() != tiposDeDato.TIPO_BOOLEAN {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "La condicion del guard debe ser un booleano")
-	}
-
-	if !condition.(*tiposDeDato.ValorBool).InternalValor {
-
-		// Push scope
-		v.RegistroAmbito.PushScope("guard")
-
-		for _, stmt := range ctx.AllStmt() {
-			v.Visit(stmt)
-		}
-
-		// Pop scope
-		v.RegistroAmbito.PopScope()
-	}
-
-	return nil
 }
 
 func (v *PatronVIsitor) VisitReturnStmt(ctx *parser.ReturnStmtContext) interface{} {
@@ -1468,16 +1380,16 @@ func (v *PatronVIsitor) VisitContinueStmt(ctx *parser.ContinueStmtContext) inter
 
 func (v *PatronVIsitor) VisitLlamarFuncion(ctx *parser.LlamarFuncionContext) interface{} {
 
-	canditateName := v.Visit(ctx.Id_pattern()).(string)
+	canditateName := v.Visit(ctx.PatronId()).(string)
 
 	// PRIMERO: Buscar en funciones nativas
-	if nativeFunc, exists := DefaultBuiltInFunctions[canditateName]; exists {
+	if nativeFunc, exists := FuncionesEmbebidas[canditateName]; exists {
 		args := make([]*Argumento, 0)
-		if ctx.Arg_list() != nil {
-			args = v.Visit(ctx.Arg_list()).([]*Argumento)
+		if ctx.Lista_argumentos() != nil {
+			args = v.Visit(ctx.Lista_argumentos()).([]*Argumento)
 		}
 
-		RetornarValor, ok, msg := nativeFunc.Exec(v.GetReplContext(), args)
+		RetornarValor, ok, msg := nativeFunc.Exec(v.GetInstruccionesContexto(), args)
 		if !ok {
 			if msg != "" {
 				v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
@@ -1497,14 +1409,14 @@ func (v *PatronVIsitor) VisitLlamarFuncion(ctx *parser.LlamarFuncionContext) int
 	}
 
 	args := make([]*Argumento, 0)
-	if ctx.Arg_list() != nil {
-		args = v.Visit(ctx.Arg_list()).([]*Argumento)
+	if ctx.Lista_argumentos() != nil {
+		args = v.Visit(ctx.Lista_argumentos()).([]*Argumento)
 	}
 
 	// struct has priority over func
 	if structObj != nil {
 		if ArgumentoValidoEstructura(args) {
-			return NewTipoObjeto(v, canditateName, ctx.Id_pattern().GetStart(), args, false)
+			return NewTipoObjeto(v, canditateName, ctx.PatronId().GetStart(), args, false)
 		} else {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), "Si bien "+canditateName+" es un struct, no se puede llamar a su constructor con los argumentos especificados. Ni tampoco es una funcion.")
 			return tiposDeDato.NuloPorDefecto
@@ -1513,7 +1425,7 @@ func (v *PatronVIsitor) VisitLlamarFuncion(ctx *parser.LlamarFuncionContext) int
 
 	switch funcObj := funcObj.(type) {
 	case *FuncionNativa:
-		RetornarValor, ok, msg := funcObj.Exec(v.GetReplContext(), args)
+		RetornarValor, ok, msg := funcObj.Exec(v.GetInstruccionesContexto(), args)
 
 		if !ok {
 			if msg != "" {
@@ -1539,11 +1451,11 @@ func (v *PatronVIsitor) VisitLlamarFuncion(ctx *parser.LlamarFuncionContext) int
 	return tiposDeDato.NuloPorDefecto
 }
 
-func (v *PatronVIsitor) VisitArgList(ctx *parser.ArgListContext) interface{} {
+func (v *PatronVIsitor) VisitListaArgumentos(ctx *parser.ListaArgumentosContext) interface{} {
 
 	args := make([]*Argumento, 0)
 
-	for _, arg := range ctx.AllFunc_arg() {
+	for _, arg := range ctx.AllArgumento_fun() {
 		args = append(args, v.Visit(arg).(*Argumento))
 	}
 
@@ -1558,13 +1470,13 @@ func (v *PatronVIsitor) VisitFuncionArg(ctx *parser.FuncionArgContext) interface
 	var argValue tiposDeDato.ValorInterno = tiposDeDato.NuloPorDefecto
 	var argVariableRef *Variable = nil
 
-	if ctx.Id_pattern() != nil {
+	if ctx.PatronId() != nil {
 		// NO asignar el nombre de la variable como nombre del argumento
-		variableName := ctx.Id_pattern().GetText()
+		variableName := ctx.PatronId().GetText()
 		argVariableRef = v.RegistroAmbito.GetVariable(variableName)
 
 		if argVariableRef != nil {
-			argValue = argVariableRef.Value
+			argValue = argVariableRef.Valor
 		} else {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+variableName+" no encontrada")
 		}
@@ -1577,16 +1489,12 @@ func (v *PatronVIsitor) VisitFuncionArg(ctx *parser.FuncionArgContext) interface
 		argName = ctx.ID().GetText()
 	}
 
-	if ctx.ANPERSAND() != nil {
-		passByReference = true
-	}
-
 	return &Argumento{
-		Name:            argName,
-		Value:           argValue,
-		PassByReference: passByReference,
-		Token:           ctx.GetStart(),
-		VariableRef:     argVariableRef,
+		Nombre:       argName,
+		Valor:        argValue,
+		esReferencia: passByReference,
+		Token:        ctx.GetStart(),
+		VariableRef:  argVariableRef,
 	}
 }
 
@@ -1597,7 +1505,7 @@ func (v *PatronVIsitor) VisitFuncionDeclerada(ctx *parser.FuncionDecleradaContex
 		return nil
 	}
 
-	if v.RegistroAmbito.AmbitoActual != v.RegistroAmbito.AmbitoGlobal && !v.RegistroAmbito.AmbitoActual.isStruct {
+	if v.RegistroAmbito.AmbitoActual != v.RegistroAmbito.AmbitoGlobal && !v.RegistroAmbito.AmbitoActual.EsEstructura {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Las funciones solo pueden ser declaradas en el scope global o en un struct")
 	}
 
@@ -1605,16 +1513,16 @@ func (v *PatronVIsitor) VisitFuncionDeclerada(ctx *parser.FuncionDecleradaContex
 
 	params := make([]*Parametros, 0)
 
-	if ctx.Param_list() != nil {
-		params = v.Visit(ctx.Param_list()).([]*Parametros)
+	if ctx.Lista_parametros() != nil {
+		params = v.Visit(ctx.Lista_parametros()).([]*Parametros)
 	}
 
 	if len(params) > 0 {
 
-		baseParamType := params[0].ParamType()
+		baseParamType := params[0].TipoParametro()
 
 		for _, param := range params {
-			if param.ParamType() != baseParamType {
+			if param.TipoParametro() != baseParamType {
 				v.TablaError.NewErrorSemantico(param.Token, "Todos los parametros de la funcion deben ser del mismo tipo")
 				return nil
 			}
@@ -1624,21 +1532,21 @@ func (v *PatronVIsitor) VisitFuncionDeclerada(ctx *parser.FuncionDecleradaContex
 	returnType := tiposDeDato.TIPO_NULO
 	var returnTypeToken antlr.Token = nil
 
-	if ctx.Type_() != nil {
-		returnType = v.Visit(ctx.Type_()).(string)
-		returnTypeToken = ctx.Type_().GetStart()
+	if ctx.Tipo() != nil {
+		returnType = v.Visit(ctx.Tipo()).(string)
+		returnTypeToken = ctx.Tipo().GetStart()
 	}
 
 	body := ctx.AllStmt()
 
 	function := &Funcion{ // pointer ?
-		Name:            funcName,
-		Parametros:      params,
-		ReturnType:      returnType,
-		Body:            body,
-		DeclScope:       v.RegistroAmbito.AmbitoActual,
-		ReturnTypeToken: returnTypeToken,
-		Token:           ctx.GetStart(),
+		Nombre:           funcName,
+		Parametros:       params,
+		TipoRetorno:      returnType,
+		Cuerpo:           body,
+		AmbitoDeclaro:    v.RegistroAmbito.AmbitoActual,
+		TokenTipoRetorno: returnTypeToken,
+		Token:            ctx.GetStart(),
 	}
 
 	ok, msg := v.RegistroAmbito.AgregarFuncion(funcName, function)
@@ -1651,18 +1559,18 @@ func (v *PatronVIsitor) VisitFuncionDeclerada(ctx *parser.FuncionDecleradaContex
 	return function
 }
 
-func (v *PatronVIsitor) VisitParamList(ctx *parser.ParamListContext) interface{} {
+func (v *PatronVIsitor) VisitListaParametros(ctx *parser.ListaParametrosContext) interface{} {
 
 	params := make([]*Parametros, 0)
 
-	for _, param := range ctx.AllFunc_param() {
+	for _, param := range ctx.AllParametro_fun() {
 		params = append(params, v.Visit(param).(*Parametros))
 	}
 
 	return params
 }
 
-func (v *PatronVIsitor) VisitFuncParam(ctx *parser.FuncParamContext) interface{} {
+func (v *PatronVIsitor) VisitParametroFun(ctx *parser.ParametroFunContext) interface{} {
 
 	externName := ""
 	innerName := ""
@@ -1681,18 +1589,14 @@ func (v *PatronVIsitor) VisitFuncParam(ctx *parser.FuncParamContext) interface{}
 
 	passByReference := false
 
-	if ctx.RW_INOUT() != nil {
-		passByReference = true
-	}
-
-	paramType := v.Visit(ctx.Type_()).(string)
+	paramType := v.Visit(ctx.Tipo()).(string)
 
 	return &Parametros{
-		ExternName:      externName,
-		InnerName:       innerName,
-		PassByReference: passByReference,
-		Type:            paramType,
-		Token:           ctx.GetStart(),
+		NombreExterno:      externName,
+		NombreInterno:      innerName,
+		PasarPorReferencia: passByReference,
+		Tipo:               paramType,
+		Token:              ctx.GetStart(),
 	}
 
 }
@@ -1712,8 +1616,8 @@ func (v *PatronVIsitor) VisitDeclararStruct(ctx *parser.DeclararStructContext) i
 	v.RegistroAmbito.AmbitoActual = structScope
 
 	// Procesar cada campo del struct
-	for _, fieldCtx := range ctx.AllStruct_prop() {
-		v.Visit(fieldCtx) // Esto llama a VisitStructAttr que ya tienes implementado
+	for _, fieldCtx := range ctx.AllPropiedad_struct() {
+		v.Visit(fieldCtx) 
 	}
 
 	// Restaurar scope
@@ -1721,9 +1625,9 @@ func (v *PatronVIsitor) VisitDeclararStruct(ctx *parser.DeclararStructContext) i
 
 	// Crear el struct con los campos procesados (mantener compatibilidad)
 	newStruct := &Struct{
-		Name:   structName,
-		Fields: ctx.AllStruct_prop(), // Mantener para compatibilidad con NewTipoObjeto
-		Token:  ctx.GetStart(),
+		Nombre:    structName,
+		Atributos: ctx.AllPropiedad_struct(), // Mantener para compatibilidad con NewTipoObjeto
+		Token:     ctx.GetStart(),
 	}
 
 	structAdded, msg := v.RegistroAmbito.AmbitoGlobal.AgregarEstructura(structName, newStruct)
@@ -1734,14 +1638,14 @@ func (v *PatronVIsitor) VisitDeclararStruct(ctx *parser.DeclararStructContext) i
 	return nil
 }
 
-func (v *PatronVIsitor) VisitStructAttr(ctx *parser.StructAttrContext) interface{} {
+func (v *PatronVIsitor) VisitPropiedadStruct(ctx *parser.PropiedadStructContext) interface{} {
 
 	// Verificar que ctx y sus elementos no sean nil
 	if ctx == nil {
 		return nil
 	}
 
-	if ctx.Type_() == nil {
+	if ctx.Tipo() == nil {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Tipo de campo no especificado")
 		return nil
 	}
@@ -1752,7 +1656,7 @@ func (v *PatronVIsitor) VisitStructAttr(ctx *parser.StructAttrContext) interface
 	}
 
 	// Nueva sintaxis: type ID = expr?
-	fieldTypeResult := v.Visit(ctx.Type_())
+	fieldTypeResult := v.Visit(ctx.Tipo())
 	if fieldTypeResult == nil {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Error al procesar tipo de campo")
 		return nil
@@ -1797,23 +1701,7 @@ func (v *PatronVIsitor) VisitStructAttr(ctx *parser.StructAttrContext) interface
 	return variable // Retornar la variable creada
 }
 
-func (v *PatronVIsitor) VisitStructFunc(ctx *parser.StructFuncContext) interface{} {
-
-	funcDcl := v.Visit(ctx.Func_dcl())
-
-	if ctx.RW_MUTATING() != nil {
-		structFunc, ok := funcDcl.(*Funcion)
-
-		if !ok {
-			return nil
-		}
-		structFunc.IsMutating = true
-	}
-
-	return nil
-}
-
-func (v *PatronVIsitor) VisitStructInit(ctx *parser.StructInitContext) interface{} {
+func (v *PatronVIsitor) VisitCrearStruct(ctx *parser.CrearStructContext) interface{} {
 
 	if ctx == nil {
 		return tiposDeDato.NuloPorDefecto
@@ -1835,14 +1723,14 @@ func (v *PatronVIsitor) VisitStructInit(ctx *parser.StructInitContext) interface
 	// Crear argumentos para el constructor existente
 	args := make([]*Argumento, 0)
 
-	if ctx.Struct_init_list() != nil {
+	if ctx.Lista_parametros_init() != nil {
 
-		initFieldsResult := v.Visit(ctx.Struct_init_list())
+		initFieldsResult := v.Visit(ctx.Lista_parametros_init())
 		if initFieldsResult == nil {
 			return tiposDeDato.NuloPorDefecto
 		}
 
-		initFields, ok := initFieldsResult.([]*StructInitValue)
+		initFields, ok := initFieldsResult.([]*ValorInicialStruct)
 		if !ok {
 			return tiposDeDato.NuloPorDefecto
 		}
@@ -1853,9 +1741,9 @@ func (v *PatronVIsitor) VisitStructInit(ctx *parser.StructInitContext) interface
 			}
 
 			args = append(args, &Argumento{
-				Name:  initField.Name,
-				Value: initField.Value,
-				Token: initField.Token,
+				Nombre: initField.Nombre,
+				Valor:  initField.Valor,
+				Token:  initField.Token,
 			})
 		}
 	}
@@ -1865,16 +1753,16 @@ func (v *PatronVIsitor) VisitStructInit(ctx *parser.StructInitContext) interface
 	return result
 }
 
-func (v *PatronVIsitor) VisitStructInitExp(ctx *parser.StructInitExpContext) interface{} {
-	return v.Visit(ctx.Struct_init())
+func (v *PatronVIsitor) VisitCrearStructExp(ctx *parser.CrearStructExpContext) interface{} {
+	return v.Visit(ctx.Crear_struct())
 }
 
-func (v *PatronVIsitor) VisitStructInitList(ctx *parser.StructInitListContext) interface{} {
-	initFields := make([]*StructInitValue, 0)
+func (v *PatronVIsitor) VisitListaParametrosInit(ctx *parser.ListaParametrosInitContext) interface{} {
+	initFields := make([]*ValorInicialStruct, 0)
 
-	for _, fieldCtx := range ctx.AllStruct_init_field() {
+	for _, fieldCtx := range ctx.AllParametros_init_struct() {
 		if field := v.Visit(fieldCtx); field != nil {
-			if initField, ok := field.(*StructInitValue); ok {
+			if initField, ok := field.(*ValorInicialStruct); ok {
 				initFields = append(initFields, initField)
 			}
 		}
@@ -1883,198 +1771,34 @@ func (v *PatronVIsitor) VisitStructInitList(ctx *parser.StructInitListContext) i
 	return initFields
 }
 
-func (v *PatronVIsitor) VisitStructInitField(ctx *parser.StructInitFieldContext) interface{} {
+func (v *PatronVIsitor) VisitParametrosInitStruct(ctx *parser.ParametrosInitStructContext) interface{} {
 	fieldName := ctx.ID().GetText()
 	fieldValue := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
-	return &StructInitValue{
-		Name:  fieldName,
-		Value: fieldValue,
-		Token: ctx.GetStart(),
+	return &ValorInicialStruct{
+		Nombre: fieldName,
+		Valor:  fieldValue,
+		Token:  ctx.GetStart(),
 	}
-}
-
-func (v *PatronVIsitor) VisitMetodoStruct(ctx *parser.MetodoStructContext) interface{} {
-	fmt.Println("=== DEBUG: ENTRANDO A VisitMetodoStruct ===")
-
-	if v.RegistroAmbito.AmbitoActual != v.RegistroAmbito.AmbitoGlobal {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Los métodos solo pueden ser declarados en el scope global")
-		return nil
-	}
-
-	// Verificar que el mapa de métodos esté inicializado
-	if v.RegistroAmbito.AmbitoGlobal.methods == nil {
-		fmt.Println("ERROR: El mapa de métodos NO está inicializado")
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Sistema de métodos no inicializado")
-		return nil
-	}
-
-	fmt.Printf("DEBUG: Mapa de métodos inicializado correctamente: %v\n", v.RegistroAmbito.AmbitoGlobal.methods)
-
-	// NUEVO: Con la nueva gramática, obtenemos receiver de method_receiver
-	receiverCtx := ctx.Method_receiver()
-
-	// Convertir a contexto específico y obtener los IDs
-	methodReceiverCtx := receiverCtx.(*parser.MethodReceiverContext)
-	receiverName := methodReceiverCtx.ID(0).GetText() // p
-	receiverType := methodReceiverCtx.ID(1).GetText() // Persona
-	methodName := ctx.ID().GetText()                  // Saludar
-
-	fmt.Printf("DEBUG Método: receiver='%s', type='*%s', method='%s'\n",
-		receiverName, receiverType, methodName)
-
-	// Verificar que el struct existe
-	_, msg := v.RegistroAmbito.AmbitoGlobal.GetEstructura(receiverType)
-	if msg != "" {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(),
-			fmt.Sprintf("El tipo %s no existe", receiverType))
-		return nil
-	}
-	fmt.Printf("DEBUG: Struct %s existe correctamente\n", receiverType)
-
-	// Procesar parámetros
-	params := make([]*Parametros, 0)
-	if ctx.Param_list() != nil {
-		paramsResult := v.Visit(ctx.Param_list())
-		if paramsResult != nil {
-			params = paramsResult.([]*Parametros)
-		}
-	}
-	fmt.Printf("DEBUG: Procesados %d parámetros\n", len(params))
-
-	// Procesar tipo de retorno
-	returnType := tiposDeDato.TIPO_NULO
-	var returnTypeToken antlr.Token = nil
-	if ctx.Type_() != nil {
-		returnTypeResult := v.Visit(ctx.Type_())
-		if returnTypeResult != nil {
-			returnType = returnTypeResult.(string)
-			returnTypeToken = ctx.Type_().GetStart()
-		}
-	}
-	fmt.Printf("DEBUG: Tipo de retorno: %s\n", returnType)
-
-	// Crear método
-	method := &MetodoStruct{
-		Name:            methodName,
-		ReceiverName:    receiverName,
-		ReceiverType:    receiverType,
-		Parametros:      params,
-		ReturnType:      returnType,
-		ReturnTypeToken: returnTypeToken,
-		Body:            ctx.AllStmt(),
-		DeclScope:       v.RegistroAmbito.AmbitoActual,
-		Token:           ctx.GetStart(),
-	}
-	fmt.Printf("DEBUG: Método %s creado correctamente\n", methodName)
-
-	// Agregar método al ámbito global
-	ok, msg := v.RegistroAmbito.AmbitoGlobal.AgregarMetodo(receiverType, methodName, method)
-	if !ok {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-		return nil
-	}
-
-	fmt.Printf("DEBUG: Método %s agregado correctamente para tipo %s\n", methodName, receiverType)
-	fmt.Printf("DEBUG: Total de métodos ahora: %d\n", len(v.RegistroAmbito.AmbitoGlobal.methods))
-
-	// Listar todos los métodos registrados
-	fmt.Println("DEBUG: Métodos registrados:")
-	for key, _ := range v.RegistroAmbito.AmbitoGlobal.methods {
-		fmt.Printf("  - %s\n", key)
-	}
-
-	fmt.Println("=== DEBUG: SALIENDO DE VisitMetodoStruct ===")
-	return method
-}
-
-func (v *PatronVIsitor) VisitStructMethodCall(ctx *parser.StructMethodCallContext) interface{} {
-	fmt.Println("=== DEBUG: LLAMANDO A MÉTODO ===")
-
-	instanceName := ctx.Id_pattern().GetText()
-	methodName := ctx.ID().GetText()
-
-	fmt.Printf("DEBUG: Instancia='%s', Método='%s'\n", instanceName, methodName)
-
-	// Obtener la instancia
-	variable := v.RegistroAmbito.GetVariable(instanceName)
-	if variable == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(),
-			fmt.Sprintf("Variable %s no encontrada", instanceName))
-		return tiposDeDato.NuloPorDefecto
-	}
-
-	// Verificar que sea un struct
-	receiver, ok := variable.Value.(*TipoObjeto)
-	if !ok {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(),
-			fmt.Sprintf("La variable %s no es un struct", instanceName))
-		return tiposDeDato.NuloPorDefecto
-	}
-
-	fmt.Printf("DEBUG: Buscando método %s para tipo %s\n", methodName, receiver.ConcretType)
-
-	// Buscar el método
-	method, msg := v.RegistroAmbito.AmbitoGlobal.GetMetodo(receiver.ConcretType, methodName)
-	if method == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-		return tiposDeDato.NuloPorDefecto
-	}
-
-	fmt.Printf("DEBUG: Método %s encontrado!\n", methodName)
-
-	// Procesar argumentos
-	args := make([]*Argumento, 0)
-	if ctx.Arg_list() != nil {
-		args = v.Visit(ctx.Arg_list()).([]*Argumento)
-	}
-
-	// Ejecutar método
-	method.Exec(v, receiver, args, ctx.GetStart())
-
-	fmt.Printf("DEBUG: Método ejecutado, retornando: %v\n", method.RetornarValor)
-	return method.RetornarValor
-}
-
-func (v *PatronVIsitor) VisitStructMethodExp(ctx *parser.StructMethodExpContext) interface{} {
-	return v.Visit(ctx.Struct_method_call())
-}
-
-func (v *PatronVIsitor) VisitStructVector(ctx *parser.StructVectorContext) interface{} {
-
-	_type := ctx.ID().GetText()
-
-	stc, msg := v.RegistroAmbito.AmbitoGlobal.GetEstructura(_type)
-
-	if stc == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-		return tiposDeDato.NuloPorDefecto
-	}
-
-	return NewTipoVector(make([]tiposDeDato.ValorInterno, 0), "["+_type+"]", _type)
-}
-
-func (v *PatronVIsitor) VisitStructExp(ctx *parser.StructExpContext) interface{} {
-	return v.Visit(ctx.Struct_vector())
 }
 
 func (v *PatronVIsitor) VisitVectorFuncExp(ctx *parser.VectorFuncExpContext) interface{} {
-	return v.Visit(ctx.Vector_func())
+	return v.Visit(ctx.Fun_slice())
 }
 
-func (v *PatronVIsitor) VisitVectorPropExp(ctx *parser.VectorPropExpContext) interface{} {
-	return v.Visit(ctx.Vector_prop())
+func (v *PatronVIsitor) VisitPropSliceExp(ctx *parser.PropSliceExpContext) interface{} {
+	return v.Visit(ctx.Prop_slice())
 }
 
-func (v *PatronVIsitor) VisitPropVector(ctx *parser.PropVectorContext) interface{} {
+func (v *PatronVIsitor) VisitPropSlice(ctx *parser.PropSliceContext) interface{} {
 
 	var objectCandidate tiposDeDato.ValorInterno
 
-	switch itemRef := v.Visit(ctx.Vector_item()).(type) {
+	switch itemRef := v.Visit(ctx.Item_slice()).(type) {
 	case *VectorItemReference:
-		objectCandidate = itemRef.Value
+		objectCandidate = itemRef.Valor
 	case *ElementoMatriz:
-		objectCandidate = itemRef.Value
+		objectCandidate = itemRef.Valor
 	}
 
 	obj, ok := objectCandidate.(*TipoObjeto)
@@ -2085,31 +1809,31 @@ func (v *PatronVIsitor) VisitPropVector(ctx *parser.PropVectorContext) interface
 	}
 
 	lastScope := v.RegistroAmbito.AmbitoActual
-	v.RegistroAmbito.AmbitoActual = obj.InternalScope
+	v.RegistroAmbito.AmbitoActual = obj.AmbitoInterno
 
 	defer func() {
 		v.RegistroAmbito.AmbitoActual = lastScope
 	}()
 
-	variable := v.RegistroAmbito.GetVariable(ctx.Id_pattern().GetText())
+	variable := v.RegistroAmbito.GetVariable(ctx.PatronId().GetText())
 
 	if variable == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Propiedad "+ctx.Id_pattern().GetText()+" no encontrada item del vector")
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Propiedad "+ctx.PatronId().GetText()+" no encontrada item del vector")
 		return tiposDeDato.NuloPorDefecto
 	}
 
-	return variable.Value
+	return variable.Valor
 }
 
-func (v *PatronVIsitor) VisitFuncionVector(ctx *parser.FuncionVectorContext) interface{} {
+func (v *PatronVIsitor) VisitFuncionSlice(ctx *parser.FuncionSliceContext) interface{} {
 
 	var objectCandidate tiposDeDato.ValorInterno
 
-	switch itemRef := v.Visit(ctx.Vector_item()).(type) {
+	switch itemRef := v.Visit(ctx.Item_slice()).(type) {
 	case *VectorItemReference:
-		objectCandidate = itemRef.Value
+		objectCandidate = itemRef.Valor
 	case *ElementoMatriz:
-		objectCandidate = itemRef.Value
+		objectCandidate = itemRef.Valor
 	}
 
 	obj, ok := objectCandidate.(*TipoObjeto)
@@ -2120,13 +1844,13 @@ func (v *PatronVIsitor) VisitFuncionVector(ctx *parser.FuncionVectorContext) int
 	}
 
 	lastScope := v.RegistroAmbito.AmbitoActual
-	v.RegistroAmbito.AmbitoActual = obj.InternalScope
+	v.RegistroAmbito.AmbitoActual = obj.AmbitoInterno
 
 	defer func() {
 		v.RegistroAmbito.AmbitoActual = lastScope
 	}()
 
-	return v.Visit(ctx.Func_call())
+	return v.Visit(ctx.Llamar_funcion())
 }
 
 func (s *RegistroAmbito) Print() {
@@ -2135,12 +1859,12 @@ func (s *RegistroAmbito) Print() {
 	fmt.Println("============")
 
 	fmt.Println("Variables")
-	for k, v := range s.AmbitoGlobal.variables {
-		fmt.Println(k, v.Value.Value(), v.Type)
+	for k, v := range s.AmbitoGlobal.Variables {
+		fmt.Println(k, v.Valor.Value(), v.Tipo)
 	}
 
 	fmt.Println("Funciones")
-	for k, v := range s.AmbitoGlobal.functions {
+	for k, v := range s.AmbitoGlobal.Funciones {
 		fmt.Println(k, v)
 	}
 
@@ -2148,18 +1872,18 @@ func (s *RegistroAmbito) Print() {
 	fmt.Println("============")
 	fmt.Println("")
 
-	for _, child := range s.AmbitoGlobal.children {
+	for _, child := range s.AmbitoGlobal.Hijos {
 
-		fmt.Println(child.name)
+		fmt.Println(child.Nombre)
 		fmt.Println("============")
 
 		fmt.Println("Variables")
-		for k, v := range child.variables {
-			fmt.Println(k, v.Value.Value())
+		for k, v := range child.Variables {
+			fmt.Println(k, v.Valor.Value())
 		}
 
 		fmt.Println("Funciones")
-		for k, v := range child.functions {
+		for k, v := range child.Funciones {
 			fmt.Println(k, v)
 		}
 
@@ -2170,33 +1894,20 @@ func (s *RegistroAmbito) Print() {
 
 // Declaración sin 'mut/let/var', con tipo y valor:  ID type = expr
 func (v *PatronVIsitor) VisitDeclararSinMutValor(ctx *parser.DeclararSinMutValorContext) interface{} {
-	varName := ctx.ID().GetText()
-	varType := v.Visit(ctx.Type_()).(string)
-	varValue := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
+	nombreVariable := ctx.ID().GetText()
+	tipoVariable := v.Visit(ctx.Tipo()).(string)
+	valorVariable := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
 	// Copiar objetos y vectores para evitar aliasing
-	if obj, ok := varValue.(*TipoObjeto); ok {
-		varValue = obj.Copy()
+	if objeto, ok := valorVariable.(*TipoObjeto); ok {
+		valorVariable = objeto.Copy()
 	}
-	if EsTipoVector(varValue.Type()) {
-		varValue = varValue.Copy()
+	if EsTipoVector(valorVariable.Type()) {
+		valorVariable = valorVariable.Copy()
 	}
 
 	// isConst = false, inferir inicialización completa => inferir=false
-	variable, msg := v.RegistroAmbito.AgregarVariable(varName, varType, varValue, false, false, ctx.GetStart())
-	if variable == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-	}
-	return nil
-}
-
-// Declaración sin 'mut/let/var', solo tipo:  ID type
-func (v *PatronVIsitor) VisitDeclararSinMutTipo(ctx *parser.DeclararSinMutTipoContext) interface{} {
-	varName := ctx.ID().GetText()
-	varType := v.Visit(ctx.Type_()).(string)
-
-	// valor por defecto (NuloPorDefecto), isConst=false, inferir=true
-	variable, msg := v.RegistroAmbito.AgregarVariable(varName, varType, tiposDeDato.NuloPorDefecto, false, true, ctx.GetStart())
+	variable, msg := v.RegistroAmbito.AgregarVariable(nombreVariable, tipoVariable, valorVariable, false, false, ctx.GetStart())
 	if variable == nil {
 		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
 	}

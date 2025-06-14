@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"fmt"
 	"main/crearArbol"
 	"main/models"
 
@@ -71,7 +72,7 @@ func (a *AnalyzerService) AnalyzeCode(code, filename string) (*models.AnalysisRe
 	frontendErrors := []models.ErrorReport{}
 	for _, err := range replVisitor.TablaError.Errores {
 		frontendErrors = append(frontendErrors, models.ErrorReport{
-			Linea:       err.Line,        // ← CORRECTO: usa Line, no Linea
+			Linea:       err.Linea,       // ← CORRECTO: usa Line, no Linea
 			Columna:     err.Columna,     // ← CORRECTO: usa Columna
 			Descripcion: err.Descripcion, // ← CORRECTO: usa Descripcion
 			Tipo:        err.Tipo,        // ← CORRECTO: usa Tipo (que ya es string)
@@ -82,7 +83,7 @@ func (a *AnalyzerService) AnalyzeCode(code, filename string) (*models.AnalysisRe
 	symbolTable := a.convertSymbolTable(replVisitor.RegistroAmbito.Report())
 
 	// Preparar output de consola
-	consoleOutput := replVisitor.Console.GetOutput()
+	consoleOutput := replVisitor.Consola.GetSalida()
 	if consoleOutput == "" {
 		if success {
 			consoleOutput = "✅ Análisis completado exitosamente\n✅ Código interpretado sin errores"
@@ -106,33 +107,89 @@ func (a *AnalyzerService) AnalyzeCode(code, filename string) (*models.AnalysisRe
 
 // Convertir tabla de símbolos del backend al formato del frontend
 func (a *AnalyzerService) convertSymbolTable(registroAmbito instrucciones.ReporteTabla) []models.SymbolEntry {
-	var symbolTable []models.SymbolEntry
+    var symbolTable []models.SymbolEntry
 
-	// Extraer variables del ámbito global
-	for _, variable := range registroAmbito.AmbitoGlobal.Vars {
-		symbolTable = append(symbolTable, models.SymbolEntry{
-			ID:         variable.Name,
-			SymbolType: "Variable",
-			DataType:   variable.Type,
-			Scope:      "global",
-			Line:       variable.Line,
-			Column:     variable.Column,
-		})
-	}
+    // Función recursiva con jerarquía de puntos
+    var procesarAmbitoRecursivo func(ambito instrucciones.ReporteAmbito, rutaScope string)
+    
+    procesarAmbitoRecursivo = func(ambito instrucciones.ReporteAmbito, rutaScope string) {
+        // Procesar variables del ámbito actual
+        for _, variable := range ambito.Variables {
+            line := variable.Linea
+            column := variable.Columna
+            if line == 0 && column == 0 {
+                line = 1
+                column = 1
+            }
+            
+            symbolTable = append(symbolTable, models.SymbolEntry{
+                ID:         variable.Nombre,
+                SymbolType: "Variable",
+                DataType:   variable.Tipo,
+                Scope:      rutaScope,
+                Line:       line,
+                Column:     column,
+            })
+        }
 
-	// Extraer funciones del ámbito global
-	for _, function := range registroAmbito.AmbitoGlobal.Funcs {
-		symbolTable = append(symbolTable, models.SymbolEntry{
-			ID:         function.Name,
-			SymbolType: "Function",
-			DataType:   function.Type,
-			Scope:      "global",
-			Line:       function.Line,
-			Column:     function.Column,
-		})
-	}
+        // Procesar funciones del ámbito actual
+        for _, function := range ambito.Funciones {
+            line := function.Linea
+            column := function.Columna
+            if line == 0 && column == 0 {
+                line = 1
+                column = 1
+            }
+            
+            symbolTable = append(symbolTable, models.SymbolEntry{
+                ID:         function.Nombre,
+                SymbolType: "Function",
+                DataType:   function.Tipo,
+                Scope:      rutaScope,
+                Line:       line,
+                Column:     column,
+            })
+        }
 
-	return symbolTable
+        // Procesar estructuras del ámbito actual
+        for _, estructura := range ambito.Estructuras {
+            line := estructura.Linea
+            column := estructura.Columna
+            if line == 0 && column == 0 {
+                line = 1
+                column = 1
+            }
+            
+            symbolTable = append(symbolTable, models.SymbolEntry{
+                ID:         estructura.Nombre,
+                SymbolType: "Struct",
+                DataType:   estructura.Tipo,
+                Scope:      rutaScope,
+                Line:       line,
+                Column:     column,
+            })
+        }
+
+        // Procesar ámbitos hijos con nueva ruta
+        for i, hijo := range ambito.AmbitosHijos {
+            // Crear nombre del ámbito hijo
+            nombreHijo := hijo.Nombre
+            if nombreHijo == "" {
+                nombreHijo = fmt.Sprintf("block_%d", i+1)
+            }
+            
+            // Crear ruta jerárquica con puntos
+            nuevaRuta := rutaScope + "." + nombreHijo
+            
+            // Llamada recursiva
+            procesarAmbitoRecursivo(hijo, nuevaRuta)
+        }
+    }
+
+    // Iniciar desde global
+    procesarAmbitoRecursivo(registroAmbito.AmbitoGlobal, "global")
+
+    return symbolTable
 }
 
 // ValidateCode valida la sintaxis del código

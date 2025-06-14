@@ -20,7 +20,7 @@ func Casteo(TipoCasteo string, Valor ValorInterno) (ValorInterno, bool) {
 	// 1. Los enteros pueden convertirse a decimales
 	if TipoCasteo == TIPO_DECIMAL && Valor.Type() == TIPO_ENTERO {
 		return &ValorDecimal{
-			InternalValor: float64(Valor.(*ValorEntero).InternalValor),
+			InternalValor: float64(Valor.(*ValorEntero).ValorInterno),
 		}, true
 	}
 

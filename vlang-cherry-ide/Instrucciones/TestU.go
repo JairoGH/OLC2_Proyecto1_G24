@@ -2,25 +2,26 @@ package instrucciones
 
 import "testing"
 
+// ProbarTipoVector: prueba la función EsTipoVector con diferentes casos de entrada
 func ProbarTipoVector(t *testing.T) {
 
-	matrix := map[string]bool{
+	casos := map[string]bool{
 		"[int]":   true,
 		"int":     false,
 		"[[int]]": false,
 		"[]":      true,
 	}
 
-	for k, v := range matrix {
-		if EsTipoVector(k) != v {
-			t.Errorf("isVector(%s) != %t", k, v)
+	for tipo, esperado := range casos {
+		if EsTipoVector(tipo) != esperado {
+			t.Errorf("EsTipoVector(%s) != %t", tipo, esperado)
 		}
 	}
-
 }
 
+// ProbarTipoMatriz: prueba la función EsTipoMatriz con diferentes casos de entrada
 func ProbarTipoMatriz(t *testing.T) {
-	matrix := map[string]bool{
+	casos := map[string]bool{
 		"[int]":     false,
 		"int":       false,
 		"[[int]]":   true,
@@ -30,9 +31,9 @@ func ProbarTipoMatriz(t *testing.T) {
 		"[[]":       false,
 	}
 
-	for k, v := range matrix {
-		if EsTipoMatriz(k) != v {
-			t.Errorf("isMatrix(%s) != %t", k, v)
+	for tipo, esperado := range casos {
+		if EsTipoMatriz(tipo) != esperado {
+			t.Errorf("EsTipoMatriz(%s) != %t", tipo, esperado)
 		}
 	}
 }

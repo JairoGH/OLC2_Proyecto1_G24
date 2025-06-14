@@ -71,11 +71,8 @@ RW_WHILE:               'while';
 RW_BREAK:               'break';
 RW_CONTINUE:            'continue';
 RW_RETURN:              'return';
-//Otros
 RW_IN:                  'in';
-RW_INOUT:               'inout';
-RW_GUARD:               'guard';
-RW_MUTATING:            'mutating';
+
 
 //  ══════════════════════════════════════════
 //              IDENTIFICADORES
@@ -95,10 +92,6 @@ PUNTO:                  '.';
 COMA:                   ',';
 PUNTO_Y_COMA:           ';';
 DOS_PUNTOS:             ':';
-// Otros
-ARROW: '->';
-INTERROGATION: '?';
-ANPERSAND: '&';
 
 //  ══════════════════════════════════════════
 //                  ERRORES

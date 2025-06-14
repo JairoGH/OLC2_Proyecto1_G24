@@ -1,17 +1,20 @@
 package main
 
 import (
-	"main/ui"
-
-	"fyne.io/fyne/v2/app"
+    "fmt"
+    "main/ui"
+    "fyne.io/fyne/v2/app"
 )
 
 func main() {
-	// Crear aplicación
-	myApp := app.New()
-	myApp.SetIcon(nil) // Puedes agregar un icono más tarde
+    // Limpiar consola usando códigos ANSI
+    fmt.Print("\033[H\033[2J")
+    
+    // Crear aplicación
+    myApp := app.New()
+    myApp.SetIcon(nil) // Puedes agregar un icono más tarde
 
-	// Crear y mostrar ventana principal
-	mainWindow := ui.NewMainWindow(myApp)
-	mainWindow.ShowAndRun()
+    // Crear y mostrar ventana principal
+    mainWindow := ui.NewMainWindow(myApp)
+    mainWindow.ShowAndRun()
 }

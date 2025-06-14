@@ -1,4 +1,4 @@
-// Code generated from vlang-cherry-ide/parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
 package parser // VGrammar
 import "github.com/antlr4-go/antlr/v4"
@@ -68,89 +68,17 @@ func (s *BaseVGrammarListener) EnterDeclararSinMutValor(ctx *DeclararSinMutValor
 // ExitDeclararSinMutValor is called when production DeclararSinMutValor is exited.
 func (s *BaseVGrammarListener) ExitDeclararSinMutValor(ctx *DeclararSinMutValorContext) {}
 
-// EnterDeclararSinMutTipo is called when production DeclararSinMutTipo is entered.
-func (s *BaseVGrammarListener) EnterDeclararSinMutTipo(ctx *DeclararSinMutTipoContext) {}
+// EnterDeclararSlice is called when production DeclararSlice is entered.
+func (s *BaseVGrammarListener) EnterDeclararSlice(ctx *DeclararSliceContext) {}
 
-// ExitDeclararSinMutTipo is called when production DeclararSinMutTipo is exited.
-func (s *BaseVGrammarListener) ExitDeclararSinMutTipo(ctx *DeclararSinMutTipoContext) {}
+// ExitDeclararSlice is called when production DeclararSlice is exited.
+func (s *BaseVGrammarListener) ExitDeclararSlice(ctx *DeclararSliceContext) {}
 
-// EnterDeclararVector is called when production DeclararVector is entered.
-func (s *BaseVGrammarListener) EnterDeclararVector(ctx *DeclararVectorContext) {}
+// EnterAsignacionSliceItem is called when production AsignacionSliceItem is entered.
+func (s *BaseVGrammarListener) EnterAsignacionSliceItem(ctx *AsignacionSliceItemContext) {}
 
-// ExitDeclararVector is called when production DeclararVector is exited.
-func (s *BaseVGrammarListener) ExitDeclararVector(ctx *DeclararVectorContext) {}
-
-// EnterListaItemsVector is called when production ListaItemsVector is entered.
-func (s *BaseVGrammarListener) EnterListaItemsVector(ctx *ListaItemsVectorContext) {}
-
-// ExitListaItemsVector is called when production ListaItemsVector is exited.
-func (s *BaseVGrammarListener) ExitListaItemsVector(ctx *ListaItemsVectorContext) {}
-
-// EnterVectorItem is called when production VectorItem is entered.
-func (s *BaseVGrammarListener) EnterVectorItem(ctx *VectorItemContext) {}
-
-// ExitVectorItem is called when production VectorItem is exited.
-func (s *BaseVGrammarListener) ExitVectorItem(ctx *VectorItemContext) {}
-
-// EnterPropVector is called when production PropVector is entered.
-func (s *BaseVGrammarListener) EnterPropVector(ctx *PropVectorContext) {}
-
-// ExitPropVector is called when production PropVector is exited.
-func (s *BaseVGrammarListener) ExitPropVector(ctx *PropVectorContext) {}
-
-// EnterFuncionVector is called when production FuncionVector is entered.
-func (s *BaseVGrammarListener) EnterFuncionVector(ctx *FuncionVectorContext) {}
-
-// ExitFuncionVector is called when production FuncionVector is exited.
-func (s *BaseVGrammarListener) ExitFuncionVector(ctx *FuncionVectorContext) {}
-
-// EnterRepeating is called when production repeating is entered.
-func (s *BaseVGrammarListener) EnterRepeating(ctx *RepeatingContext) {}
-
-// ExitRepeating is called when production repeating is exited.
-func (s *BaseVGrammarListener) ExitRepeating(ctx *RepeatingContext) {}
-
-// EnterVar_type is called when production var_type is entered.
-func (s *BaseVGrammarListener) EnterVar_type(ctx *Var_typeContext) {}
-
-// ExitVar_type is called when production var_type is exited.
-func (s *BaseVGrammarListener) ExitVar_type(ctx *Var_typeContext) {}
-
-// EnterType is called when production type is entered.
-func (s *BaseVGrammarListener) EnterType(ctx *TypeContext) {}
-
-// ExitType is called when production type is exited.
-func (s *BaseVGrammarListener) ExitType(ctx *TypeContext) {}
-
-// EnterVectorSimple is called when production VectorSimple is entered.
-func (s *BaseVGrammarListener) EnterVectorSimple(ctx *VectorSimpleContext) {}
-
-// ExitVectorSimple is called when production VectorSimple is exited.
-func (s *BaseVGrammarListener) ExitVectorSimple(ctx *VectorSimpleContext) {}
-
-// EnterMatrizDoble is called when production MatrizDoble is entered.
-func (s *BaseVGrammarListener) EnterMatrizDoble(ctx *MatrizDobleContext) {}
-
-// ExitMatrizDoble is called when production MatrizDoble is exited.
-func (s *BaseVGrammarListener) ExitMatrizDoble(ctx *MatrizDobleContext) {}
-
-// EnterMatrix_type is called when production matrix_type is entered.
-func (s *BaseVGrammarListener) EnterMatrix_type(ctx *Matrix_typeContext) {}
-
-// ExitMatrix_type is called when production matrix_type is exited.
-func (s *BaseVGrammarListener) ExitMatrix_type(ctx *Matrix_typeContext) {}
-
-// EnterAux_matrix_type is called when production aux_matrix_type is entered.
-func (s *BaseVGrammarListener) EnterAux_matrix_type(ctx *Aux_matrix_typeContext) {}
-
-// ExitAux_matrix_type is called when production aux_matrix_type is exited.
-func (s *BaseVGrammarListener) ExitAux_matrix_type(ctx *Aux_matrix_typeContext) {}
-
-// EnterAssignVectorItem is called when production AssignVectorItem is entered.
-func (s *BaseVGrammarListener) EnterAssignVectorItem(ctx *AssignVectorItemContext) {}
-
-// ExitAssignVectorItem is called when production AssignVectorItem is exited.
-func (s *BaseVGrammarListener) ExitAssignVectorItem(ctx *AssignVectorItemContext) {}
+// ExitAsignacionSliceItem is called when production AsignacionSliceItem is exited.
+func (s *BaseVGrammarListener) ExitAsignacionSliceItem(ctx *AsignacionSliceItemContext) {}
 
 // EnterAsignacionDirecta is called when production AsignacionDirecta is entered.
 func (s *BaseVGrammarListener) EnterAsignacionDirecta(ctx *AsignacionDirectaContext) {}
@@ -164,131 +92,29 @@ func (s *BaseVGrammarListener) EnterAsignacionAritmetica(ctx *AsignacionAritmeti
 // ExitAsignacionAritmetica is called when production AsignacionAritmetica is exited.
 func (s *BaseVGrammarListener) ExitAsignacionAritmetica(ctx *AsignacionAritmeticaContext) {}
 
-// EnterAsignacionVector is called when production AsignacionVector is entered.
-func (s *BaseVGrammarListener) EnterAsignacionVector(ctx *AsignacionVectorContext) {}
+// EnterAsignacionSlice is called when production AsignacionSlice is entered.
+func (s *BaseVGrammarListener) EnterAsignacionSlice(ctx *AsignacionSliceContext) {}
 
-// ExitAsignacionVector is called when production AsignacionVector is exited.
-func (s *BaseVGrammarListener) ExitAsignacionVector(ctx *AsignacionVectorContext) {}
+// ExitAsignacionSlice is called when production AsignacionSlice is exited.
+func (s *BaseVGrammarListener) ExitAsignacionSlice(ctx *AsignacionSliceContext) {}
 
-// EnterID_Patron is called when production ID_Patron is entered.
-func (s *BaseVGrammarListener) EnterID_Patron(ctx *ID_PatronContext) {}
+// EnterReturnStmt is called when production ReturnStmt is entered.
+func (s *BaseVGrammarListener) EnterReturnStmt(ctx *ReturnStmtContext) {}
 
-// ExitID_Patron is called when production ID_Patron is exited.
-func (s *BaseVGrammarListener) ExitID_Patron(ctx *ID_PatronContext) {}
+// ExitReturnStmt is called when production ReturnStmt is exited.
+func (s *BaseVGrammarListener) ExitReturnStmt(ctx *ReturnStmtContext) {}
 
-// EnterIntLiteral is called when production IntLiteral is entered.
-func (s *BaseVGrammarListener) EnterIntLiteral(ctx *IntLiteralContext) {}
+// EnterBreakStmt is called when production BreakStmt is entered.
+func (s *BaseVGrammarListener) EnterBreakStmt(ctx *BreakStmtContext) {}
 
-// ExitIntLiteral is called when production IntLiteral is exited.
-func (s *BaseVGrammarListener) ExitIntLiteral(ctx *IntLiteralContext) {}
+// ExitBreakStmt is called when production BreakStmt is exited.
+func (s *BaseVGrammarListener) ExitBreakStmt(ctx *BreakStmtContext) {}
 
-// EnterFloatLiteral is called when production FloatLiteral is entered.
-func (s *BaseVGrammarListener) EnterFloatLiteral(ctx *FloatLiteralContext) {}
+// EnterContinueStmt is called when production ContinueStmt is entered.
+func (s *BaseVGrammarListener) EnterContinueStmt(ctx *ContinueStmtContext) {}
 
-// ExitFloatLiteral is called when production FloatLiteral is exited.
-func (s *BaseVGrammarListener) ExitFloatLiteral(ctx *FloatLiteralContext) {}
-
-// EnterStringLiteral is called when production StringLiteral is entered.
-func (s *BaseVGrammarListener) EnterStringLiteral(ctx *StringLiteralContext) {}
-
-// ExitStringLiteral is called when production StringLiteral is exited.
-func (s *BaseVGrammarListener) ExitStringLiteral(ctx *StringLiteralContext) {}
-
-// EnterBoolLiteral is called when production BoolLiteral is entered.
-func (s *BaseVGrammarListener) EnterBoolLiteral(ctx *BoolLiteralContext) {}
-
-// ExitBoolLiteral is called when production BoolLiteral is exited.
-func (s *BaseVGrammarListener) ExitBoolLiteral(ctx *BoolLiteralContext) {}
-
-// EnterNilLiteral is called when production NilLiteral is entered.
-func (s *BaseVGrammarListener) EnterNilLiteral(ctx *NilLiteralContext) {}
-
-// ExitNilLiteral is called when production NilLiteral is exited.
-func (s *BaseVGrammarListener) ExitNilLiteral(ctx *NilLiteralContext) {}
-
-// EnterLiteralExp is called when production LiteralExp is entered.
-func (s *BaseVGrammarListener) EnterLiteralExp(ctx *LiteralExpContext) {}
-
-// ExitLiteralExp is called when production LiteralExp is exited.
-func (s *BaseVGrammarListener) ExitLiteralExp(ctx *LiteralExpContext) {}
-
-// EnterStructMethodExp is called when production StructMethodExp is entered.
-func (s *BaseVGrammarListener) EnterStructMethodExp(ctx *StructMethodExpContext) {}
-
-// ExitStructMethodExp is called when production StructMethodExp is exited.
-func (s *BaseVGrammarListener) ExitStructMethodExp(ctx *StructMethodExpContext) {}
-
-// EnterStructInitExp is called when production StructInitExp is entered.
-func (s *BaseVGrammarListener) EnterStructInitExp(ctx *StructInitExpContext) {}
-
-// ExitStructInitExp is called when production StructInitExp is exited.
-func (s *BaseVGrammarListener) ExitStructInitExp(ctx *StructInitExpContext) {}
-
-// EnterRepeatingExp is called when production RepeatingExp is entered.
-func (s *BaseVGrammarListener) EnterRepeatingExp(ctx *RepeatingExpContext) {}
-
-// ExitRepeatingExp is called when production RepeatingExp is exited.
-func (s *BaseVGrammarListener) ExitRepeatingExp(ctx *RepeatingExpContext) {}
-
-// EnterStructExp is called when production StructExp is entered.
-func (s *BaseVGrammarListener) EnterStructExp(ctx *StructExpContext) {}
-
-// ExitStructExp is called when production StructExp is exited.
-func (s *BaseVGrammarListener) ExitStructExp(ctx *StructExpContext) {}
-
-// EnterExpBinario is called when production ExpBinario is entered.
-func (s *BaseVGrammarListener) EnterExpBinario(ctx *ExpBinarioContext) {}
-
-// ExitExpBinario is called when production ExpBinario is exited.
-func (s *BaseVGrammarListener) ExitExpBinario(ctx *ExpBinarioContext) {}
-
-// EnterVectorPropExp is called when production VectorPropExp is entered.
-func (s *BaseVGrammarListener) EnterVectorPropExp(ctx *VectorPropExpContext) {}
-
-// ExitVectorPropExp is called when production VectorPropExp is exited.
-func (s *BaseVGrammarListener) ExitVectorPropExp(ctx *VectorPropExpContext) {}
-
-// EnterVectorFuncExp is called when production VectorFuncExp is entered.
-func (s *BaseVGrammarListener) EnterVectorFuncExp(ctx *VectorFuncExpContext) {}
-
-// ExitVectorFuncExp is called when production VectorFuncExp is exited.
-func (s *BaseVGrammarListener) ExitVectorFuncExp(ctx *VectorFuncExpContext) {}
-
-// EnterParentecisExp is called when production ParentecisExp is entered.
-func (s *BaseVGrammarListener) EnterParentecisExp(ctx *ParentecisExpContext) {}
-
-// ExitParentecisExp is called when production ParentecisExp is exited.
-func (s *BaseVGrammarListener) ExitParentecisExp(ctx *ParentecisExpContext) {}
-
-// EnterExpUnary is called when production ExpUnary is entered.
-func (s *BaseVGrammarListener) EnterExpUnary(ctx *ExpUnaryContext) {}
-
-// ExitExpUnary is called when production ExpUnary is exited.
-func (s *BaseVGrammarListener) ExitExpUnary(ctx *ExpUnaryContext) {}
-
-// EnterIdExp is called when production IdExp is entered.
-func (s *BaseVGrammarListener) EnterIdExp(ctx *IdExpContext) {}
-
-// ExitIdExp is called when production IdExp is exited.
-func (s *BaseVGrammarListener) ExitIdExp(ctx *IdExpContext) {}
-
-// EnterFunctionCallExp is called when production FunctionCallExp is entered.
-func (s *BaseVGrammarListener) EnterFunctionCallExp(ctx *FunctionCallExpContext) {}
-
-// ExitFunctionCallExp is called when production FunctionCallExp is exited.
-func (s *BaseVGrammarListener) ExitFunctionCallExp(ctx *FunctionCallExpContext) {}
-
-// EnterVectorItemExp is called when production VectorItemExp is entered.
-func (s *BaseVGrammarListener) EnterVectorItemExp(ctx *VectorItemExpContext) {}
-
-// ExitVectorItemExp is called when production VectorItemExp is exited.
-func (s *BaseVGrammarListener) ExitVectorItemExp(ctx *VectorItemExpContext) {}
-
-// EnterVectorExp is called when production VectorExp is entered.
-func (s *BaseVGrammarListener) EnterVectorExp(ctx *VectorExpContext) {}
-
-// ExitVectorExp is called when production VectorExp is exited.
-func (s *BaseVGrammarListener) ExitVectorExp(ctx *VectorExpContext) {}
+// ExitContinueStmt is called when production ContinueStmt is exited.
+func (s *BaseVGrammarListener) ExitContinueStmt(ctx *ContinueStmtContext) {}
 
 // EnterIFstmt is called when production IFstmt is entered.
 func (s *BaseVGrammarListener) EnterIFstmt(ctx *IFstmtContext) {}
@@ -344,29 +170,11 @@ func (s *BaseVGrammarListener) EnterRangoNum(ctx *RangoNumContext) {}
 // ExitRangoNum is called when production RangoNum is exited.
 func (s *BaseVGrammarListener) ExitRangoNum(ctx *RangoNumContext) {}
 
-// EnterGuardStmt is called when production GuardStmt is entered.
-func (s *BaseVGrammarListener) EnterGuardStmt(ctx *GuardStmtContext) {}
+// EnterFuncionDeclerada is called when production FuncionDeclerada is entered.
+func (s *BaseVGrammarListener) EnterFuncionDeclerada(ctx *FuncionDecleradaContext) {}
 
-// ExitGuardStmt is called when production GuardStmt is exited.
-func (s *BaseVGrammarListener) ExitGuardStmt(ctx *GuardStmtContext) {}
-
-// EnterReturnStmt is called when production ReturnStmt is entered.
-func (s *BaseVGrammarListener) EnterReturnStmt(ctx *ReturnStmtContext) {}
-
-// ExitReturnStmt is called when production ReturnStmt is exited.
-func (s *BaseVGrammarListener) ExitReturnStmt(ctx *ReturnStmtContext) {}
-
-// EnterBreakStmt is called when production BreakStmt is entered.
-func (s *BaseVGrammarListener) EnterBreakStmt(ctx *BreakStmtContext) {}
-
-// ExitBreakStmt is called when production BreakStmt is exited.
-func (s *BaseVGrammarListener) ExitBreakStmt(ctx *BreakStmtContext) {}
-
-// EnterContinueStmt is called when production ContinueStmt is entered.
-func (s *BaseVGrammarListener) EnterContinueStmt(ctx *ContinueStmtContext) {}
-
-// ExitContinueStmt is called when production ContinueStmt is exited.
-func (s *BaseVGrammarListener) ExitContinueStmt(ctx *ContinueStmtContext) {}
+// ExitFuncionDeclerada is called when production FuncionDeclerada is exited.
+func (s *BaseVGrammarListener) ExitFuncionDeclerada(ctx *FuncionDecleradaContext) {}
 
 // EnterLlamarFuncion is called when production LlamarFuncion is entered.
 func (s *BaseVGrammarListener) EnterLlamarFuncion(ctx *LlamarFuncionContext) {}
@@ -374,11 +182,23 @@ func (s *BaseVGrammarListener) EnterLlamarFuncion(ctx *LlamarFuncionContext) {}
 // ExitLlamarFuncion is called when production LlamarFuncion is exited.
 func (s *BaseVGrammarListener) ExitLlamarFuncion(ctx *LlamarFuncionContext) {}
 
-// EnterArgList is called when production ArgList is entered.
-func (s *BaseVGrammarListener) EnterArgList(ctx *ArgListContext) {}
+// EnterListaParametros is called when production ListaParametros is entered.
+func (s *BaseVGrammarListener) EnterListaParametros(ctx *ListaParametrosContext) {}
 
-// ExitArgList is called when production ArgList is exited.
-func (s *BaseVGrammarListener) ExitArgList(ctx *ArgListContext) {}
+// ExitListaParametros is called when production ListaParametros is exited.
+func (s *BaseVGrammarListener) ExitListaParametros(ctx *ListaParametrosContext) {}
+
+// EnterParametroFun is called when production ParametroFun is entered.
+func (s *BaseVGrammarListener) EnterParametroFun(ctx *ParametroFunContext) {}
+
+// ExitParametroFun is called when production ParametroFun is exited.
+func (s *BaseVGrammarListener) ExitParametroFun(ctx *ParametroFunContext) {}
+
+// EnterListaArgumentos is called when production ListaArgumentos is entered.
+func (s *BaseVGrammarListener) EnterListaArgumentos(ctx *ListaArgumentosContext) {}
+
+// ExitListaArgumentos is called when production ListaArgumentos is exited.
+func (s *BaseVGrammarListener) ExitListaArgumentos(ctx *ListaArgumentosContext) {}
 
 // EnterFuncionArg is called when production FuncionArg is entered.
 func (s *BaseVGrammarListener) EnterFuncionArg(ctx *FuncionArgContext) {}
@@ -386,80 +206,176 @@ func (s *BaseVGrammarListener) EnterFuncionArg(ctx *FuncionArgContext) {}
 // ExitFuncionArg is called when production FuncionArg is exited.
 func (s *BaseVGrammarListener) ExitFuncionArg(ctx *FuncionArgContext) {}
 
-// EnterFuncionDeclerada is called when production FuncionDeclerada is entered.
-func (s *BaseVGrammarListener) EnterFuncionDeclerada(ctx *FuncionDecleradaContext) {}
-
-// ExitFuncionDeclerada is called when production FuncionDeclerada is exited.
-func (s *BaseVGrammarListener) ExitFuncionDeclerada(ctx *FuncionDecleradaContext) {}
-
-// EnterMetodoStruct is called when production MetodoStruct is entered.
-func (s *BaseVGrammarListener) EnterMetodoStruct(ctx *MetodoStructContext) {}
-
-// ExitMetodoStruct is called when production MetodoStruct is exited.
-func (s *BaseVGrammarListener) ExitMetodoStruct(ctx *MetodoStructContext) {}
-
-// EnterMethodReceiver is called when production MethodReceiver is entered.
-func (s *BaseVGrammarListener) EnterMethodReceiver(ctx *MethodReceiverContext) {}
-
-// ExitMethodReceiver is called when production MethodReceiver is exited.
-func (s *BaseVGrammarListener) ExitMethodReceiver(ctx *MethodReceiverContext) {}
-
-// EnterParamList is called when production ParamList is entered.
-func (s *BaseVGrammarListener) EnterParamList(ctx *ParamListContext) {}
-
-// ExitParamList is called when production ParamList is exited.
-func (s *BaseVGrammarListener) ExitParamList(ctx *ParamListContext) {}
-
-// EnterFuncParam is called when production FuncParam is entered.
-func (s *BaseVGrammarListener) EnterFuncParam(ctx *FuncParamContext) {}
-
-// ExitFuncParam is called when production FuncParam is exited.
-func (s *BaseVGrammarListener) ExitFuncParam(ctx *FuncParamContext) {}
-
 // EnterDeclararStruct is called when production DeclararStruct is entered.
 func (s *BaseVGrammarListener) EnterDeclararStruct(ctx *DeclararStructContext) {}
 
 // ExitDeclararStruct is called when production DeclararStruct is exited.
 func (s *BaseVGrammarListener) ExitDeclararStruct(ctx *DeclararStructContext) {}
 
-// EnterStructAttr is called when production StructAttr is entered.
-func (s *BaseVGrammarListener) EnterStructAttr(ctx *StructAttrContext) {}
+// EnterPropiedadStruct is called when production PropiedadStruct is entered.
+func (s *BaseVGrammarListener) EnterPropiedadStruct(ctx *PropiedadStructContext) {}
 
-// ExitStructAttr is called when production StructAttr is exited.
-func (s *BaseVGrammarListener) ExitStructAttr(ctx *StructAttrContext) {}
+// ExitPropiedadStruct is called when production PropiedadStruct is exited.
+func (s *BaseVGrammarListener) ExitPropiedadStruct(ctx *PropiedadStructContext) {}
 
-// EnterStructFunc is called when production StructFunc is entered.
-func (s *BaseVGrammarListener) EnterStructFunc(ctx *StructFuncContext) {}
+// EnterCrearStruct is called when production CrearStruct is entered.
+func (s *BaseVGrammarListener) EnterCrearStruct(ctx *CrearStructContext) {}
 
-// ExitStructFunc is called when production StructFunc is exited.
-func (s *BaseVGrammarListener) ExitStructFunc(ctx *StructFuncContext) {}
+// ExitCrearStruct is called when production CrearStruct is exited.
+func (s *BaseVGrammarListener) ExitCrearStruct(ctx *CrearStructContext) {}
 
-// EnterStructVector is called when production StructVector is entered.
-func (s *BaseVGrammarListener) EnterStructVector(ctx *StructVectorContext) {}
+// EnterListaParametrosInit is called when production ListaParametrosInit is entered.
+func (s *BaseVGrammarListener) EnterListaParametrosInit(ctx *ListaParametrosInitContext) {}
 
-// ExitStructVector is called when production StructVector is exited.
-func (s *BaseVGrammarListener) ExitStructVector(ctx *StructVectorContext) {}
+// ExitListaParametrosInit is called when production ListaParametrosInit is exited.
+func (s *BaseVGrammarListener) ExitListaParametrosInit(ctx *ListaParametrosInitContext) {}
 
-// EnterStructInit is called when production StructInit is entered.
-func (s *BaseVGrammarListener) EnterStructInit(ctx *StructInitContext) {}
+// EnterParametrosInitStruct is called when production ParametrosInitStruct is entered.
+func (s *BaseVGrammarListener) EnterParametrosInitStruct(ctx *ParametrosInitStructContext) {}
 
-// ExitStructInit is called when production StructInit is exited.
-func (s *BaseVGrammarListener) ExitStructInit(ctx *StructInitContext) {}
+// ExitParametrosInitStruct is called when production ParametrosInitStruct is exited.
+func (s *BaseVGrammarListener) ExitParametrosInitStruct(ctx *ParametrosInitStructContext) {}
 
-// EnterStructInitList is called when production StructInitList is entered.
-func (s *BaseVGrammarListener) EnterStructInitList(ctx *StructInitListContext) {}
+// EnterListaSlice is called when production ListaSlice is entered.
+func (s *BaseVGrammarListener) EnterListaSlice(ctx *ListaSliceContext) {}
 
-// ExitStructInitList is called when production StructInitList is exited.
-func (s *BaseVGrammarListener) ExitStructInitList(ctx *StructInitListContext) {}
+// ExitListaSlice is called when production ListaSlice is exited.
+func (s *BaseVGrammarListener) ExitListaSlice(ctx *ListaSliceContext) {}
 
-// EnterStructMethodCall is called when production StructMethodCall is entered.
-func (s *BaseVGrammarListener) EnterStructMethodCall(ctx *StructMethodCallContext) {}
+// EnterItemSlice is called when production ItemSlice is entered.
+func (s *BaseVGrammarListener) EnterItemSlice(ctx *ItemSliceContext) {}
 
-// ExitStructMethodCall is called when production StructMethodCall is exited.
-func (s *BaseVGrammarListener) ExitStructMethodCall(ctx *StructMethodCallContext) {}
+// ExitItemSlice is called when production ItemSlice is exited.
+func (s *BaseVGrammarListener) ExitItemSlice(ctx *ItemSliceContext) {}
 
-// EnterStructInitField is called when production StructInitField is entered.
-func (s *BaseVGrammarListener) EnterStructInitField(ctx *StructInitFieldContext) {}
+// EnterPropSlice is called when production PropSlice is entered.
+func (s *BaseVGrammarListener) EnterPropSlice(ctx *PropSliceContext) {}
 
-// ExitStructInitField is called when production StructInitField is exited.
-func (s *BaseVGrammarListener) ExitStructInitField(ctx *StructInitFieldContext) {}
+// ExitPropSlice is called when production PropSlice is exited.
+func (s *BaseVGrammarListener) ExitPropSlice(ctx *PropSliceContext) {}
+
+// EnterFuncionSlice is called when production FuncionSlice is entered.
+func (s *BaseVGrammarListener) EnterFuncionSlice(ctx *FuncionSliceContext) {}
+
+// ExitFuncionSlice is called when production FuncionSlice is exited.
+func (s *BaseVGrammarListener) ExitFuncionSlice(ctx *FuncionSliceContext) {}
+
+// EnterTipo is called when production tipo is entered.
+func (s *BaseVGrammarListener) EnterTipo(ctx *TipoContext) {}
+
+// ExitTipo is called when production tipo is exited.
+func (s *BaseVGrammarListener) ExitTipo(ctx *TipoContext) {}
+
+// EnterVectorSimple is called when production VectorSimple is entered.
+func (s *BaseVGrammarListener) EnterVectorSimple(ctx *VectorSimpleContext) {}
+
+// ExitVectorSimple is called when production VectorSimple is exited.
+func (s *BaseVGrammarListener) ExitVectorSimple(ctx *VectorSimpleContext) {}
+
+// EnterMatrizDoble is called when production MatrizDoble is entered.
+func (s *BaseVGrammarListener) EnterMatrizDoble(ctx *MatrizDobleContext) {}
+
+// ExitMatrizDoble is called when production MatrizDoble is exited.
+func (s *BaseVGrammarListener) ExitMatrizDoble(ctx *MatrizDobleContext) {}
+
+// EnterLiteralExp is called when production LiteralExp is entered.
+func (s *BaseVGrammarListener) EnterLiteralExp(ctx *LiteralExpContext) {}
+
+// ExitLiteralExp is called when production LiteralExp is exited.
+func (s *BaseVGrammarListener) ExitLiteralExp(ctx *LiteralExpContext) {}
+
+// EnterIdExp is called when production IdExp is entered.
+func (s *BaseVGrammarListener) EnterIdExp(ctx *IdExpContext) {}
+
+// ExitIdExp is called when production IdExp is exited.
+func (s *BaseVGrammarListener) ExitIdExp(ctx *IdExpContext) {}
+
+// EnterCrearStructExp is called when production CrearStructExp is entered.
+func (s *BaseVGrammarListener) EnterCrearStructExp(ctx *CrearStructExpContext) {}
+
+// ExitCrearStructExp is called when production CrearStructExp is exited.
+func (s *BaseVGrammarListener) ExitCrearStructExp(ctx *CrearStructExpContext) {}
+
+// EnterUnarioExp is called when production UnarioExp is entered.
+func (s *BaseVGrammarListener) EnterUnarioExp(ctx *UnarioExpContext) {}
+
+// ExitUnarioExp is called when production UnarioExp is exited.
+func (s *BaseVGrammarListener) ExitUnarioExp(ctx *UnarioExpContext) {}
+
+// EnterItemSliceExp is called when production ItemSliceExp is entered.
+func (s *BaseVGrammarListener) EnterItemSliceExp(ctx *ItemSliceExpContext) {}
+
+// ExitItemSliceExp is called when production ItemSliceExp is exited.
+func (s *BaseVGrammarListener) ExitItemSliceExp(ctx *ItemSliceExpContext) {}
+
+// EnterVectorFuncExp is called when production VectorFuncExp is entered.
+func (s *BaseVGrammarListener) EnterVectorFuncExp(ctx *VectorFuncExpContext) {}
+
+// ExitVectorFuncExp is called when production VectorFuncExp is exited.
+func (s *BaseVGrammarListener) ExitVectorFuncExp(ctx *VectorFuncExpContext) {}
+
+// EnterSliceExp is called when production SliceExp is entered.
+func (s *BaseVGrammarListener) EnterSliceExp(ctx *SliceExpContext) {}
+
+// ExitSliceExp is called when production SliceExp is exited.
+func (s *BaseVGrammarListener) ExitSliceExp(ctx *SliceExpContext) {}
+
+// EnterPropSliceExp is called when production PropSliceExp is entered.
+func (s *BaseVGrammarListener) EnterPropSliceExp(ctx *PropSliceExpContext) {}
+
+// ExitPropSliceExp is called when production PropSliceExp is exited.
+func (s *BaseVGrammarListener) ExitPropSliceExp(ctx *PropSliceExpContext) {}
+
+// EnterLlamarFuncionExp is called when production LlamarFuncionExp is entered.
+func (s *BaseVGrammarListener) EnterLlamarFuncionExp(ctx *LlamarFuncionExpContext) {}
+
+// ExitLlamarFuncionExp is called when production LlamarFuncionExp is exited.
+func (s *BaseVGrammarListener) ExitLlamarFuncionExp(ctx *LlamarFuncionExpContext) {}
+
+// EnterBinarioExp is called when production BinarioExp is entered.
+func (s *BaseVGrammarListener) EnterBinarioExp(ctx *BinarioExpContext) {}
+
+// ExitBinarioExp is called when production BinarioExp is exited.
+func (s *BaseVGrammarListener) ExitBinarioExp(ctx *BinarioExpContext) {}
+
+// EnterParentecisExp is called when production ParentecisExp is entered.
+func (s *BaseVGrammarListener) EnterParentecisExp(ctx *ParentecisExpContext) {}
+
+// ExitParentecisExp is called when production ParentecisExp is exited.
+func (s *BaseVGrammarListener) ExitParentecisExp(ctx *ParentecisExpContext) {}
+
+// EnterIntLiteral is called when production IntLiteral is entered.
+func (s *BaseVGrammarListener) EnterIntLiteral(ctx *IntLiteralContext) {}
+
+// ExitIntLiteral is called when production IntLiteral is exited.
+func (s *BaseVGrammarListener) ExitIntLiteral(ctx *IntLiteralContext) {}
+
+// EnterFloatLiteral is called when production FloatLiteral is entered.
+func (s *BaseVGrammarListener) EnterFloatLiteral(ctx *FloatLiteralContext) {}
+
+// ExitFloatLiteral is called when production FloatLiteral is exited.
+func (s *BaseVGrammarListener) ExitFloatLiteral(ctx *FloatLiteralContext) {}
+
+// EnterStringLiteral is called when production StringLiteral is entered.
+func (s *BaseVGrammarListener) EnterStringLiteral(ctx *StringLiteralContext) {}
+
+// ExitStringLiteral is called when production StringLiteral is exited.
+func (s *BaseVGrammarListener) ExitStringLiteral(ctx *StringLiteralContext) {}
+
+// EnterBoolLiteral is called when production BoolLiteral is entered.
+func (s *BaseVGrammarListener) EnterBoolLiteral(ctx *BoolLiteralContext) {}
+
+// ExitBoolLiteral is called when production BoolLiteral is exited.
+func (s *BaseVGrammarListener) ExitBoolLiteral(ctx *BoolLiteralContext) {}
+
+// EnterNilLiteral is called when production NilLiteral is entered.
+func (s *BaseVGrammarListener) EnterNilLiteral(ctx *NilLiteralContext) {}
+
+// ExitNilLiteral is called when production NilLiteral is exited.
+func (s *BaseVGrammarListener) ExitNilLiteral(ctx *NilLiteralContext) {}
+
+// EnterID_Patron is called when production ID_Patron is entered.
+func (s *BaseVGrammarListener) EnterID_Patron(ctx *ID_PatronContext) {}
+
+// ExitID_Patron is called when production ID_Patron is exited.
+func (s *BaseVGrammarListener) ExitID_Patron(ctx *ID_PatronContext) {}

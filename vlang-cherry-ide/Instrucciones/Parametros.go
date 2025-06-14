@@ -3,32 +3,30 @@ package instrucciones
 import "github.com/antlr4-go/antlr/v4"
 
 const (
-	ExternNameParam = iota
-	ExternEqualInnerParam
-	PositionalParam
+	ParametroExterno = iota
+	ParametroNombreUnico
+	ParametroPosicional
 )
 
+// Parametros: representa un parámetro de función con su nombre externo e interno,
+// tipo y forma de paso (por valor o referencia)
 type Parametros struct {
-	ExternName      string
-	InnerName       string
-	Type            string
-	PassByReference bool
-	Token           antlr.Token
+	NombreExterno      string      
+	NombreInterno      string      
+	Tipo               string      
+	PasarPorReferencia bool       
+	Token              antlr.Token 
 }
 
-// 3 types of Parametrosantlr
-// 1. extern and inner name declared 			[args are specified with the extern name]
-// 2. extern name = "_", inner name declared 	[args are specified with the order]
-// 3. extern name = "", inner name declared	[args are specified with the inner name]
-
-func (p *Parametros) ParamType() int {
-	if p.ExternName != "" {
-		if p.ExternName == "_" {
-			return PositionalParam
+// TipoParametro: determina el tipo de parámetro basado en los nombres externos e internos
+func (p *Parametros) TipoParametro() int {
+	if p.NombreExterno != "" {
+		if p.NombreExterno == "_" {
+			return ParametroPosicional
 		} else {
-			return ExternNameParam
+			return ParametroExterno
 		}
 	} else {
-		return ExternEqualInnerParam
+		return ParametroNombreUnico
 	}
 }

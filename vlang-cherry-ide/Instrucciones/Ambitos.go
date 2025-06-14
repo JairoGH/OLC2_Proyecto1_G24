@@ -1,7 +1,6 @@
 package instrucciones
 
 import (
-	"fmt"
 	"log"
 	"main/tiposDeDato"
 	"strings"
@@ -9,45 +8,47 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+// AmbitoBase: representa un ámbito/contexto que contiene variables, funciones y estructuras
 type AmbitoBase struct {
-    name      string
-    variables map[string]*Variable
-    functions map[string]tiposDeDato.ValorInterno
-    methods   map[string]*MetodoStruct 
-    children  []*AmbitoBase
-    structs   map[string]*Struct
-    parent    *AmbitoBase
-    isStruct  bool
-    IsMutating bool
+	Nombre       string
+	Variables    map[string]*Variable
+	Funciones    map[string]tiposDeDato.ValorInterno
+	Hijos        []*AmbitoBase
+	Estructuras  map[string]*Struct
+	Padre        *AmbitoBase
+	EsEstructura bool
+	EsMutante    bool
 }
 
 func (s *AmbitoBase) Name() string {
-	return s.name
+	return s.Nombre
 }
 
 func (s *AmbitoBase) Parent() *AmbitoBase {
-	return s.parent
+	return s.Padre
 }
 
 func (s *AmbitoBase) Children() []*AmbitoBase {
-	return s.children
+	return s.Hijos
 }
 
+// ValidType: verifica si un tipo es válido (primitivo o estructura definida)
 func (s *AmbitoBase) ValidType(_type string) bool {
+	_, esTipoEstructura := s.Estructuras[_type]
 
-	_, isStructType := s.structs[_type]
-
-	return tiposDeDato.PRIMITIVO(_type) || isStructType
+	return tiposDeDato.PRIMITIVO(_type) || esTipoEstructura
 }
 
-func (s *AmbitoBase) AddChild(child *AmbitoBase) {
-	s.children = append(s.children, child)
-	child.parent = s
+// AddChild: agrega un ámbito hijo y establece la relación padre-hijo
+func (s *AmbitoBase) AddChild(hijo *AmbitoBase) {
+	s.Hijos = append(s.Hijos, hijo)
+	hijo.Padre = s
 }
 
+// existeVariable: verifica si una variable ya existe en el ámbito actual
 func (s *AmbitoBase) existeVariable(variable *Variable) bool {
 
-	if _, ok := s.variables[variable.Name]; ok {
+	if _, ok := s.Variables[variable.Nombre]; ok {
 		return true
 	}
 
@@ -56,61 +57,41 @@ func (s *AmbitoBase) existeVariable(variable *Variable) bool {
 }
 
 // Crear función NewAmbitoBase:
-func NewAmbitoBase(name string, isStruct bool) *AmbitoBase {
-    return &AmbitoBase{
-        name:       name,
-        variables:  make(map[string]*Variable),
-        functions:  make(map[string]tiposDeDato.ValorInterno),
-        methods:    make(map[string]*MetodoStruct),  // NUEVO
-        children:   make([]*AmbitoBase, 0),
-        structs:    make(map[string]*Struct),
-        parent:     nil,
-        isStruct:   isStruct,
-        IsMutating: false,
-    }
+func NewAmbitoBase(name string, esEstructura bool) *AmbitoBase {
+	return &AmbitoBase{
+		Nombre:       name,
+		Variables:    make(map[string]*Variable),
+		Funciones:    make(map[string]tiposDeDato.ValorInterno),
+		Hijos:        make([]*AmbitoBase, 0),
+		Estructuras:  make(map[string]*Struct),
+		Padre:        nil,
+		EsEstructura: esEstructura,
+		EsMutante:    false,
+	}
 }
 
-// Agregar método para obtener métodos:
-func (a *AmbitoBase) GetMetodo(receiverType, methodName string) (*MetodoStruct, string) {
-    methodKey := receiverType + "." + methodName
-    if method, exists := a.methods[methodKey]; exists {
-        return method, ""
-    }
-    return nil, fmt.Sprintf("Método %s no encontrado para tipo %s", methodName, receiverType)
-}
-
-// Agregar método para agregar métodos:
-func (a *AmbitoBase) AgregarMetodo(receiverType, methodName string, method *MetodoStruct) (bool, string) {
-    methodKey := receiverType + "." + methodName
-    if _, exists := a.methods[methodKey]; exists {
-        return false, fmt.Sprintf("Método %s ya existe para tipo %s", methodName, receiverType)
-    }
-    a.methods[methodKey] = method
-    return true, ""
-}
-
-func (s *AmbitoBase) AgregarVariable(name string, varType string, value tiposDeDato.ValorInterno, isConst bool, allowNil bool, token antlr.Token) (*Variable, string) {
+func (s *AmbitoBase) AgregarVariable(nombre string, tipoVariable string, valor tiposDeDato.ValorInterno, esConstante bool, pudeSerNulo bool, token antlr.Token) (*Variable, string) {
 
 	variable := &Variable{
-		Name:     name,
-		Value:    value,
-		Type:     varType,
-		IsConst:  isConst,
-		AllowNil: allowNil,
-		Token:    token,
+		Nombre:       nombre,
+		Valor:        valor,
+		Tipo:         tipoVariable,
+		esConstante:  esConstante,
+		PuedeSerNulo: pudeSerNulo,
+		Token:        token,
 	}
 
 	if s.existeVariable(variable) {
-		return nil, "La variable " + name + " ya existe"
+		return nil, "La variable " + nombre + " ya existe"
 	}
 
 	typesOk, msg := variable.TipoValidacion()
 
-	// even if the variable is not valid, we add it to the scope, (internally it will be nil)
-	s.variables[name] = variable
+	// incluso si la variable no es válida, la agregamos al ámbito (internamente será nil)
+	s.Variables[nombre] = variable
 
 	if !typesOk {
-		// report error
+		// reportar error
 		return nil, msg
 	}
 
@@ -118,43 +99,42 @@ func (s *AmbitoBase) AgregarVariable(name string, varType string, value tiposDeD
 }
 
 func (s *AmbitoBase) GetVariable(name string) *Variable {
-	// verify if is refering to and object/struct function
+	// verificar si se refiere a una función/variable de objeto/struct
 	if strings.Contains(name, ".") {
-		return s.searchObjectVariable(name, nil)
+		return s.buscarVariableObjeto(name, nil)
 	}
 
-	initialScope := s
+	ambitoInicial := s
 
 	for {
-		if variable, ok := initialScope.variables[name]; ok {
+		if variable, ok := ambitoInicial.Variables[name]; ok {
 
-			// verify if is refering to a pointer
-			if variable.Type == tiposDeDato.TIPO_PUNTERO {
-				return variable.Value.(*TipoPuntero).VariableAsociada // pointer of a pointer ?
+			// verificar si se refiere a un puntero
+			if variable.Tipo == tiposDeDato.TIPO_PUNTERO {
+				return variable.Valor.(*TipoPuntero).VariableAsociada
 			}
 
 			return variable
 		}
 
-		if initialScope.parent == nil {
+		if ambitoInicial.Padre == nil {
 			break
 		}
 
-		initialScope = initialScope.parent
+		ambitoInicial = ambitoInicial.Padre
 	}
 
 	return nil
 }
 
 // obj1.obj2.prop1
-
-func (s *AmbitoBase) searchObjectVariable(name string, lastObj tiposDeDato.ValorInterno) *Variable {
+func (s *AmbitoBase) buscarVariableObjeto(name string, lastObj tiposDeDato.ValorInterno) *Variable {
 
 	// split name by dot
 	parts := strings.Split(name, ".")
 
 	if len(parts) == 0 {
-		log.Fatal("idk what u did, cant split by dot")
+		log.Fatal("no se puede dividir por punto")
 		return nil
 	}
 
@@ -162,10 +142,10 @@ func (s *AmbitoBase) searchObjectVariable(name string, lastObj tiposDeDato.Valor
 		obj, ok := lastObj.(*TipoObjeto)
 
 		if ok {
-			return obj.InternalScope.GetVariable(name)
+			return obj.AmbitoInterno.GetVariable(name)
 		}
 
-		log.Fatal("idk what u did, cant convert to object")
+		log.Fatal("no se puede convertir a objeto")
 		return nil
 	}
 
@@ -178,9 +158,9 @@ func (s *AmbitoBase) searchObjectVariable(name string, lastObj tiposDeDato.Valor
 			return nil
 		}
 
-		obj := variable.Value
+		obj := variable.Valor
 
-		// obj must be an object/struct or vector
+		// obj debe ser un objeto/struct o vector
 		switch obj := obj.(type) {
 		case *TipoObjeto:
 			lastObj = obj
@@ -190,66 +170,64 @@ func (s *AmbitoBase) searchObjectVariable(name string, lastObj tiposDeDato.Valor
 			return nil
 		}
 
-		return s.searchObjectVariable(strings.Join(parts[1:], "."), lastObj)
+		return s.buscarVariableObjeto(strings.Join(parts[1:], "."), lastObj)
 	}
 
 	obj, ok := lastObj.(*TipoObjeto)
 
 	if ok {
-		lastObj = obj.InternalScope.GetVariable(parts[0]).Value
+		lastObj = obj.AmbitoInterno.GetVariable(parts[0]).Valor
 
-		return s.searchObjectVariable(strings.Join(parts[1:], "."), lastObj)
+		return s.buscarVariableObjeto(strings.Join(parts[1:], "."), lastObj)
 	} else {
-		log.Fatal("idk what u did, cant convert to object")
+		log.Fatal("no se puede convertir a objeto")
 		return nil
 	}
 }
 
 func (s *AmbitoBase) AgregarFuncion(name string, function tiposDeDato.ValorInterno) (bool, string) {
-	// check if function already exists
 
-	if _, ok := s.functions[name]; ok {
+	if _, ok := s.Funciones[name]; ok {
 		return false, "La funcion " + name + " ya existe"
 	}
 
-	s.functions[name] = function
+	s.Funciones[name] = function
 
 	return true, ""
 }
 
 func (s *AmbitoBase) GetFuncion(name string) (tiposDeDato.ValorInterno, string) {
 
-	// verify if is refering to and object/struct function
+	// verificar si se refiere a una función de objeto/struct
 	if strings.Contains(name, ".") {
 		return s.buscarFuncion(name, nil)
 	}
 
-	initialScope := s
+	ambitoInicial := s
 
 	for {
-		if function, ok := initialScope.functions[name]; ok {
+		if function, ok := ambitoInicial.Funciones[name]; ok {
 			return function, ""
 		}
 
-		if initialScope.parent == nil {
+		if ambitoInicial.Padre == nil {
 			break
 		}
 
-		initialScope = initialScope.parent
+		ambitoInicial = ambitoInicial.Padre
 	}
 
 	return nil, "La funcion " + name + " no existe"
 }
 
 // obj1.obj2.func1()
-
 func (s *AmbitoBase) buscarFuncion(name string, lastObj tiposDeDato.ValorInterno) (tiposDeDato.ValorInterno, string) {
 
 	// split name by dot
 	parts := strings.Split(name, ".")
 
 	if len(parts) == 0 {
-		log.Fatal("idk what u did, cant split by dot")
+		log.Fatal("no se puede dividir por punto")
 		return nil, ""
 	}
 
@@ -257,10 +235,10 @@ func (s *AmbitoBase) buscarFuncion(name string, lastObj tiposDeDato.ValorInterno
 		obj, ok := lastObj.(*TipoObjeto)
 
 		if ok {
-			return obj.InternalScope.GetFuncion(name)
+			return obj.AmbitoInterno.GetFuncion(name)
 		}
 
-		log.Fatal("idk what u did, cant convert to object")
+		log.Fatal("no se puede convertir a objeto")
 		return nil, ""
 	}
 
@@ -273,17 +251,16 @@ func (s *AmbitoBase) buscarFuncion(name string, lastObj tiposDeDato.ValorInterno
 			return nil, "No se puede acceder a la propiedad " + parts[0]
 		}
 
-		obj := variable.Value
+		obj := variable.Valor
 
-		// obj must be an object/struct or vector
-
+		// obj debe ser un objeto/struct o vector
 		switch obj := obj.(type) {
 		case *TipoObjeto:
 			lastObj = obj
 		case *TipoVector:
 			lastObj = obj.TipoObjeto
 		default:
-			return nil, "La propiedad '" + variable.Name + "' de tipo " + obj.Type() + " no tiene propiedades"
+			return nil, "La propiedad '" + variable.Nombre + "' de tipo " + obj.Type() + " no tiene propiedades"
 		}
 
 		return s.buscarFuncion(strings.Join(parts[1:], "."), lastObj)
@@ -292,139 +269,151 @@ func (s *AmbitoBase) buscarFuncion(name string, lastObj tiposDeDato.ValorInterno
 	obj, ok := lastObj.(*TipoObjeto)
 
 	if ok {
-		lastObj = obj.InternalScope.GetVariable(parts[0]).Value
+		lastObj = obj.AmbitoInterno.GetVariable(parts[0]).Valor
 
 		return s.buscarFuncion(strings.Join(parts[1:], "."), lastObj)
 	} else {
-		log.Fatal("idk what u did, cant convert to object")
+		log.Fatal("no se puede convertir a objeto")
 		return nil, ""
 	}
 }
 
 func (s *AmbitoBase) AgregarEstructura(name string, structValue *Struct) (bool, string) {
 
-	if _, ok := s.structs[name]; ok {
+	if _, ok := s.Estructuras[name]; ok {
 		return false, "La estructura " + name + " ya existe"
 	}
 
-	s.structs[name] = structValue
+	s.Estructuras[name] = structValue
 	return true, ""
 }
 
 func (s *AmbitoBase) GetEstructura(name string) (*Struct, string) {
 
-	initialScope := s
+	ambitoInicial := s
 
 	for {
-		if structValue, ok := initialScope.structs[name]; ok {
+		if structValue, ok := ambitoInicial.Estructuras[name]; ok {
 			return structValue, ""
 		}
 
-		if initialScope.parent == nil {
+		if ambitoInicial.Padre == nil {
 			break
 		}
 
-		initialScope = initialScope.parent
+		ambitoInicial = ambitoInicial.Padre
 	}
 
 	return nil, "La estructura " + name + " no existe"
 }
 
+// Reset: limpia todas las variables, hijos y funciones del ámbito
 func (s *AmbitoBase) Reset() {
-	s.variables = make(map[string]*Variable)
-	s.children = make([]*AmbitoBase, 0)
-	s.functions = make(map[string]tiposDeDato.ValorInterno)
+	s.Variables = make(map[string]*Variable)
+	s.Hijos = make([]*AmbitoBase, 0)
+	s.Funciones = make(map[string]tiposDeDato.ValorInterno)
 }
 
+// EsAmbitoMutante: verifica si el ámbito actual o algún padre es mutante
 func (s *AmbitoBase) EsAmbitoMutante() bool {
 	aux := s
 
 	for {
-		if aux.IsMutating {
+		if aux.EsMutante {
 			return true
 		}
 
-		if aux.parent == nil {
+		if aux.Padre == nil {
 			break
 		}
 
-		aux = aux.parent
+		aux = aux.Padre
 	}
 
 	return false
 }
 
+// NuevoAmbitoGlobal: constructor que crea el ámbito global con funciones embebidas
 func NuevoAmbitoGlobal() *AmbitoBase {
-    funcs := make(map[string]tiposDeDato.ValorInterno)
+	funcs := make(map[string]tiposDeDato.ValorInterno)
 
-    for k, v := range DefaultBuiltInFunctions {
-        funcs[k] = v
-    }
+	for k, v := range FuncionesEmbebidas {
+		funcs[k] = v
+	}
 
-    return &AmbitoBase{
-        name:      "global",
-        variables: make(map[string]*Variable),
-        children:  make([]*AmbitoBase, 0),
-        structs:   make(map[string]*Struct),
-        parent:    nil,
-        functions: funcs,
-        methods:   make(map[string]*MetodoStruct), 
-    }
+	return &AmbitoBase{
+		Nombre:      "global",
+		Variables:   make(map[string]*Variable),
+		Hijos:       make([]*AmbitoBase, 0),
+		Estructuras: make(map[string]*Struct),
+		Padre:       nil,
+		Funciones:   funcs,
+	}
 }
 
-func NewLocalScope(name string) *AmbitoBase {
-    return &AmbitoBase{
-        name:      name,
-        variables: make(map[string]*Variable),
-        functions: make(map[string]tiposDeDato.ValorInterno),
-        methods:   make(map[string]*MetodoStruct), 
-        children:  make([]*AmbitoBase, 0),
-        parent:    nil,
-    }
+// NuevoAmbitoLocal: constructor que crea un nuevo ámbito local
+func NuevoAmbitoLocal(name string) *AmbitoBase {
+	return &AmbitoBase{
+		Nombre:    name,
+		Variables: make(map[string]*Variable),
+		Funciones: make(map[string]tiposDeDato.ValorInterno),
+		Hijos:     make([]*AmbitoBase, 0),
+		Padre:     nil,
+	}
 }
 
+// RegistroAmbito: maneja la pila de ámbitos y el ámbito actual
 type RegistroAmbito struct {
 	AmbitoGlobal *AmbitoBase
 	AmbitoActual *AmbitoBase
 }
 
-func (s *RegistroAmbito) PushScope(name string) *AmbitoBase {
+// PushAmbito: crea y empuja un nuevo ámbito a la pila
+func (s *RegistroAmbito) PushAmbito(name string) *AmbitoBase {
 
-	newScope := NewLocalScope(name)
-	s.AmbitoActual.AddChild(newScope)
-	s.AmbitoActual = newScope
+	nuevoAmbito := NuevoAmbitoLocal(name)
+	s.AmbitoActual.AddChild(nuevoAmbito)
+	s.AmbitoActual = nuevoAmbito
 
 	return s.AmbitoActual
 }
 
-func (s *RegistroAmbito) PopScope() {
+// PopAmbito: retorna al ámbito padre en la pila
+func (s *RegistroAmbito) PopAmbito() {
 	s.AmbitoActual = s.AmbitoActual.Parent()
 }
 
+// Reset: reinicia el registro al ámbito global
 func (s *RegistroAmbito) Reset() {
 	s.AmbitoActual = s.AmbitoGlobal
 }
 
+// AgregarVariable: delegada para agregar variable en el ámbito actual
 func (s *RegistroAmbito) AgregarVariable(name string, varType string, value tiposDeDato.ValorInterno, isConst bool, allowNil bool, token antlr.Token) (*Variable, string) {
 	return s.AmbitoActual.AgregarVariable(name, varType, value, isConst, allowNil, token)
 }
 
+// GetVariable: delegada para obtener variable del ámbito actual
 func (s *RegistroAmbito) GetVariable(name string) *Variable {
 	return s.AmbitoActual.GetVariable(name)
 }
 
+// AgregarFuncion: delegada para agregar función en el ámbito actual
 func (s *RegistroAmbito) AgregarFuncion(name string, function tiposDeDato.ValorInterno) (bool, string) {
 	return s.AmbitoActual.AgregarFuncion(name, function)
 }
 
+// GetFuncion: delegada para obtener función del ámbito actual
 func (s *RegistroAmbito) GetFuncion(name string) (tiposDeDato.ValorInterno, string) {
 	return s.AmbitoActual.GetFuncion(name)
 }
 
+// EsEntornoMutable: verifica si el entorno actual permite mutaciones
 func (s *RegistroAmbito) EsEntornoMutable() bool {
 	return s.AmbitoActual.EsAmbitoMutante()
 }
 
+// NuevoRegistroAmbito: constructor que crea un nuevo registro con ámbito global
 func NuevoRegistroAmbito() *RegistroAmbito {
 	AmbitoGlobal := NuevoAmbitoGlobal()
 	return &RegistroAmbito{
@@ -433,58 +422,58 @@ func NuevoRegistroAmbito() *RegistroAmbito {
 	}
 }
 
+// NuevoVectorGlobal: constructor que crea un ámbito específico para vectores
 func NuevoVectorGlobal() *AmbitoBase {
 	var scope = &AmbitoBase{
-		name:      "vector",
-		variables: make(map[string]*Variable),
-		children:  make([]*AmbitoBase, 0),
-		functions: make(map[string]tiposDeDato.ValorInterno),
-		parent:    nil,
+		Nombre:    "vector",
+		Variables: make(map[string]*Variable),
+		Hijos:     make([]*AmbitoBase, 0),
+		Funciones: make(map[string]tiposDeDato.ValorInterno),
+		Padre:     nil,
 	}
-
-	// register object built-in functions
 
 	return scope
 }
 
-// * Report
-
+// Reporte: estructuras para generar reportes de la tabla de símbolos
 type ReporteTabla struct {
 	AmbitoGlobal ReporteAmbito
 }
 
 type ReporteAmbito struct {
-	Name        string
-	Vars        []ReporteSimbolos
-	Funcs       []ReporteSimbolos
-	Structs     []ReporteSimbolos
-	ChildScopes []ReporteAmbito
+	Nombre       string
+	Variables    []ReporteSimbolos
+	Funciones    []ReporteSimbolos
+	Estructuras      []ReporteSimbolos
+	AmbitosHijos []ReporteAmbito
 }
 
 type ReporteSimbolos struct {
-	Name   string
-	Type   string
-	Line   int
-	Column int
+	Nombre  string
+	Tipo    string
+	Linea   int
+	Columna int
 }
 
+// Report: genera un reporte completo de la tabla de símbolos
 func (s *RegistroAmbito) Report() ReporteTabla {
 	return ReporteTabla{
 		AmbitoGlobal: s.AmbitoActual.Report(),
 	}
 }
 
+// Report: genera un reporte del ámbito actual incluyendo todos sus símbolos
 func (s *AmbitoBase) Report() ReporteAmbito {
 
 	ReporteAmbito := ReporteAmbito{
-		Name:        s.name,
-		Vars:        make([]ReporteSimbolos, 0),
-		Funcs:       make([]ReporteSimbolos, 0),
-		Structs:     make([]ReporteSimbolos, 0),
-		ChildScopes: make([]ReporteAmbito, 0),
+		Nombre:       s.Nombre,
+		Variables:    make([]ReporteSimbolos, 0),
+		Funciones:    make([]ReporteSimbolos, 0),
+		Estructuras:      make([]ReporteSimbolos, 0),
+		AmbitosHijos: make([]ReporteAmbito, 0),
 	}
 
-	for _, v := range s.variables {
+	for _, v := range s.Variables {
 
 		token := v.Token
 		line := 0
@@ -495,57 +484,61 @@ func (s *AmbitoBase) Report() ReporteAmbito {
 			column = token.GetColumn()
 		}
 
-		ReporteAmbito.Vars = append(ReporteAmbito.Vars, ReporteSimbolos{
-			Name:   v.Name,
-			Type:   v.Type,
-			Line:   line,
-			Column: column,
+		ReporteAmbito.Variables = append(ReporteAmbito.Variables, ReporteSimbolos{
+			Nombre:  v.Nombre,
+			Tipo:    v.Tipo,
+			Linea:   line,
+			Columna: column,
 		})
 	}
 
-	for _, f := range s.functions {
-		switch function := f.(type) {
+	for _, f := range s.Funciones {
+		switch funcion := f.(type) {
 		case *FuncionNativa:
-			ReporteAmbito.Funcs = append(ReporteAmbito.Funcs, ReporteSimbolos{
-				Name:   function.Name,
-				Type:   "Embebida: " + function.Name,
-				Line:   0,
-				Column: 0,
-			})
+			// No incluir funciones embebidas en el reporte
+			if _, esEmbebida := FuncionesEmbebidas[funcion.Nombre]; !esEmbebida {
+				ReporteAmbito.Funciones = append(ReporteAmbito.Funciones, ReporteSimbolos{
+					Nombre:  funcion.Nombre,
+					Tipo:    funcion.Nombre,
+					Linea:   0,
+					Columna: 0,
+				})
+			}
 		case *Funcion:
 
-			line := 0
-			column := 0
+			linea := 0
+			columna := 0
 
-			if function.Token != nil {
-				line = function.Token.GetLine()
-				column = function.Token.GetColumn()
+			if funcion.Token != nil {
+				linea = funcion.Token.GetLine()
+				columna = funcion.Token.GetColumn()
 			}
 
-			ReporteAmbito.Funcs = append(ReporteAmbito.Funcs, ReporteSimbolos{
-				Name:   function.Name,
-				Type:   function.ReturnType,
-				Line:   line,
-				Column: column,
+			ReporteAmbito.Funciones = append(ReporteAmbito.Funciones, ReporteSimbolos{
+				Nombre:  funcion.Nombre,
+				Tipo:    funcion.TipoRetorno,
+				Linea:   linea,
+				Columna: columna,
 			})
 		case *FuncionNativaObjeto:
+			// No incluir FuncionNativaObjeto en el reporte
 			break
 		default:
-			log.Fatal("Function type not found")
+			log.Fatal("Tipo de función no encontrado")
 		}
 	}
 
-	for _, v := range s.structs {
-		ReporteAmbito.Structs = append(ReporteAmbito.Structs, ReporteSimbolos{
-			Name:   v.Name,
-			Type:   v.Name,
-			Line:   v.Token.GetLine(),
-			Column: v.Token.GetColumn(),
+	for _, v := range s.Estructuras {
+		ReporteAmbito.Estructuras = append(ReporteAmbito.Estructuras, ReporteSimbolos{
+			Nombre:  v.Nombre,
+			Tipo:    v.Nombre,
+			Linea:   v.Token.GetLine(),
+			Columna: v.Token.GetColumn(),
 		})
 	}
 
-	for _, v := range s.children {
-		ReporteAmbito.ChildScopes = append(ReporteAmbito.ChildScopes, v.Report())
+	for _, v := range s.Hijos {
+		ReporteAmbito.AmbitosHijos = append(ReporteAmbito.AmbitosHijos, v.Report())
 	}
 
 	return ReporteAmbito

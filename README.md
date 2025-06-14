@@ -169,25 +169,42 @@ graph TD
 
 ### 🖥️ **V-Lang Cherry en Acción** 🖥️
 
-<table align="center">
-<tr>
-<th>Funcionalidad</th>
-<th>Preview</th>
-</tr>
-<tr>
-<td align="center">**🎨 Editor Principal**</td>
-<td align="center">*Próximamente: Screenshot del editor con código*</td>
-</tr>
-<tr>
-<td align="center">**📊 Visualizador AST**</td>
-<td align="center">*Próximamente: Screenshot del AST generado*</td>
-</tr>
-<tr>
-<td align="center">**📋 Reportes**</td>
-<td align="center">*Próximamente: Screenshot de reportes de errores*</td>
-</tr>
-</table>
+</div>
 
+### 🎨 **Editor Principal**
+<div align="center">
+  <img src="./assets/editor_principal.png" alt="Editor Principal de V-Lang Cherry" width="800">
+  <p><em>Editor con syntax highlighting, números de línea y detección de errores en tiempo real</em></p>
+</div>
+
+### 📊 **Visualizador AST**
+<div align="center">
+  <img src="./assets/ast_viewer.png" alt="Visualizador AST" width="800">
+  <p><em>Representación gráfica del árbol de sintaxis abstracta (AST) generado</em></p>
+</div>
+
+### 📋 **Tabla de Símbolos**
+<div align="center">
+  <img src="./assets/tabla_simbolos.png" alt="Tabla de Símbolos" width="800">
+  <p><em>Tabla dinámica que muestra todas las variables, funciones y estructuras declaradas</em></p>
+</div>
+
+### 🚨 **Reportes de Errores**
+<div align="center">
+  <img src="./assets/reportes_errores.png" alt="Sistema de Reportes de Errores" width="800">
+  <p><em>Sistema inteligente de detección y reporte de errores semánticos y sintácticos</em></p>
+</div>
+
+### 🖥️ **Interfaz Completa**
+<div align="center">
+  <img src="./assets/interfaz_completa.png" alt="Interfaz Completa" width="800">
+  <p><em>Vista completa del IDE con todos los paneles y herramientas integradas</em></p>
+</div>
+
+### ⚡ **Compilación en Tiempo Real**
+<div align="center">
+  <img src="./assets/compilacion_tiempo_real.png" alt="Compilación en Tiempo Real" width="800">
+  <p><em>Consola de salida mostrando los resultados de la ejecución del código</em></p>
 </div>
 
 ---
@@ -218,8 +235,39 @@ go build -o cherry ./cmd/main.go
 <tr>
 <td align="center">📖 [Manual de Usuario]</td>
 <td align="center">🔧 [API Reference]</td>
-<td align="center">🎯 [Ejemplos]</td>
-<td align="center">🐛 [Issues]</td>
+## 📚 Ejemplos
+
+<div align="center">
+
+### 🎯 **Aprende V-Lang Cherry con Ejemplos Prácticos** 🎯
+
+</div>
+
+| Categoría | Descripción | Link |
+|:---:|:---:|:---:|
+| 🎮 **Básicos** | Variables, tipos, operaciones | [Ver ejemplos](./examples/basicos/) |
+| 🔄 **Control** | if, while, for, switch | [Ver ejemplos](./examples/control/) |
+| 📊 **Estructuras** | Arrays, structs, matrices | [Ver ejemplos](./examples/datos/) |
+| 🎯 **Funciones** | Definición, parámetros, return | [Ver ejemplos](./examples/funciones/) |
+| 🚀 **Proyectos** | Calculadora | [Ver ejemplos](./examples/proyectos/) |
+
+### 🌟 **Ejemplo Destacado: Calculadora Cherry**
+
+```vlang
+fn main() {
+    println("=== Calculadora Cherry ===")
+    
+    mut a := 15.5
+    mut b := 4.2
+    
+    println("Suma:", a + b)
+    println("Resta:", a - b)
+    println("Multiplicación:", a * b)
+    println("División:", a / b)
+}
+```
+
+[🔗 Ver más ejemplos en GitHub](./examples/)
 </tr>
 </table>
 
@@ -245,6 +293,7 @@ go build -o cherry ./cmd/main.go
 
 [![⭐ Star este proyecto](https://img.shields.io/badge/⭐-Star_este_proyecto-yellow?style=for-the-badge)](https://github.com/JairoGH/OLC2_Proyecto1)
 [![📢 Issues](https://img.shields.io/badge/📢-Report_Issues-red?style=for-the-badge)](https://github.com/JairoGH/OLC2_Proyecto1/blob/main/QUELLEVAMOS.txt)
+
 ---
 
 **Hecho con ❤️ y mucho ☕ por el Team Cherry**

@@ -1,12 +1,14 @@
 package instrucciones
 
+// InstruccionesContexto: contexto de ejecución que contiene todos los componentes
+// necesarios para interpretar y ejecutar instrucciones del lenguaje
 type InstruccionesContexto struct {
-	// The console is the output of the REPL
-	Console *Console
-	// The scope is the current scope of the REPL
+	// La consola es la salida del REPL
+	Consola *Consola
+	// El registro de ámbito maneja el ámbito actual del REPL
 	RegistroAmbito *RegistroAmbito
-	// The call stack is the stack of breakable, continueable and returnable items
+	// La pila de llamadas almacena elementos que pueden ser interrumpidos, continuados o retornados
 	PilaLlamada *PilaLlamada
-	// Error table is the table of errors
+	// La tabla de errores almacena todos los errores encontrados
 	TablaError *TablaError
 }

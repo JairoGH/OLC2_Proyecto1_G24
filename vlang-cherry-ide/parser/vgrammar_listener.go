@@ -1,4 +1,4 @@
-// Code generated from vlang-cherry-ide/parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
 package parser // VGrammar
 import "github.com/antlr4-go/antlr/v4"
@@ -31,47 +31,11 @@ type VGrammarListener interface {
 	// EnterDeclararSinMutValor is called when entering the DeclararSinMutValor production.
 	EnterDeclararSinMutValor(c *DeclararSinMutValorContext)
 
-	// EnterDeclararSinMutTipo is called when entering the DeclararSinMutTipo production.
-	EnterDeclararSinMutTipo(c *DeclararSinMutTipoContext)
+	// EnterDeclararSlice is called when entering the DeclararSlice production.
+	EnterDeclararSlice(c *DeclararSliceContext)
 
-	// EnterDeclararVector is called when entering the DeclararVector production.
-	EnterDeclararVector(c *DeclararVectorContext)
-
-	// EnterListaItemsVector is called when entering the ListaItemsVector production.
-	EnterListaItemsVector(c *ListaItemsVectorContext)
-
-	// EnterVectorItem is called when entering the VectorItem production.
-	EnterVectorItem(c *VectorItemContext)
-
-	// EnterPropVector is called when entering the PropVector production.
-	EnterPropVector(c *PropVectorContext)
-
-	// EnterFuncionVector is called when entering the FuncionVector production.
-	EnterFuncionVector(c *FuncionVectorContext)
-
-	// EnterRepeating is called when entering the repeating production.
-	EnterRepeating(c *RepeatingContext)
-
-	// EnterVar_type is called when entering the var_type production.
-	EnterVar_type(c *Var_typeContext)
-
-	// EnterType is called when entering the type production.
-	EnterType(c *TypeContext)
-
-	// EnterVectorSimple is called when entering the VectorSimple production.
-	EnterVectorSimple(c *VectorSimpleContext)
-
-	// EnterMatrizDoble is called when entering the MatrizDoble production.
-	EnterMatrizDoble(c *MatrizDobleContext)
-
-	// EnterMatrix_type is called when entering the matrix_type production.
-	EnterMatrix_type(c *Matrix_typeContext)
-
-	// EnterAux_matrix_type is called when entering the aux_matrix_type production.
-	EnterAux_matrix_type(c *Aux_matrix_typeContext)
-
-	// EnterAssignVectorItem is called when entering the AssignVectorItem production.
-	EnterAssignVectorItem(c *AssignVectorItemContext)
+	// EnterAsignacionSliceItem is called when entering the AsignacionSliceItem production.
+	EnterAsignacionSliceItem(c *AsignacionSliceItemContext)
 
 	// EnterAsignacionDirecta is called when entering the AsignacionDirecta production.
 	EnterAsignacionDirecta(c *AsignacionDirectaContext)
@@ -79,68 +43,17 @@ type VGrammarListener interface {
 	// EnterAsignacionAritmetica is called when entering the AsignacionAritmetica production.
 	EnterAsignacionAritmetica(c *AsignacionAritmeticaContext)
 
-	// EnterAsignacionVector is called when entering the AsignacionVector production.
-	EnterAsignacionVector(c *AsignacionVectorContext)
+	// EnterAsignacionSlice is called when entering the AsignacionSlice production.
+	EnterAsignacionSlice(c *AsignacionSliceContext)
 
-	// EnterID_Patron is called when entering the ID_Patron production.
-	EnterID_Patron(c *ID_PatronContext)
+	// EnterReturnStmt is called when entering the ReturnStmt production.
+	EnterReturnStmt(c *ReturnStmtContext)
 
-	// EnterIntLiteral is called when entering the IntLiteral production.
-	EnterIntLiteral(c *IntLiteralContext)
+	// EnterBreakStmt is called when entering the BreakStmt production.
+	EnterBreakStmt(c *BreakStmtContext)
 
-	// EnterFloatLiteral is called when entering the FloatLiteral production.
-	EnterFloatLiteral(c *FloatLiteralContext)
-
-	// EnterStringLiteral is called when entering the StringLiteral production.
-	EnterStringLiteral(c *StringLiteralContext)
-
-	// EnterBoolLiteral is called when entering the BoolLiteral production.
-	EnterBoolLiteral(c *BoolLiteralContext)
-
-	// EnterNilLiteral is called when entering the NilLiteral production.
-	EnterNilLiteral(c *NilLiteralContext)
-
-	// EnterLiteralExp is called when entering the LiteralExp production.
-	EnterLiteralExp(c *LiteralExpContext)
-
-	// EnterStructMethodExp is called when entering the StructMethodExp production.
-	EnterStructMethodExp(c *StructMethodExpContext)
-
-	// EnterStructInitExp is called when entering the StructInitExp production.
-	EnterStructInitExp(c *StructInitExpContext)
-
-	// EnterRepeatingExp is called when entering the RepeatingExp production.
-	EnterRepeatingExp(c *RepeatingExpContext)
-
-	// EnterStructExp is called when entering the StructExp production.
-	EnterStructExp(c *StructExpContext)
-
-	// EnterExpBinario is called when entering the ExpBinario production.
-	EnterExpBinario(c *ExpBinarioContext)
-
-	// EnterVectorPropExp is called when entering the VectorPropExp production.
-	EnterVectorPropExp(c *VectorPropExpContext)
-
-	// EnterVectorFuncExp is called when entering the VectorFuncExp production.
-	EnterVectorFuncExp(c *VectorFuncExpContext)
-
-	// EnterParentecisExp is called when entering the ParentecisExp production.
-	EnterParentecisExp(c *ParentecisExpContext)
-
-	// EnterExpUnary is called when entering the ExpUnary production.
-	EnterExpUnary(c *ExpUnaryContext)
-
-	// EnterIdExp is called when entering the IdExp production.
-	EnterIdExp(c *IdExpContext)
-
-	// EnterFunctionCallExp is called when entering the FunctionCallExp production.
-	EnterFunctionCallExp(c *FunctionCallExpContext)
-
-	// EnterVectorItemExp is called when entering the VectorItemExp production.
-	EnterVectorItemExp(c *VectorItemExpContext)
-
-	// EnterVectorExp is called when entering the VectorExp production.
-	EnterVectorExp(c *VectorExpContext)
+	// EnterContinueStmt is called when entering the ContinueStmt production.
+	EnterContinueStmt(c *ContinueStmtContext)
 
 	// EnterIFstmt is called when entering the IFstmt production.
 	EnterIFstmt(c *IFstmtContext)
@@ -169,65 +82,110 @@ type VGrammarListener interface {
 	// EnterRangoNum is called when entering the RangoNum production.
 	EnterRangoNum(c *RangoNumContext)
 
-	// EnterGuardStmt is called when entering the GuardStmt production.
-	EnterGuardStmt(c *GuardStmtContext)
-
-	// EnterReturnStmt is called when entering the ReturnStmt production.
-	EnterReturnStmt(c *ReturnStmtContext)
-
-	// EnterBreakStmt is called when entering the BreakStmt production.
-	EnterBreakStmt(c *BreakStmtContext)
-
-	// EnterContinueStmt is called when entering the ContinueStmt production.
-	EnterContinueStmt(c *ContinueStmtContext)
+	// EnterFuncionDeclerada is called when entering the FuncionDeclerada production.
+	EnterFuncionDeclerada(c *FuncionDecleradaContext)
 
 	// EnterLlamarFuncion is called when entering the LlamarFuncion production.
 	EnterLlamarFuncion(c *LlamarFuncionContext)
 
-	// EnterArgList is called when entering the ArgList production.
-	EnterArgList(c *ArgListContext)
+	// EnterListaParametros is called when entering the ListaParametros production.
+	EnterListaParametros(c *ListaParametrosContext)
+
+	// EnterParametroFun is called when entering the ParametroFun production.
+	EnterParametroFun(c *ParametroFunContext)
+
+	// EnterListaArgumentos is called when entering the ListaArgumentos production.
+	EnterListaArgumentos(c *ListaArgumentosContext)
 
 	// EnterFuncionArg is called when entering the FuncionArg production.
 	EnterFuncionArg(c *FuncionArgContext)
 
-	// EnterFuncionDeclerada is called when entering the FuncionDeclerada production.
-	EnterFuncionDeclerada(c *FuncionDecleradaContext)
-
-	// EnterMetodoStruct is called when entering the MetodoStruct production.
-	EnterMetodoStruct(c *MetodoStructContext)
-
-	// EnterMethodReceiver is called when entering the MethodReceiver production.
-	EnterMethodReceiver(c *MethodReceiverContext)
-
-	// EnterParamList is called when entering the ParamList production.
-	EnterParamList(c *ParamListContext)
-
-	// EnterFuncParam is called when entering the FuncParam production.
-	EnterFuncParam(c *FuncParamContext)
-
 	// EnterDeclararStruct is called when entering the DeclararStruct production.
 	EnterDeclararStruct(c *DeclararStructContext)
 
-	// EnterStructAttr is called when entering the StructAttr production.
-	EnterStructAttr(c *StructAttrContext)
+	// EnterPropiedadStruct is called when entering the PropiedadStruct production.
+	EnterPropiedadStruct(c *PropiedadStructContext)
 
-	// EnterStructFunc is called when entering the StructFunc production.
-	EnterStructFunc(c *StructFuncContext)
+	// EnterCrearStruct is called when entering the CrearStruct production.
+	EnterCrearStruct(c *CrearStructContext)
 
-	// EnterStructVector is called when entering the StructVector production.
-	EnterStructVector(c *StructVectorContext)
+	// EnterListaParametrosInit is called when entering the ListaParametrosInit production.
+	EnterListaParametrosInit(c *ListaParametrosInitContext)
 
-	// EnterStructInit is called when entering the StructInit production.
-	EnterStructInit(c *StructInitContext)
+	// EnterParametrosInitStruct is called when entering the ParametrosInitStruct production.
+	EnterParametrosInitStruct(c *ParametrosInitStructContext)
 
-	// EnterStructInitList is called when entering the StructInitList production.
-	EnterStructInitList(c *StructInitListContext)
+	// EnterListaSlice is called when entering the ListaSlice production.
+	EnterListaSlice(c *ListaSliceContext)
 
-	// EnterStructMethodCall is called when entering the StructMethodCall production.
-	EnterStructMethodCall(c *StructMethodCallContext)
+	// EnterItemSlice is called when entering the ItemSlice production.
+	EnterItemSlice(c *ItemSliceContext)
 
-	// EnterStructInitField is called when entering the StructInitField production.
-	EnterStructInitField(c *StructInitFieldContext)
+	// EnterPropSlice is called when entering the PropSlice production.
+	EnterPropSlice(c *PropSliceContext)
+
+	// EnterFuncionSlice is called when entering the FuncionSlice production.
+	EnterFuncionSlice(c *FuncionSliceContext)
+
+	// EnterTipo is called when entering the tipo production.
+	EnterTipo(c *TipoContext)
+
+	// EnterVectorSimple is called when entering the VectorSimple production.
+	EnterVectorSimple(c *VectorSimpleContext)
+
+	// EnterMatrizDoble is called when entering the MatrizDoble production.
+	EnterMatrizDoble(c *MatrizDobleContext)
+
+	// EnterLiteralExp is called when entering the LiteralExp production.
+	EnterLiteralExp(c *LiteralExpContext)
+
+	// EnterIdExp is called when entering the IdExp production.
+	EnterIdExp(c *IdExpContext)
+
+	// EnterCrearStructExp is called when entering the CrearStructExp production.
+	EnterCrearStructExp(c *CrearStructExpContext)
+
+	// EnterUnarioExp is called when entering the UnarioExp production.
+	EnterUnarioExp(c *UnarioExpContext)
+
+	// EnterItemSliceExp is called when entering the ItemSliceExp production.
+	EnterItemSliceExp(c *ItemSliceExpContext)
+
+	// EnterVectorFuncExp is called when entering the VectorFuncExp production.
+	EnterVectorFuncExp(c *VectorFuncExpContext)
+
+	// EnterSliceExp is called when entering the SliceExp production.
+	EnterSliceExp(c *SliceExpContext)
+
+	// EnterPropSliceExp is called when entering the PropSliceExp production.
+	EnterPropSliceExp(c *PropSliceExpContext)
+
+	// EnterLlamarFuncionExp is called when entering the LlamarFuncionExp production.
+	EnterLlamarFuncionExp(c *LlamarFuncionExpContext)
+
+	// EnterBinarioExp is called when entering the BinarioExp production.
+	EnterBinarioExp(c *BinarioExpContext)
+
+	// EnterParentecisExp is called when entering the ParentecisExp production.
+	EnterParentecisExp(c *ParentecisExpContext)
+
+	// EnterIntLiteral is called when entering the IntLiteral production.
+	EnterIntLiteral(c *IntLiteralContext)
+
+	// EnterFloatLiteral is called when entering the FloatLiteral production.
+	EnterFloatLiteral(c *FloatLiteralContext)
+
+	// EnterStringLiteral is called when entering the StringLiteral production.
+	EnterStringLiteral(c *StringLiteralContext)
+
+	// EnterBoolLiteral is called when entering the BoolLiteral production.
+	EnterBoolLiteral(c *BoolLiteralContext)
+
+	// EnterNilLiteral is called when entering the NilLiteral production.
+	EnterNilLiteral(c *NilLiteralContext)
+
+	// EnterID_Patron is called when entering the ID_Patron production.
+	EnterID_Patron(c *ID_PatronContext)
 
 	// ExitProgram is called when exiting the program production.
 	ExitProgram(c *ProgramContext)
@@ -253,47 +211,11 @@ type VGrammarListener interface {
 	// ExitDeclararSinMutValor is called when exiting the DeclararSinMutValor production.
 	ExitDeclararSinMutValor(c *DeclararSinMutValorContext)
 
-	// ExitDeclararSinMutTipo is called when exiting the DeclararSinMutTipo production.
-	ExitDeclararSinMutTipo(c *DeclararSinMutTipoContext)
+	// ExitDeclararSlice is called when exiting the DeclararSlice production.
+	ExitDeclararSlice(c *DeclararSliceContext)
 
-	// ExitDeclararVector is called when exiting the DeclararVector production.
-	ExitDeclararVector(c *DeclararVectorContext)
-
-	// ExitListaItemsVector is called when exiting the ListaItemsVector production.
-	ExitListaItemsVector(c *ListaItemsVectorContext)
-
-	// ExitVectorItem is called when exiting the VectorItem production.
-	ExitVectorItem(c *VectorItemContext)
-
-	// ExitPropVector is called when exiting the PropVector production.
-	ExitPropVector(c *PropVectorContext)
-
-	// ExitFuncionVector is called when exiting the FuncionVector production.
-	ExitFuncionVector(c *FuncionVectorContext)
-
-	// ExitRepeating is called when exiting the repeating production.
-	ExitRepeating(c *RepeatingContext)
-
-	// ExitVar_type is called when exiting the var_type production.
-	ExitVar_type(c *Var_typeContext)
-
-	// ExitType is called when exiting the type production.
-	ExitType(c *TypeContext)
-
-	// ExitVectorSimple is called when exiting the VectorSimple production.
-	ExitVectorSimple(c *VectorSimpleContext)
-
-	// ExitMatrizDoble is called when exiting the MatrizDoble production.
-	ExitMatrizDoble(c *MatrizDobleContext)
-
-	// ExitMatrix_type is called when exiting the matrix_type production.
-	ExitMatrix_type(c *Matrix_typeContext)
-
-	// ExitAux_matrix_type is called when exiting the aux_matrix_type production.
-	ExitAux_matrix_type(c *Aux_matrix_typeContext)
-
-	// ExitAssignVectorItem is called when exiting the AssignVectorItem production.
-	ExitAssignVectorItem(c *AssignVectorItemContext)
+	// ExitAsignacionSliceItem is called when exiting the AsignacionSliceItem production.
+	ExitAsignacionSliceItem(c *AsignacionSliceItemContext)
 
 	// ExitAsignacionDirecta is called when exiting the AsignacionDirecta production.
 	ExitAsignacionDirecta(c *AsignacionDirectaContext)
@@ -301,68 +223,17 @@ type VGrammarListener interface {
 	// ExitAsignacionAritmetica is called when exiting the AsignacionAritmetica production.
 	ExitAsignacionAritmetica(c *AsignacionAritmeticaContext)
 
-	// ExitAsignacionVector is called when exiting the AsignacionVector production.
-	ExitAsignacionVector(c *AsignacionVectorContext)
+	// ExitAsignacionSlice is called when exiting the AsignacionSlice production.
+	ExitAsignacionSlice(c *AsignacionSliceContext)
 
-	// ExitID_Patron is called when exiting the ID_Patron production.
-	ExitID_Patron(c *ID_PatronContext)
+	// ExitReturnStmt is called when exiting the ReturnStmt production.
+	ExitReturnStmt(c *ReturnStmtContext)
 
-	// ExitIntLiteral is called when exiting the IntLiteral production.
-	ExitIntLiteral(c *IntLiteralContext)
+	// ExitBreakStmt is called when exiting the BreakStmt production.
+	ExitBreakStmt(c *BreakStmtContext)
 
-	// ExitFloatLiteral is called when exiting the FloatLiteral production.
-	ExitFloatLiteral(c *FloatLiteralContext)
-
-	// ExitStringLiteral is called when exiting the StringLiteral production.
-	ExitStringLiteral(c *StringLiteralContext)
-
-	// ExitBoolLiteral is called when exiting the BoolLiteral production.
-	ExitBoolLiteral(c *BoolLiteralContext)
-
-	// ExitNilLiteral is called when exiting the NilLiteral production.
-	ExitNilLiteral(c *NilLiteralContext)
-
-	// ExitLiteralExp is called when exiting the LiteralExp production.
-	ExitLiteralExp(c *LiteralExpContext)
-
-	// ExitStructMethodExp is called when exiting the StructMethodExp production.
-	ExitStructMethodExp(c *StructMethodExpContext)
-
-	// ExitStructInitExp is called when exiting the StructInitExp production.
-	ExitStructInitExp(c *StructInitExpContext)
-
-	// ExitRepeatingExp is called when exiting the RepeatingExp production.
-	ExitRepeatingExp(c *RepeatingExpContext)
-
-	// ExitStructExp is called when exiting the StructExp production.
-	ExitStructExp(c *StructExpContext)
-
-	// ExitExpBinario is called when exiting the ExpBinario production.
-	ExitExpBinario(c *ExpBinarioContext)
-
-	// ExitVectorPropExp is called when exiting the VectorPropExp production.
-	ExitVectorPropExp(c *VectorPropExpContext)
-
-	// ExitVectorFuncExp is called when exiting the VectorFuncExp production.
-	ExitVectorFuncExp(c *VectorFuncExpContext)
-
-	// ExitParentecisExp is called when exiting the ParentecisExp production.
-	ExitParentecisExp(c *ParentecisExpContext)
-
-	// ExitExpUnary is called when exiting the ExpUnary production.
-	ExitExpUnary(c *ExpUnaryContext)
-
-	// ExitIdExp is called when exiting the IdExp production.
-	ExitIdExp(c *IdExpContext)
-
-	// ExitFunctionCallExp is called when exiting the FunctionCallExp production.
-	ExitFunctionCallExp(c *FunctionCallExpContext)
-
-	// ExitVectorItemExp is called when exiting the VectorItemExp production.
-	ExitVectorItemExp(c *VectorItemExpContext)
-
-	// ExitVectorExp is called when exiting the VectorExp production.
-	ExitVectorExp(c *VectorExpContext)
+	// ExitContinueStmt is called when exiting the ContinueStmt production.
+	ExitContinueStmt(c *ContinueStmtContext)
 
 	// ExitIFstmt is called when exiting the IFstmt production.
 	ExitIFstmt(c *IFstmtContext)
@@ -391,63 +262,108 @@ type VGrammarListener interface {
 	// ExitRangoNum is called when exiting the RangoNum production.
 	ExitRangoNum(c *RangoNumContext)
 
-	// ExitGuardStmt is called when exiting the GuardStmt production.
-	ExitGuardStmt(c *GuardStmtContext)
-
-	// ExitReturnStmt is called when exiting the ReturnStmt production.
-	ExitReturnStmt(c *ReturnStmtContext)
-
-	// ExitBreakStmt is called when exiting the BreakStmt production.
-	ExitBreakStmt(c *BreakStmtContext)
-
-	// ExitContinueStmt is called when exiting the ContinueStmt production.
-	ExitContinueStmt(c *ContinueStmtContext)
+	// ExitFuncionDeclerada is called when exiting the FuncionDeclerada production.
+	ExitFuncionDeclerada(c *FuncionDecleradaContext)
 
 	// ExitLlamarFuncion is called when exiting the LlamarFuncion production.
 	ExitLlamarFuncion(c *LlamarFuncionContext)
 
-	// ExitArgList is called when exiting the ArgList production.
-	ExitArgList(c *ArgListContext)
+	// ExitListaParametros is called when exiting the ListaParametros production.
+	ExitListaParametros(c *ListaParametrosContext)
+
+	// ExitParametroFun is called when exiting the ParametroFun production.
+	ExitParametroFun(c *ParametroFunContext)
+
+	// ExitListaArgumentos is called when exiting the ListaArgumentos production.
+	ExitListaArgumentos(c *ListaArgumentosContext)
 
 	// ExitFuncionArg is called when exiting the FuncionArg production.
 	ExitFuncionArg(c *FuncionArgContext)
 
-	// ExitFuncionDeclerada is called when exiting the FuncionDeclerada production.
-	ExitFuncionDeclerada(c *FuncionDecleradaContext)
-
-	// ExitMetodoStruct is called when exiting the MetodoStruct production.
-	ExitMetodoStruct(c *MetodoStructContext)
-
-	// ExitMethodReceiver is called when exiting the MethodReceiver production.
-	ExitMethodReceiver(c *MethodReceiverContext)
-
-	// ExitParamList is called when exiting the ParamList production.
-	ExitParamList(c *ParamListContext)
-
-	// ExitFuncParam is called when exiting the FuncParam production.
-	ExitFuncParam(c *FuncParamContext)
-
 	// ExitDeclararStruct is called when exiting the DeclararStruct production.
 	ExitDeclararStruct(c *DeclararStructContext)
 
-	// ExitStructAttr is called when exiting the StructAttr production.
-	ExitStructAttr(c *StructAttrContext)
+	// ExitPropiedadStruct is called when exiting the PropiedadStruct production.
+	ExitPropiedadStruct(c *PropiedadStructContext)
 
-	// ExitStructFunc is called when exiting the StructFunc production.
-	ExitStructFunc(c *StructFuncContext)
+	// ExitCrearStruct is called when exiting the CrearStruct production.
+	ExitCrearStruct(c *CrearStructContext)
 
-	// ExitStructVector is called when exiting the StructVector production.
-	ExitStructVector(c *StructVectorContext)
+	// ExitListaParametrosInit is called when exiting the ListaParametrosInit production.
+	ExitListaParametrosInit(c *ListaParametrosInitContext)
 
-	// ExitStructInit is called when exiting the StructInit production.
-	ExitStructInit(c *StructInitContext)
+	// ExitParametrosInitStruct is called when exiting the ParametrosInitStruct production.
+	ExitParametrosInitStruct(c *ParametrosInitStructContext)
 
-	// ExitStructInitList is called when exiting the StructInitList production.
-	ExitStructInitList(c *StructInitListContext)
+	// ExitListaSlice is called when exiting the ListaSlice production.
+	ExitListaSlice(c *ListaSliceContext)
 
-	// ExitStructMethodCall is called when exiting the StructMethodCall production.
-	ExitStructMethodCall(c *StructMethodCallContext)
+	// ExitItemSlice is called when exiting the ItemSlice production.
+	ExitItemSlice(c *ItemSliceContext)
 
-	// ExitStructInitField is called when exiting the StructInitField production.
-	ExitStructInitField(c *StructInitFieldContext)
+	// ExitPropSlice is called when exiting the PropSlice production.
+	ExitPropSlice(c *PropSliceContext)
+
+	// ExitFuncionSlice is called when exiting the FuncionSlice production.
+	ExitFuncionSlice(c *FuncionSliceContext)
+
+	// ExitTipo is called when exiting the tipo production.
+	ExitTipo(c *TipoContext)
+
+	// ExitVectorSimple is called when exiting the VectorSimple production.
+	ExitVectorSimple(c *VectorSimpleContext)
+
+	// ExitMatrizDoble is called when exiting the MatrizDoble production.
+	ExitMatrizDoble(c *MatrizDobleContext)
+
+	// ExitLiteralExp is called when exiting the LiteralExp production.
+	ExitLiteralExp(c *LiteralExpContext)
+
+	// ExitIdExp is called when exiting the IdExp production.
+	ExitIdExp(c *IdExpContext)
+
+	// ExitCrearStructExp is called when exiting the CrearStructExp production.
+	ExitCrearStructExp(c *CrearStructExpContext)
+
+	// ExitUnarioExp is called when exiting the UnarioExp production.
+	ExitUnarioExp(c *UnarioExpContext)
+
+	// ExitItemSliceExp is called when exiting the ItemSliceExp production.
+	ExitItemSliceExp(c *ItemSliceExpContext)
+
+	// ExitVectorFuncExp is called when exiting the VectorFuncExp production.
+	ExitVectorFuncExp(c *VectorFuncExpContext)
+
+	// ExitSliceExp is called when exiting the SliceExp production.
+	ExitSliceExp(c *SliceExpContext)
+
+	// ExitPropSliceExp is called when exiting the PropSliceExp production.
+	ExitPropSliceExp(c *PropSliceExpContext)
+
+	// ExitLlamarFuncionExp is called when exiting the LlamarFuncionExp production.
+	ExitLlamarFuncionExp(c *LlamarFuncionExpContext)
+
+	// ExitBinarioExp is called when exiting the BinarioExp production.
+	ExitBinarioExp(c *BinarioExpContext)
+
+	// ExitParentecisExp is called when exiting the ParentecisExp production.
+	ExitParentecisExp(c *ParentecisExpContext)
+
+	// ExitIntLiteral is called when exiting the IntLiteral production.
+	ExitIntLiteral(c *IntLiteralContext)
+
+	// ExitFloatLiteral is called when exiting the FloatLiteral production.
+	ExitFloatLiteral(c *FloatLiteralContext)
+
+	// ExitStringLiteral is called when exiting the StringLiteral production.
+	ExitStringLiteral(c *StringLiteralContext)
+
+	// ExitBoolLiteral is called when exiting the BoolLiteral production.
+	ExitBoolLiteral(c *BoolLiteralContext)
+
+	// ExitNilLiteral is called when exiting the NilLiteral production.
+	ExitNilLiteral(c *NilLiteralContext)
+
+	// ExitID_Patron is called when exiting the ID_Patron production.
+	ExitID_Patron(c *ID_PatronContext)
 }

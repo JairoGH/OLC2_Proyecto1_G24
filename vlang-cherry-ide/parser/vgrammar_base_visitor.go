@@ -1,4 +1,4 @@
-// Code generated from vlang-cherry-ide/parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
 package parser // VGrammar
 import "github.com/antlr4-go/antlr/v4"
@@ -39,59 +39,11 @@ func (v *BaseVGrammarVisitor) VisitDeclararSinMutValor(ctx *DeclararSinMutValorC
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitDeclararSinMutTipo(ctx *DeclararSinMutTipoContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitDeclararSlice(ctx *DeclararSliceContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitDeclararVector(ctx *DeclararVectorContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitListaItemsVector(ctx *ListaItemsVectorContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitVectorItem(ctx *VectorItemContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitPropVector(ctx *PropVectorContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitFuncionVector(ctx *FuncionVectorContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitRepeating(ctx *RepeatingContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitVar_type(ctx *Var_typeContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitType(ctx *TypeContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitVectorSimple(ctx *VectorSimpleContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitMatrizDoble(ctx *MatrizDobleContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitMatrix_type(ctx *Matrix_typeContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitAux_matrix_type(ctx *Aux_matrix_typeContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitAssignVectorItem(ctx *AssignVectorItemContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitAsignacionSliceItem(ctx *AsignacionSliceItemContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -103,87 +55,19 @@ func (v *BaseVGrammarVisitor) VisitAsignacionAritmetica(ctx *AsignacionAritmetic
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitAsignacionVector(ctx *AsignacionVectorContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitAsignacionSlice(ctx *AsignacionSliceContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitID_Patron(ctx *ID_PatronContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitReturnStmt(ctx *ReturnStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitIntLiteral(ctx *IntLiteralContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitBreakStmt(ctx *BreakStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitFloatLiteral(ctx *FloatLiteralContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitStringLiteral(ctx *StringLiteralContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitBoolLiteral(ctx *BoolLiteralContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitNilLiteral(ctx *NilLiteralContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitLiteralExp(ctx *LiteralExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitStructMethodExp(ctx *StructMethodExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitStructInitExp(ctx *StructInitExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitRepeatingExp(ctx *RepeatingExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitStructExp(ctx *StructExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitExpBinario(ctx *ExpBinarioContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitVectorPropExp(ctx *VectorPropExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitVectorFuncExp(ctx *VectorFuncExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitParentecisExp(ctx *ParentecisExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitExpUnary(ctx *ExpUnaryContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitIdExp(ctx *IdExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitFunctionCallExp(ctx *FunctionCallExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitVectorItemExp(ctx *VectorItemExpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitVectorExp(ctx *VectorExpContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitContinueStmt(ctx *ContinueStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -223,19 +107,7 @@ func (v *BaseVGrammarVisitor) VisitRangoNum(ctx *RangoNumContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitGuardStmt(ctx *GuardStmtContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitReturnStmt(ctx *ReturnStmtContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitBreakStmt(ctx *BreakStmtContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitContinueStmt(ctx *ContinueStmtContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitFuncionDeclerada(ctx *FuncionDecleradaContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -243,7 +115,15 @@ func (v *BaseVGrammarVisitor) VisitLlamarFuncion(ctx *LlamarFuncionContext) inte
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitArgList(ctx *ArgListContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitListaParametros(ctx *ListaParametrosContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitParametroFun(ctx *ParametroFunContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitListaArgumentos(ctx *ListaArgumentosContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -251,54 +131,118 @@ func (v *BaseVGrammarVisitor) VisitFuncionArg(ctx *FuncionArgContext) interface{
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitFuncionDeclerada(ctx *FuncionDecleradaContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitMetodoStruct(ctx *MetodoStructContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitMethodReceiver(ctx *MethodReceiverContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitParamList(ctx *ParamListContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseVGrammarVisitor) VisitFuncParam(ctx *FuncParamContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
 func (v *BaseVGrammarVisitor) VisitDeclararStruct(ctx *DeclararStructContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitStructAttr(ctx *StructAttrContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitPropiedadStruct(ctx *PropiedadStructContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitStructFunc(ctx *StructFuncContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitCrearStruct(ctx *CrearStructContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitStructVector(ctx *StructVectorContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitListaParametrosInit(ctx *ListaParametrosInitContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitStructInit(ctx *StructInitContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitParametrosInitStruct(ctx *ParametrosInitStructContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitStructInitList(ctx *StructInitListContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitListaSlice(ctx *ListaSliceContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitStructMethodCall(ctx *StructMethodCallContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitItemSlice(ctx *ItemSliceContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseVGrammarVisitor) VisitStructInitField(ctx *StructInitFieldContext) interface{} {
+func (v *BaseVGrammarVisitor) VisitPropSlice(ctx *PropSliceContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitFuncionSlice(ctx *FuncionSliceContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitTipo(ctx *TipoContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitVectorSimple(ctx *VectorSimpleContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitMatrizDoble(ctx *MatrizDobleContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitLiteralExp(ctx *LiteralExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitIdExp(ctx *IdExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitCrearStructExp(ctx *CrearStructExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitUnarioExp(ctx *UnarioExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitItemSliceExp(ctx *ItemSliceExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitVectorFuncExp(ctx *VectorFuncExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitSliceExp(ctx *SliceExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitPropSliceExp(ctx *PropSliceExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitLlamarFuncionExp(ctx *LlamarFuncionExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitBinarioExp(ctx *BinarioExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitParentecisExp(ctx *ParentecisExpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitIntLiteral(ctx *IntLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitFloatLiteral(ctx *FloatLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitStringLiteral(ctx *StringLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitBoolLiteral(ctx *BoolLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitNilLiteral(ctx *NilLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseVGrammarVisitor) VisitID_Patron(ctx *ID_PatronContext) interface{} {
 	return v.VisitChildren(ctx)
 }

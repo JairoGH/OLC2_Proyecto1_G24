@@ -1,4 +1,4 @@
-// Code generated from vlang-cherry-ide/parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from parser/VGrammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
 package parser // VGrammar
 import "github.com/antlr4-go/antlr/v4"
@@ -31,47 +31,11 @@ type VGrammarVisitor interface {
 	// Visit a parse tree produced by VGrammar#DeclararSinMutValor.
 	VisitDeclararSinMutValor(ctx *DeclararSinMutValorContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#DeclararSinMutTipo.
-	VisitDeclararSinMutTipo(ctx *DeclararSinMutTipoContext) interface{}
+	// Visit a parse tree produced by VGrammar#DeclararSlice.
+	VisitDeclararSlice(ctx *DeclararSliceContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#DeclararVector.
-	VisitDeclararVector(ctx *DeclararVectorContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#ListaItemsVector.
-	VisitListaItemsVector(ctx *ListaItemsVectorContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#VectorItem.
-	VisitVectorItem(ctx *VectorItemContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#PropVector.
-	VisitPropVector(ctx *PropVectorContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#FuncionVector.
-	VisitFuncionVector(ctx *FuncionVectorContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#repeating.
-	VisitRepeating(ctx *RepeatingContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#var_type.
-	VisitVar_type(ctx *Var_typeContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#type.
-	VisitType(ctx *TypeContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#VectorSimple.
-	VisitVectorSimple(ctx *VectorSimpleContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#MatrizDoble.
-	VisitMatrizDoble(ctx *MatrizDobleContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#matrix_type.
-	VisitMatrix_type(ctx *Matrix_typeContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#aux_matrix_type.
-	VisitAux_matrix_type(ctx *Aux_matrix_typeContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#AssignVectorItem.
-	VisitAssignVectorItem(ctx *AssignVectorItemContext) interface{}
+	// Visit a parse tree produced by VGrammar#AsignacionSliceItem.
+	VisitAsignacionSliceItem(ctx *AsignacionSliceItemContext) interface{}
 
 	// Visit a parse tree produced by VGrammar#AsignacionDirecta.
 	VisitAsignacionDirecta(ctx *AsignacionDirectaContext) interface{}
@@ -79,68 +43,17 @@ type VGrammarVisitor interface {
 	// Visit a parse tree produced by VGrammar#AsignacionAritmetica.
 	VisitAsignacionAritmetica(ctx *AsignacionAritmeticaContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#AsignacionVector.
-	VisitAsignacionVector(ctx *AsignacionVectorContext) interface{}
+	// Visit a parse tree produced by VGrammar#AsignacionSlice.
+	VisitAsignacionSlice(ctx *AsignacionSliceContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#ID_Patron.
-	VisitID_Patron(ctx *ID_PatronContext) interface{}
+	// Visit a parse tree produced by VGrammar#ReturnStmt.
+	VisitReturnStmt(ctx *ReturnStmtContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#IntLiteral.
-	VisitIntLiteral(ctx *IntLiteralContext) interface{}
+	// Visit a parse tree produced by VGrammar#BreakStmt.
+	VisitBreakStmt(ctx *BreakStmtContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#FloatLiteral.
-	VisitFloatLiteral(ctx *FloatLiteralContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#StringLiteral.
-	VisitStringLiteral(ctx *StringLiteralContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#BoolLiteral.
-	VisitBoolLiteral(ctx *BoolLiteralContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#NilLiteral.
-	VisitNilLiteral(ctx *NilLiteralContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#LiteralExp.
-	VisitLiteralExp(ctx *LiteralExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#StructMethodExp.
-	VisitStructMethodExp(ctx *StructMethodExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#StructInitExp.
-	VisitStructInitExp(ctx *StructInitExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#RepeatingExp.
-	VisitRepeatingExp(ctx *RepeatingExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#StructExp.
-	VisitStructExp(ctx *StructExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#ExpBinario.
-	VisitExpBinario(ctx *ExpBinarioContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#VectorPropExp.
-	VisitVectorPropExp(ctx *VectorPropExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#VectorFuncExp.
-	VisitVectorFuncExp(ctx *VectorFuncExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#ParentecisExp.
-	VisitParentecisExp(ctx *ParentecisExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#ExpUnary.
-	VisitExpUnary(ctx *ExpUnaryContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#IdExp.
-	VisitIdExp(ctx *IdExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#FunctionCallExp.
-	VisitFunctionCallExp(ctx *FunctionCallExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#VectorItemExp.
-	VisitVectorItemExp(ctx *VectorItemExpContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#VectorExp.
-	VisitVectorExp(ctx *VectorExpContext) interface{}
+	// Visit a parse tree produced by VGrammar#ContinueStmt.
+	VisitContinueStmt(ctx *ContinueStmtContext) interface{}
 
 	// Visit a parse tree produced by VGrammar#IFstmt.
 	VisitIFstmt(ctx *IFstmtContext) interface{}
@@ -169,63 +82,108 @@ type VGrammarVisitor interface {
 	// Visit a parse tree produced by VGrammar#RangoNum.
 	VisitRangoNum(ctx *RangoNumContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#GuardStmt.
-	VisitGuardStmt(ctx *GuardStmtContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#ReturnStmt.
-	VisitReturnStmt(ctx *ReturnStmtContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#BreakStmt.
-	VisitBreakStmt(ctx *BreakStmtContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#ContinueStmt.
-	VisitContinueStmt(ctx *ContinueStmtContext) interface{}
+	// Visit a parse tree produced by VGrammar#FuncionDeclerada.
+	VisitFuncionDeclerada(ctx *FuncionDecleradaContext) interface{}
 
 	// Visit a parse tree produced by VGrammar#LlamarFuncion.
 	VisitLlamarFuncion(ctx *LlamarFuncionContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#ArgList.
-	VisitArgList(ctx *ArgListContext) interface{}
+	// Visit a parse tree produced by VGrammar#ListaParametros.
+	VisitListaParametros(ctx *ListaParametrosContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#ParametroFun.
+	VisitParametroFun(ctx *ParametroFunContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#ListaArgumentos.
+	VisitListaArgumentos(ctx *ListaArgumentosContext) interface{}
 
 	// Visit a parse tree produced by VGrammar#FuncionArg.
 	VisitFuncionArg(ctx *FuncionArgContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#FuncionDeclerada.
-	VisitFuncionDeclerada(ctx *FuncionDecleradaContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#MetodoStruct.
-	VisitMetodoStruct(ctx *MetodoStructContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#MethodReceiver.
-	VisitMethodReceiver(ctx *MethodReceiverContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#ParamList.
-	VisitParamList(ctx *ParamListContext) interface{}
-
-	// Visit a parse tree produced by VGrammar#FuncParam.
-	VisitFuncParam(ctx *FuncParamContext) interface{}
-
 	// Visit a parse tree produced by VGrammar#DeclararStruct.
 	VisitDeclararStruct(ctx *DeclararStructContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#StructAttr.
-	VisitStructAttr(ctx *StructAttrContext) interface{}
+	// Visit a parse tree produced by VGrammar#PropiedadStruct.
+	VisitPropiedadStruct(ctx *PropiedadStructContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#StructFunc.
-	VisitStructFunc(ctx *StructFuncContext) interface{}
+	// Visit a parse tree produced by VGrammar#CrearStruct.
+	VisitCrearStruct(ctx *CrearStructContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#StructVector.
-	VisitStructVector(ctx *StructVectorContext) interface{}
+	// Visit a parse tree produced by VGrammar#ListaParametrosInit.
+	VisitListaParametrosInit(ctx *ListaParametrosInitContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#StructInit.
-	VisitStructInit(ctx *StructInitContext) interface{}
+	// Visit a parse tree produced by VGrammar#ParametrosInitStruct.
+	VisitParametrosInitStruct(ctx *ParametrosInitStructContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#StructInitList.
-	VisitStructInitList(ctx *StructInitListContext) interface{}
+	// Visit a parse tree produced by VGrammar#ListaSlice.
+	VisitListaSlice(ctx *ListaSliceContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#StructMethodCall.
-	VisitStructMethodCall(ctx *StructMethodCallContext) interface{}
+	// Visit a parse tree produced by VGrammar#ItemSlice.
+	VisitItemSlice(ctx *ItemSliceContext) interface{}
 
-	// Visit a parse tree produced by VGrammar#StructInitField.
-	VisitStructInitField(ctx *StructInitFieldContext) interface{}
+	// Visit a parse tree produced by VGrammar#PropSlice.
+	VisitPropSlice(ctx *PropSliceContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#FuncionSlice.
+	VisitFuncionSlice(ctx *FuncionSliceContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#tipo.
+	VisitTipo(ctx *TipoContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#VectorSimple.
+	VisitVectorSimple(ctx *VectorSimpleContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#MatrizDoble.
+	VisitMatrizDoble(ctx *MatrizDobleContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#LiteralExp.
+	VisitLiteralExp(ctx *LiteralExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#IdExp.
+	VisitIdExp(ctx *IdExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#CrearStructExp.
+	VisitCrearStructExp(ctx *CrearStructExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#UnarioExp.
+	VisitUnarioExp(ctx *UnarioExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#ItemSliceExp.
+	VisitItemSliceExp(ctx *ItemSliceExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#VectorFuncExp.
+	VisitVectorFuncExp(ctx *VectorFuncExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#SliceExp.
+	VisitSliceExp(ctx *SliceExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#PropSliceExp.
+	VisitPropSliceExp(ctx *PropSliceExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#LlamarFuncionExp.
+	VisitLlamarFuncionExp(ctx *LlamarFuncionExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#BinarioExp.
+	VisitBinarioExp(ctx *BinarioExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#ParentecisExp.
+	VisitParentecisExp(ctx *ParentecisExpContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#IntLiteral.
+	VisitIntLiteral(ctx *IntLiteralContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#FloatLiteral.
+	VisitFloatLiteral(ctx *FloatLiteralContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#StringLiteral.
+	VisitStringLiteral(ctx *StringLiteralContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#BoolLiteral.
+	VisitBoolLiteral(ctx *BoolLiteralContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#NilLiteral.
+	VisitNilLiteral(ctx *NilLiteralContext) interface{}
+
+	// Visit a parse tree produced by VGrammar#ID_Patron.
+	VisitID_Patron(ctx *ID_PatronContext) interface{}
 }

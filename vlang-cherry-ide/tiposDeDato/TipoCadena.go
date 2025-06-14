@@ -1,11 +1,11 @@
 package tiposDeDato
 
 type ValorCadena struct {
-	InternalValor string
+	ValorInterno string
 }
 
 func (s ValorCadena) Value() interface{} {
-	return s.InternalValor
+	return s.ValorInterno
 }
 
 func (s ValorCadena) Type() string {
@@ -13,5 +13,5 @@ func (s ValorCadena) Type() string {
 }
 
 func (s ValorCadena) Copy() ValorInterno {
-	return &ValorCadena{InternalValor: s.InternalValor}
+	return &ValorCadena{ValorInterno: s.ValorInterno}
 }

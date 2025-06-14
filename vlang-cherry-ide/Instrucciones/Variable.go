@@ -7,109 +7,108 @@ import (
 )
 
 type Variable struct {
-	Name     string
-	Value    tiposDeDato.ValorInterno
-	Type     string
-	IsConst  bool
-	AllowNil bool
-	Token    antlr.Token
-	isProp   bool
+	Nombre       string
+	Valor        tiposDeDato.ValorInterno
+	Tipo         string
+	esConstante  bool
+	PuedeSerNulo bool
+	Token        antlr.Token
+	esPropiedad  bool
 }
 
+// TipoValidacion: verifica que el valor asignado a la variable sea compatible con su tipo declarado.
+// Maneja conversiones implícitas y casos especiales como vectores vacíos y valores nulos.
 func (v *Variable) TipoValidacion() (bool, string) {
 
-    if v.Value == tiposDeDato.ValorNoIniPorDefecto {
-        return true, ""
-    }
+	if v.Valor == tiposDeDato.ValorNoIniPorDefecto {
+		return true, ""
+	}
 
-    if v.Value == tiposDeDato.NuloPorDefecto && v.AllowNil {
-        return true, ""
-    }
+	if v.Valor == tiposDeDato.NuloPorDefecto && v.PuedeSerNulo {
+		return true, ""
+	}
 
-    if v.Type != v.Value.Type() {
+	if v.Tipo != v.Valor.Type() {
 
-        // vector type validation
-        if EsTipoVector(v.Type) && EsTipoVector(v.Value.Type()) {
+		// Validación de tipos de vectores
+		if EsTipoVector(v.Tipo) && EsTipoVector(v.Valor.Type()) {
 
-            // CORRECCIÓN: Manejar tanto vectores con tipo "[]" como vectores vacíos
-            vectorValue := v.Value.(*TipoVector)
-            
-            // Vector vacío genérico - asignar el tipo correcto
-            if v.Value.Type() == "[]" || len(vectorValue.InternalValor) == 0 {
-                // Modificar el tipo del vector para que coincida con el esperado
-                vectorValue.ItemType = EliminarCorchetes(v.Type)
-                vectorValue.FullType = v.Type
-                return true, ""
-            }
+			// Manejar vectores con tipo "[]" y vectores vacíos
+			vectorValue := v.Valor.(*TipoVector)
 
-            // implicit vector conversion para vectores no vacíos
-            targetType := EliminarCorchetes(v.Type) // inner type
-            newConvertedItems := make([]tiposDeDato.ValorInterno, 0)
+			// Vector vacío genérico - asignar el tipo correcto
+			if v.Valor.Type() == "[]" || len(vectorValue.ValorInterno) == 0 {
+				vectorValue.TipoElemento = EliminarCorchetes(v.Tipo)
+				vectorValue.TipoCompleto = v.Tipo
+				return true, ""
+			}
 
-            for _, item := range vectorValue.InternalValor {
-                convertedValue, ok := tiposDeDato.Casteo(targetType, item)
+			// Conversión implícita de vectores para vectores no vacíos
+			targetType := EliminarCorchetes(v.Tipo)
+			newConvertedItems := make([]tiposDeDato.ValorInterno, 0)
 
-                if !ok {
-                    break
-                }
-                newConvertedItems = append(newConvertedItems, convertedValue)
-            }
+			for _, item := range vectorValue.ValorInterno {
+				convertedValue, ok := tiposDeDato.Casteo(targetType, item)
 
-            if len(newConvertedItems) == len(vectorValue.InternalValor) {
-                // Actualizar el vector con los elementos convertidos
-                vectorValue.InternalValor = newConvertedItems
-                vectorValue.ItemType = targetType
-                vectorValue.FullType = v.Type
-                return true, ""
-            }
+				if !ok {
+					break
+				}
+				newConvertedItems = append(newConvertedItems, convertedValue)
+			}
 
-            msg := "No se puede asignar un vector de tipo " + v.Value.Type() + " a una vector de tipo " + v.Type
-            v.Value = tiposDeDato.NuloPorDefecto
-            return false, msg
-        }
+			if len(newConvertedItems) == len(vectorValue.ValorInterno) {
+				// Actualizar el vector con los elementos convertidos
+				vectorValue.ValorInterno = newConvertedItems
+				vectorValue.TipoElemento = targetType
+				vectorValue.TipoCompleto = v.Tipo
+				return true, ""
+			}
 
-        // Caso especial: vector vacío genérico "[]" asignado a tipo específico
-        if v.Value.Type() == "[]" && EsTipoVector(v.Type) {
-            if vectorValue, ok := v.Value.(*TipoVector); ok {
-                vectorValue.ItemType = EliminarCorchetes(v.Type)
-                vectorValue.FullType = v.Type
-                return true, ""
-            }
-        }
+			msg := "No se puede asignar un vector de tipo " + v.Valor.Type() + " a una vector de tipo " + v.Tipo
+			v.Valor = tiposDeDato.NuloPorDefecto
+			return false, msg
+		}
 
-        // try implicit primitive conversion
-        convertedValue, ok := tiposDeDato.Casteo(v.Type, v.Value)
+		// Caso especial: vector vacío genérico "[]" asignado a tipo específico
+		if v.Valor.Type() == "[]" && EsTipoVector(v.Tipo) {
+			if vectorValue, ok := v.Valor.(*TipoVector); ok {
+				vectorValue.TipoElemento = EliminarCorchetes(v.Tipo)
+				vectorValue.TipoCompleto = v.Tipo
+				return true, ""
+			}
+		}
 
-        if !ok {
-            // Si la expresión tiene un tipo de dato diferente al definido previamente se tomará como error y la variable obtendrá el valor de nil para fines prácticos.
-            msg := "No se puede asignar un valor de tipo " + v.Value.Type() + " a una variable de tipo " + v.Type
-            v.Value = tiposDeDato.NuloPorDefecto
-            return false, msg
-        }
+		// Intentar conversión implícita de tipos primitivos
+		convertedValue, ok := tiposDeDato.Casteo(v.Tipo, v.Valor)
 
-        v.Value = convertedValue
-    }
+		if !ok {
+			// Si la conversión falla, asignar nil y retornar error
+			msg := "No se puede asignar un valor de tipo " + v.Valor.Type() + " a una variable de tipo " + v.Tipo
+			v.Valor = tiposDeDato.NuloPorDefecto
+			return false, msg
+		}
 
-    return true, ""
+		v.Valor = convertedValue
+	}
+
+	return true, ""
 }
 
+// AsignarVariable: asigna un nuevo valor a la variable verificando restricciones como
+// constantes y propiedades en contextos no mutables. Valida la compatibilidad de tipos.
 func (v *Variable) AsignarVariable(val tiposDeDato.ValorInterno, isMutatingContext bool) (bool, string) {
 
-	if v.IsConst {
+	if v.esConstante {
 		return false, "No se puede asignar un valor a una constante"
 	}
 
-	if v.isProp {
+	if v.esPropiedad {
 		if !isMutatingContext {
 			return false, "No se puede asignar un valor a una propiedad desde un contexto de función no mutable"
 		}
 	}
 
-	v.Value = val
-
-	// if obj, ok := val.(*ObjectValue); ok {
-	// 	v.Value = obj.Copy()
-	// }
+	v.Valor = val
 
 	return v.TipoValidacion()
 }
