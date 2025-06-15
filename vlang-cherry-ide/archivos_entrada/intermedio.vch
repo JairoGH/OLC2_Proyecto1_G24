@@ -143,7 +143,7 @@ fn main() {
     println("Tipo de true:", t4)
     println("Tipo de [1, 2, 3]:", typeOf(t5))
     if t1 == "int" && t2 == "f64" && t3 == "string" && t4 == "bool" && t6 == "[]int" {
-        puntos_type += 2
+        puntos_type += 1
         println("OK typeOf: correcto")
     } else {
         println("X typeOf: incorrecto")
