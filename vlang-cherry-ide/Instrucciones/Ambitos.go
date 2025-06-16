@@ -1,7 +1,6 @@
 package instrucciones
 
 import (
-	"log"
 	"main/tiposDeDato"
 	"strings"
 
@@ -129,39 +128,32 @@ func (s *AmbitoBase) GetVariable(name string) *Variable {
 
 // obj1.obj2.prop1
 func (s *AmbitoBase) buscarVariableObjeto(name string, lastObj tiposDeDato.ValorInterno) *Variable {
-
-	// split name by dot
 	parts := strings.Split(name, ".")
 
 	if len(parts) == 0 {
-		log.Fatal("no se puede dividir por punto")
+		// Nombre vacío, no es válido
 		return nil
 	}
 
 	if len(parts) == 1 {
+		if lastObj == nil {
+			return nil
+		}
 		obj, ok := lastObj.(*TipoObjeto)
-
 		if ok {
 			return obj.AmbitoInterno.GetVariable(name)
 		}
-
-		log.Fatal("no se puede convertir a objeto")
+		// No es un objeto válido
 		return nil
 	}
 
-	// then parts should be 2 or more
-
 	if lastObj == nil {
 		variable := s.GetVariable(parts[0])
-
 		if variable == nil {
 			return nil
 		}
 
-		obj := variable.Valor
-
-		// obj debe ser un objeto/struct o vector
-		switch obj := obj.(type) {
+		switch obj := variable.Valor.(type) {
 		case *TipoObjeto:
 			lastObj = obj
 		case *TipoVector:
@@ -174,15 +166,16 @@ func (s *AmbitoBase) buscarVariableObjeto(name string, lastObj tiposDeDato.Valor
 	}
 
 	obj, ok := lastObj.(*TipoObjeto)
-
-	if ok {
-		lastObj = obj.AmbitoInterno.GetVariable(parts[0]).Valor
-
-		return s.buscarVariableObjeto(strings.Join(parts[1:], "."), lastObj)
-	} else {
-		log.Fatal("no se puede convertir a objeto")
+	if !ok {
 		return nil
 	}
+
+	nextVar := obj.AmbitoInterno.GetVariable(parts[0])
+	if nextVar == nil {
+		return nil
+	}
+
+	return s.buscarVariableObjeto(strings.Join(parts[1:], "."), nextVar.Valor)
 }
 
 func (s *AmbitoBase) AgregarFuncion(name string, function tiposDeDato.ValorInterno) (bool, string) {
@@ -222,60 +215,51 @@ func (s *AmbitoBase) GetFuncion(name string) (tiposDeDato.ValorInterno, string) 
 
 // obj1.obj2.func1()
 func (s *AmbitoBase) buscarFuncion(name string, lastObj tiposDeDato.ValorInterno) (tiposDeDato.ValorInterno, string) {
-
-	// split name by dot
 	parts := strings.Split(name, ".")
 
 	if len(parts) == 0 {
-		log.Fatal("no se puede dividir por punto")
-		return nil, ""
+		return nil, "Nombre de función inválido (cadena vacía)"
 	}
 
 	if len(parts) == 1 {
+		// Se espera que lastObj sea un objeto
 		obj, ok := lastObj.(*TipoObjeto)
-
-		if ok {
-			return obj.AmbitoInterno.GetFuncion(name)
+		if !ok {
+			return nil, "No se puede acceder a la función '" + name + "' porque el valor no es un objeto"
 		}
-
-		log.Fatal("no se puede convertir a objeto")
-		return nil, ""
+		return obj.AmbitoInterno.GetFuncion(name)
 	}
 
-	// then parts should be 2 or more
-
+	// Si es acceso anidado (a.b.c)
 	if lastObj == nil {
 		variable := s.GetVariable(parts[0])
-
 		if variable == nil {
-			return nil, "No se puede acceder a la propiedad " + parts[0]
+			return nil, "No se encontró la variable '" + parts[0] + "' en el ámbito actual"
 		}
 
-		obj := variable.Valor
-
-		// obj debe ser un objeto/struct o vector
-		switch obj := obj.(type) {
+		switch val := variable.Valor.(type) {
 		case *TipoObjeto:
-			lastObj = obj
+			lastObj = val
 		case *TipoVector:
-			lastObj = obj.TipoObjeto
+			lastObj = val.TipoObjeto
 		default:
-			return nil, "La propiedad '" + variable.Nombre + "' de tipo " + obj.Type() + " no tiene propiedades"
+			return nil, "La propiedad '" + parts[0] + "' de tipo " + val.Type() + " no tiene funciones"
 		}
 
 		return s.buscarFuncion(strings.Join(parts[1:], "."), lastObj)
 	}
 
 	obj, ok := lastObj.(*TipoObjeto)
-
-	if ok {
-		lastObj = obj.AmbitoInterno.GetVariable(parts[0]).Valor
-
-		return s.buscarFuncion(strings.Join(parts[1:], "."), lastObj)
-	} else {
-		log.Fatal("no se puede convertir a objeto")
-		return nil, ""
+	if !ok {
+		return nil, "No se puede acceder a la función porque el valor actual no es un objeto"
 	}
+
+	nextVar := obj.AmbitoInterno.GetVariable(parts[0])
+	if nextVar == nil {
+		return nil, "No se encontró la propiedad '" + parts[0] + "' en el objeto"
+	}
+
+	return s.buscarFuncion(strings.Join(parts[1:], "."), nextVar.Valor)
 }
 
 func (s *AmbitoBase) AgregarEstructura(name string, structValue *Struct) (bool, string) {
@@ -444,7 +428,7 @@ type ReporteAmbito struct {
 	Nombre       string
 	Variables    []ReporteSimbolos
 	Funciones    []ReporteSimbolos
-	Estructuras      []ReporteSimbolos
+	Estructuras  []ReporteSimbolos
 	AmbitosHijos []ReporteAmbito
 }
 
@@ -464,27 +448,24 @@ func (s *RegistroAmbito) Report() ReporteTabla {
 
 // Report: genera un reporte del ámbito actual incluyendo todos sus símbolos
 func (s *AmbitoBase) Report() ReporteAmbito {
-
-	ReporteAmbito := ReporteAmbito{
+	reporte := ReporteAmbito{
 		Nombre:       s.Nombre,
 		Variables:    make([]ReporteSimbolos, 0),
 		Funciones:    make([]ReporteSimbolos, 0),
-		Estructuras:      make([]ReporteSimbolos, 0),
+		Estructuras:  make([]ReporteSimbolos, 0),
 		AmbitosHijos: make([]ReporteAmbito, 0),
 	}
 
 	for _, v := range s.Variables {
-
 		token := v.Token
-		line := 0
-		column := 0
+		line, column := 0, 0
 
 		if token != nil {
 			line = token.GetLine()
 			column = token.GetColumn()
 		}
 
-		ReporteAmbito.Variables = append(ReporteAmbito.Variables, ReporteSimbolos{
+		reporte.Variables = append(reporte.Variables, ReporteSimbolos{
 			Nombre:  v.Nombre,
 			Tipo:    v.Tipo,
 			Linea:   line,
@@ -495,9 +476,9 @@ func (s *AmbitoBase) Report() ReporteAmbito {
 	for _, f := range s.Funciones {
 		switch funcion := f.(type) {
 		case *FuncionNativa:
-			// No incluir funciones embebidas en el reporte
+			// Omitir funciones embebidas
 			if _, esEmbebida := FuncionesEmbebidas[funcion.Nombre]; !esEmbebida {
-				ReporteAmbito.Funciones = append(ReporteAmbito.Funciones, ReporteSimbolos{
+				reporte.Funciones = append(reporte.Funciones, ReporteSimbolos{
 					Nombre:  funcion.Nombre,
 					Tipo:    funcion.Nombre,
 					Linea:   0,
@@ -505,31 +486,31 @@ func (s *AmbitoBase) Report() ReporteAmbito {
 				})
 			}
 		case *Funcion:
-
-			linea := 0
-			columna := 0
-
+			line, column := 0, 0
 			if funcion.Token != nil {
-				linea = funcion.Token.GetLine()
-				columna = funcion.Token.GetColumn()
+				line = funcion.Token.GetLine()
+				column = funcion.Token.GetColumn()
 			}
-
-			ReporteAmbito.Funciones = append(ReporteAmbito.Funciones, ReporteSimbolos{
+			reporte.Funciones = append(reporte.Funciones, ReporteSimbolos{
 				Nombre:  funcion.Nombre,
 				Tipo:    funcion.TipoRetorno,
-				Linea:   linea,
-				Columna: columna,
+				Linea:   line,
+				Columna: column,
 			})
 		case *FuncionNativaObjeto:
-			// No incluir FuncionNativaObjeto en el reporte
-			break
+			// Ignorar
 		default:
-			log.Fatal("Tipo de función no encontrado")
+			reporte.Funciones = append(reporte.Funciones, ReporteSimbolos{
+				Nombre:  "función_desconocida",
+				Tipo:    "tipo_desconocido",
+				Linea:   0,
+				Columna: 0,
+			})
 		}
 	}
 
 	for _, v := range s.Estructuras {
-		ReporteAmbito.Estructuras = append(ReporteAmbito.Estructuras, ReporteSimbolos{
+		reporte.Estructuras = append(reporte.Estructuras, ReporteSimbolos{
 			Nombre:  v.Nombre,
 			Tipo:    v.Nombre,
 			Linea:   v.Token.GetLine(),
@@ -538,8 +519,8 @@ func (s *AmbitoBase) Report() ReporteAmbito {
 	}
 
 	for _, v := range s.Hijos {
-		ReporteAmbito.AmbitosHijos = append(ReporteAmbito.AmbitosHijos, v.Report())
+		reporte.AmbitosHijos = append(reporte.AmbitosHijos, v.Report())
 	}
 
-	return ReporteAmbito
+	return reporte
 }

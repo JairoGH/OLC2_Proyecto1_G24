@@ -2,7 +2,6 @@ package instrucciones
 
 import (
 	"fmt"
-	"log"
 	"main/parser"
 	"main/tiposDeDato"
 	"strconv"
@@ -60,15 +59,14 @@ func (v *PatronVIsitor) TipoValido(_type string) bool {
 }
 
 func (v *PatronVIsitor) Visit(tree antlr.ParseTree) interface{} {
-
 	switch val := tree.(type) {
 	case *antlr.ErrorNodeImpl:
-		log.Fatal(val.GetText())
+		token := val.GetSymbol()
+		v.TablaError.NewErrorSintactico(token.GetLine(), token.GetColumn(), "Error de análisis: "+val.GetText())
 		return nil
 	default:
 		return tree.Accept(v)
 	}
-
 }
 
 func (v *PatronVIsitor) VisitProgram(ctx *parser.ProgramContext) interface{} {
@@ -102,25 +100,24 @@ func (v *PatronVIsitor) VisitStmt(ctx *parser.StmtContext) interface{} {
 	if ds := ctx.Stmt_declaracion(); ds != nil {
 		switch decl := ds.(type) {
 		case *parser.DeclararInferenciaMutContext:
-			v.VisitDeclararInferenciaMut(decl) // mut x := expr
+			v.VisitDeclararInferenciaMut(decl)
 		case *parser.DeclararInferenciaContext:
-			v.VisitDeclararInferencia(decl) // x := expr
+			v.VisitDeclararInferencia(decl)
 		case *parser.DeclaraTipoValorContext:
-			v.VisitDeclaraTipoValor(decl) // mut x type = expr
+			v.VisitDeclaraTipoValor(decl)
 		case *parser.DeclararTipoContext:
-			v.VisitDeclararTipo(decl) // mut x type
+			v.VisitDeclararTipo(decl)
 		case *parser.DeclararSinMutValorContext:
-			v.VisitDeclararSinMutValor(decl) // x type = expr
-
+			v.VisitDeclararSinMutValor(decl)
 		case *parser.DeclararSliceContext:
-			v.VisitDeclararSlice(decl) // mut x = [type] [values...]
+			v.VisitDeclararSlice(decl)
 		default:
-			v.Visit(ds)
+			v.Visit(ds) // fallback por si se agregan nuevas alternativas
 		}
 		return nil
 	}
 
-	// 2) Asignaciones +, -, *, /, % y accesos a vectores
+	// 2) Asignaciones
 	if ctx.Stmt_asignar() != nil {
 		v.Visit(ctx.Stmt_asignar())
 		return nil
@@ -147,7 +144,8 @@ func (v *PatronVIsitor) VisitStmt(ctx *parser.StmtContext) interface{} {
 	case ctx.Fun_slice() != nil:
 		v.Visit(ctx.Fun_slice())
 	default:
-		log.Fatal("Declaracion No Fue Encontrada: " + ctx.GetText())
+		token := ctx.GetStart()
+		v.TablaError.NewErrorSemantico(token, "No se reconoció la declaración: "+ctx.GetText())
 	}
 
 	return nil
@@ -425,124 +423,124 @@ func (v *PatronVIsitor) VisitTipos_slices(ctx *parser.Tipos_slicesContext) inter
 
 func (v *PatronVIsitor) VisitItemSlice(ctx *parser.ItemSliceContext) interface{} {
 
-    nombreVariable := ctx.PatronId().GetText()
-    variable := v.RegistroAmbito.GetVariable(nombreVariable)
+	nombreVariable := ctx.PatronId().GetText()
+	variable := v.RegistroAmbito.GetVariable(nombreVariable)
 
-    if variable == nil {
-        v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+nombreVariable+" no encontrada")
-        return nil
-    }
+	if variable == nil {
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+nombreVariable+" no encontrada")
+		return nil
+	}
 
-    // Verificar que sea un vector o matriz (incluyendo formato [][]tipo)
-    if !(EsTipoVector(variable.Tipo) || EsTipoMatriz(variable.Tipo) ||
-        strings.HasPrefix(variable.Tipo, "[]")) {
-        v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+nombreVariable+" no es un vector o una matriz")
-        return nil
-    }
+	// Verificar que sea un vector o matriz (incluyendo formato [][]tipo)
+	if !(EsTipoVector(variable.Tipo) || EsTipoMatriz(variable.Tipo) ||
+		strings.HasPrefix(variable.Tipo, "[]")) {
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+nombreVariable+" no es un vector o una matriz")
+		return nil
+	}
 
-    indices := []int{}
-    for _, expr := range ctx.AllExpr() {
-        val := v.Visit(expr).(tiposDeDato.ValorInterno)
-        if val.Type() != tiposDeDato.TIPO_ENTERO {
-            v.TablaError.NewErrorSemantico(ctx.GetStart(), "Los indices de acceso deben ser enteros")
-            return nil
-        }
-        indices = append(indices, val.Value().(int))
-    }
+	indices := []int{}
+	for _, expr := range ctx.AllExpr() {
+		val := v.Visit(expr).(tiposDeDato.ValorInterno)
+		if val.Type() != tiposDeDato.TIPO_ENTERO {
+			v.TablaError.NewErrorSemantico(ctx.GetStart(), "Los indices de acceso deben ser enteros")
+			return nil
+		}
+		indices = append(indices, val.Value().(int))
+	}
 
-    // ✅ NUEVO: Manejar TipoMatrizMulti primero
-    if matrizMulti, ok := variable.Valor.(*TipoMatrizMulti); ok {
-        if len(indices) == 2 {
-            // Acceso completo: matriz[fila][columna]
-            fila, columna := indices[0], indices[1]
-            if !matrizMulti.ValidIndex(fila, columna) {
-                v.TablaError.NewErrorSemantico(ctx.GetStart(),
-                    fmt.Sprintf("Índice fuera de rango: [%d][%d]. La matriz tiene %d filas",
-                        fila, columna, len(matrizMulti.ValorInterno)))
+	// ✅ NUEVO: Manejar TipoMatrizMulti primero
+	if matrizMulti, ok := variable.Valor.(*TipoMatrizMulti); ok {
+		if len(indices) == 2 {
+			// Acceso completo: matriz[fila][columna]
+			fila, columna := indices[0], indices[1]
+			if !matrizMulti.ValidIndex(fila, columna) {
+				v.TablaError.NewErrorSemantico(ctx.GetStart(),
+					fmt.Sprintf("Índice fuera de rango: [%d][%d]. La matriz tiene %d filas",
+						fila, columna, len(matrizMulti.ValorInterno)))
 
-                // Retornar un valor que indique error pero que no rompa el programa
-                return &tiposDeDato.ValorEntero{ValorInterno: -1}
-            }
-            return &MatrizMultiItemReference{
-                Matriz:  matrizMulti,
-                Fila:    fila,
-                Columna: columna,
-                Valor:   matrizMulti.Get(fila, columna),
-            }
-        } else if len(indices) == 1 {
-            // ✅ ARREGLO: Acceso a fila: matriz[fila] -> retorna vector para que len() funcione
-            fila := indices[0]
-            if fila < 0 || fila >= len(matrizMulti.ValorInterno) {
-                v.TablaError.NewErrorSemantico(ctx.GetStart(),
-                    fmt.Sprintf("Índice de fila fuera de rango: %d", fila))
-                return &tiposDeDato.ValorEntero{ValorInterno: -1}
-            }
-            
-            // ✅ CLAVE: Crear un TipoVector para la fila y retornarlo como VectorItemReference
-            filaVector := NewTipoVector(matrizMulti.ValorInterno[fila], matrizMulti.TipoElemento, matrizMulti.TipoBase)
-            
-            return &VectorItemReference{
-                Vector: filaVector,
-                Indice: -1, // -1 indica que es una fila completa, no un elemento individual
-                Valor:  filaVector, // ✅ El valor ES el vector completo
-            }
-        } else {
-            v.TablaError.NewErrorSemantico(ctx.GetStart(), "Número incorrecto de índices para matriz multidimensional")
-            return nil
-        }
-    }
+				// Retornar un valor que indique error pero que no rompa el programa
+				return &tiposDeDato.ValorEntero{ValorInterno: -1}
+			}
+			return &MatrizMultiItemReference{
+				Matriz:  matrizMulti,
+				Fila:    fila,
+				Columna: columna,
+				Valor:   matrizMulti.Get(fila, columna),
+			}
+		} else if len(indices) == 1 {
+			// ✅ ARREGLO: Acceso a fila: matriz[fila] -> retorna vector para que len() funcione
+			fila := indices[0]
+			if fila < 0 || fila >= len(matrizMulti.ValorInterno) {
+				v.TablaError.NewErrorSemantico(ctx.GetStart(),
+					fmt.Sprintf("Índice de fila fuera de rango: %d", fila))
+				return &tiposDeDato.ValorEntero{ValorInterno: -1}
+			}
 
-    // Resto del código existente para vectores simples y matrices regulares
-    tipoStructs := tiposDeDato.TIPO_VECTOR
-    indice := v.Visit(ctx.Expr(0)).(tiposDeDato.ValorInterno)
+			// ✅ CLAVE: Crear un TipoVector para la fila y retornarlo como VectorItemReference
+			filaVector := NewTipoVector(matrizMulti.ValorInterno[fila], matrizMulti.TipoElemento, matrizMulti.TipoBase)
 
-    if len(ctx.AllExpr()) != 1 {
-        tipoStructs = tiposDeDato.TIPO_MATRIZ
-    }
+			return &VectorItemReference{
+				Vector: filaVector,
+				Indice: -1,         // -1 indica que es una fila completa, no un elemento individual
+				Valor:  filaVector, // ✅ El valor ES el vector completo
+			}
+		} else {
+			v.TablaError.NewErrorSemantico(ctx.GetStart(), "Número incorrecto de índices para matriz multidimensional")
+			return nil
+		}
+	}
 
-    if tipoStructs == tiposDeDato.TIPO_VECTOR {
-        switch valorVector := variable.Valor.(type) {
-        case *TipoVector:
-            valorIndice := indice.(*tiposDeDato.ValorEntero).ValorInterno
-            if !valorVector.IndiceValido(valorIndice) {
-                v.TablaError.NewErrorSemantico(ctx.GetStart(),
-                    fmt.Sprintf("Índice fuera de rango: %d. El vector tiene %d elementos (rango válido: 0-%d)",
-                        valorIndice, len(valorVector.ValorInterno), len(valorVector.ValorInterno)-1))
-                return &VectorItemReference{
-                    Vector: valorVector,
-                    Indice: valorIndice,
-                    Valor:  &tiposDeDato.ValorEntero{ValorInterno: -1},
-                }
-            }
-            return &VectorItemReference{
-                Vector: valorVector,
-                Indice: valorIndice,
-                Valor:  valorVector.Get(valorIndice),
-            }
-        default:
-            v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+nombreVariable+" no es un vector")
-            return nil
-        }
-    } else if tipoStructs == tiposDeDato.TIPO_MATRIZ {
-        switch TipoMatriz := variable.Valor.(type) {
-        case *TipoMatriz:
-            if !TipoMatriz.IndicesValidos(indices) {
-                v.TablaError.NewErrorSemantico(ctx.GetStart(),
-                    fmt.Sprintf("Índice fuera de rango: %v. La matriz tiene dimensiones válidas", indices))
-                return nil
-            }
-            return &ElementoMatriz{
-                Matriz: TipoMatriz,
-                Indice: indices,
-                Valor:  TipoMatriz.Get(indices),
-            }
-        default:
-            v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+nombreVariable+" no es una matriz")
-            return nil
-        }
-    }
+	// Resto del código existente para vectores simples y matrices regulares
+	tipoStructs := tiposDeDato.TIPO_VECTOR
+	indice := v.Visit(ctx.Expr(0)).(tiposDeDato.ValorInterno)
 
-    return nil
+	if len(ctx.AllExpr()) != 1 {
+		tipoStructs = tiposDeDato.TIPO_MATRIZ
+	}
+
+	if tipoStructs == tiposDeDato.TIPO_VECTOR {
+		switch valorVector := variable.Valor.(type) {
+		case *TipoVector:
+			valorIndice := indice.(*tiposDeDato.ValorEntero).ValorInterno
+			if !valorVector.IndiceValido(valorIndice) {
+				v.TablaError.NewErrorSemantico(ctx.GetStart(),
+					fmt.Sprintf("Índice fuera de rango: %d. El vector tiene %d elementos (rango válido: 0-%d)",
+						valorIndice, len(valorVector.ValorInterno), len(valorVector.ValorInterno)-1))
+				return &VectorItemReference{
+					Vector: valorVector,
+					Indice: valorIndice,
+					Valor:  &tiposDeDato.ValorEntero{ValorInterno: -1},
+				}
+			}
+			return &VectorItemReference{
+				Vector: valorVector,
+				Indice: valorIndice,
+				Valor:  valorVector.Get(valorIndice),
+			}
+		default:
+			v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+nombreVariable+" no es un vector")
+			return nil
+		}
+	} else if tipoStructs == tiposDeDato.TIPO_MATRIZ {
+		switch TipoMatriz := variable.Valor.(type) {
+		case *TipoMatriz:
+			if !TipoMatriz.IndicesValidos(indices) {
+				v.TablaError.NewErrorSemantico(ctx.GetStart(),
+					fmt.Sprintf("Índice fuera de rango: %v. La matriz tiene dimensiones válidas", indices))
+				return nil
+			}
+			return &ElementoMatriz{
+				Matriz: TipoMatriz,
+				Indice: indices,
+				Valor:  TipoMatriz.Get(indices),
+			}
+		default:
+			v.TablaError.NewErrorSemantico(ctx.GetStart(), "La variable "+nombreVariable+" no es una matriz")
+			return nil
+		}
+	}
+
+	return nil
 }
 
 func (v *PatronVIsitor) VisitAsignacionDirecta(ctx *parser.AsignacionDirectaContext) interface{} {
@@ -588,56 +586,54 @@ func (v *PatronVIsitor) VisitAsignacionAritmetica(ctx *parser.AsignacionAritmeti
 	variable := v.RegistroAmbito.GetVariable(nombreVariable)
 
 	if variable == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable "+nombreVariable+" no encontrada")
-	} else {
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Variable '"+nombreVariable+"' no encontrada")
+		return nil
+	}
 
-		valorIzq := variable.Valor
-		valorDcha := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
+	valorIzq := variable.Valor
+	valorDcha := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
-		op := string(ctx.GetOp().GetText()[0])
+	op := string(ctx.GetOp().GetText()[0])
+	strat, ok := ExpresionBinaria[op]
 
-		strat, ok := ExpresionBinaria[op]
+	if !ok {
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Operador binario no reconocido: "+op)
+		return nil
+	}
 
-		if !ok {
-			log.Fatal("Operador binario no encontrado: " + op)
-		}
+	ok, msg, valorVariable := strat.ValidarExp(valorIzq, valorDcha)
+	if !ok {
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
+		return nil
+	}
 
-		ok, msg, valorVariable := strat.ValidarExp(valorIzq, valorDcha)
+	puedeModificarse := true
+	if v.RegistroAmbito.AmbitoActual.EsEstructura {
+		puedeModificarse = v.RegistroAmbito.EsEntornoMutable()
+	}
 
-		if !ok {
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-			return nil
-		}
-
-		puedeModificarse := true
-
-		if v.RegistroAmbito.AmbitoActual.EsEstructura {
-			puedeModificarse = v.RegistroAmbito.EsEntornoMutable()
-		}
-
-		ok, msg = variable.AsignarVariable(valorVariable, puedeModificarse)
-
-		if !ok {
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-		}
+	ok, msg = variable.AsignarVariable(valorVariable, puedeModificarse)
+	if !ok {
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
 	}
 
 	return nil
 }
 
 func (v *PatronVIsitor) VisitAsignacionSlice(ctx *parser.AsignacionSliceContext) interface{} {
-
 	valorDcha := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
 	switch itemRef := v.Visit(ctx.Item_slice()).(type) {
 	case *VectorItemReference:
-
 		valorIzq := itemRef.Valor
 
 		if valorDcha.Type() != itemRef.Vector.TipoElemento {
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), "No se puede asignar un valor de tipo "+valorDcha.Type()+" a un vector de tipo "+itemRef.Vector.TipoElemento)
+			v.TablaError.NewErrorSemantico(ctx.GetStart(),
+				"No se puede asignar un valor de tipo "+valorDcha.Type()+
+					" a un vector de tipo "+itemRef.Vector.TipoElemento)
 			return nil
 		}
+
 		op := string(ctx.GetOp().GetText()[0])
 
 		if op == "=" {
@@ -646,27 +642,28 @@ func (v *PatronVIsitor) VisitAsignacionSlice(ctx *parser.AsignacionSliceContext)
 		}
 
 		strat, ok := ExpresionBinaria[op]
-
 		if !ok {
-			log.Fatal("Operador binario no encontrado: " + op)
+			v.TablaError.NewErrorSemantico(ctx.GetStart(), "Operador binario no reconocido: "+op)
+			return nil
 		}
 
 		ok, msg, varValue := strat.ValidarExp(valorIzq, valorDcha)
-
 		if !ok {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
 			return nil
 		}
 
 		itemRef.Vector.ValorInterno[itemRef.Indice] = varValue
-
 		return nil
+
 	case *ElementoMatriz:
 		valorIzq := itemRef.Valor
 
-		// check type, todo: improve cast -> ¿? idk what i was thinking
-		if valorDcha.Type() != EliminarCorchetes(itemRef.Matriz.Type()) {
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), "No se puede asignar un valor de tipo "+valorDcha.Type()+" a una matriz de tipo "+EliminarCorchetes(itemRef.Matriz.Type()))
+		tipoEsperado := EliminarCorchetes(itemRef.Matriz.Type())
+		if valorDcha.Type() != tipoEsperado {
+			v.TablaError.NewErrorSemantico(ctx.GetStart(),
+				"No se puede asignar un valor de tipo "+valorDcha.Type()+
+					" a una matriz de tipo "+tipoEsperado)
 			return nil
 		}
 
@@ -678,13 +675,12 @@ func (v *PatronVIsitor) VisitAsignacionSlice(ctx *parser.AsignacionSliceContext)
 		}
 
 		strat, ok := ExpresionBinaria[op]
-
 		if !ok {
-			log.Fatal("Binary operator not found")
+			v.TablaError.NewErrorSemantico(ctx.GetStart(), "Operador binario no reconocido: "+op)
+			return nil
 		}
 
 		ok, msg, valorVariable := strat.ValidarExp(valorIzq, valorDcha)
-
 		if !ok {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
 			return nil
@@ -694,6 +690,8 @@ func (v *PatronVIsitor) VisitAsignacionSlice(ctx *parser.AsignacionSliceContext)
 		return nil
 	}
 
+	// Si no se puede hacer match con ninguno
+	v.TablaError.NewErrorSemantico(ctx.GetStart(), "Referencia de slice o matriz inválida")
 	return nil
 }
 
@@ -777,11 +775,11 @@ func (v *PatronVIsitor) VisitAsignacionSliceItem(ctx *parser.AsignacionSliceItem
 }
 
 func (v *PatronVIsitor) VisitVectorSimple(ctx *parser.VectorSimpleContext) interface{} {
-    return ctx.GetText()
+	return ctx.GetText()
 }
 
 func (v *PatronVIsitor) VisitMatrizDoble(ctx *parser.MatrizDobleContext) interface{} {
-    return ctx.GetText()
+	return ctx.GetText()
 }
 
 func (v *PatronVIsitor) VisitID_Patron(ctx *parser.ID_PatronContext) interface{} {
@@ -863,36 +861,36 @@ func (v *PatronVIsitor) VisitParentecisExp(ctx *parser.ParentecisExpContext) int
 
 func (v *PatronVIsitor) VisitItemSliceExp(ctx *parser.ItemSliceExpContext) interface{} {
 
-    resultado := v.Visit(ctx.Item_slice())
+	resultado := v.Visit(ctx.Item_slice())
 
-    switch refItem := resultado.(type) {
-    case *VectorItemReference:
-        // ✅ ARREGLO: Si es una referencia a fila completa (Indice == -1), retornar el vector
-        if refItem.Indice == -1 {
-            return refItem.Vector // Retorna el TipoVector para que len() funcione
-        }
-        // Si es un elemento individual, retornar el valor
-        return refItem.Valor
-        
-    case *ElementoMatriz:
-        return refItem.Valor
-        
-    case *MatrizMultiItemReference:
-        return refItem.Valor
-        
-    case *tiposDeDato.ValorEntero:
-        // Caso de error (índice fuera de rango)
-        if refItem.ValorInterno == -1 {
-            return &tiposDeDato.ValorEntero{ValorInterno: -1}
-        }
-        return refItem
-        
-    case *TipoVector:
-        return refItem
-        
-    default:
-        return tiposDeDato.NuloPorDefecto
-    }
+	switch refItem := resultado.(type) {
+	case *VectorItemReference:
+		// ✅ ARREGLO: Si es una referencia a fila completa (Indice == -1), retornar el vector
+		if refItem.Indice == -1 {
+			return refItem.Vector // Retorna el TipoVector para que len() funcione
+		}
+		// Si es un elemento individual, retornar el valor
+		return refItem.Valor
+
+	case *ElementoMatriz:
+		return refItem.Valor
+
+	case *MatrizMultiItemReference:
+		return refItem.Valor
+
+	case *tiposDeDato.ValorEntero:
+		// Caso de error (índice fuera de rango)
+		if refItem.ValorInterno == -1 {
+			return &tiposDeDato.ValorEntero{ValorInterno: -1}
+		}
+		return refItem
+
+	case *TipoVector:
+		return refItem
+
+	default:
+		return tiposDeDato.NuloPorDefecto
+	}
 }
 
 func (v *PatronVIsitor) VisitLlamarFuncionExp(ctx *parser.LlamarFuncionExpContext) interface{} {
@@ -904,13 +902,14 @@ func (v *PatronVIsitor) VisitSliceExp(ctx *parser.SliceExpContext) interface{} {
 }
 
 func (v *PatronVIsitor) VisitUnarioExp(ctx *parser.UnarioExpContext) interface{} {
-
 	exp := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
-	strat, ok := ExpresionesUnarias[ctx.GetOp().GetText()]
+	op := ctx.GetOp().GetText()
+	strat, ok := ExpresionesUnarias[op]
 
 	if !ok {
-		log.Fatal("Operador Unario no encontrado: " + ctx.GetOp().GetText())
+		v.TablaError.NewErrorSemantico(ctx.GetOp(), "Operador unario no reconocido: "+op)
+		return tiposDeDato.NuloPorDefecto
 	}
 
 	ok, msg, resultado := strat.ValidarExp(exp)
@@ -921,19 +920,15 @@ func (v *PatronVIsitor) VisitUnarioExp(ctx *parser.UnarioExpContext) interface{}
 	}
 
 	return resultado
-
 }
 
 func (v *PatronVIsitor) VisitBinarioExp(ctx *parser.BinarioExpContext) interface{} {
-
 	op := ctx.GetOp().GetText()
 	izq := v.Visit(ctx.GetLeft()).(tiposDeDato.ValorInterno)
 
-	chequeoInicial, ok := RetornoAnticipado[op]
-
-	if ok {
+	// Evaluación anticipada (por ejemplo, cortocircuito lógico)
+	if chequeoInicial, ok := RetornoAnticipado[op]; ok {
 		ok, _, resultado := chequeoInicial.ValidarExp(izq)
-
 		if ok {
 			return resultado
 		}
@@ -942,13 +937,12 @@ func (v *PatronVIsitor) VisitBinarioExp(ctx *parser.BinarioExpContext) interface
 	dcha := v.Visit(ctx.GetRight()).(tiposDeDato.ValorInterno)
 
 	strat, ok := ExpresionBinaria[op]
-
 	if !ok {
-		log.Fatal("Operador binario no encontrado: " + op)
+		v.TablaError.NewErrorSemantico(ctx.GetOp(), "Operador binario no reconocido: "+op)
+		return tiposDeDato.NuloPorDefecto
 	}
 
 	ok, msg, resultado := strat.ValidarExp(izq, dcha)
-
 	if !ok {
 		v.TablaError.NewErrorSemantico(ctx.GetOp(), msg)
 		return tiposDeDato.NuloPorDefecto
@@ -1188,21 +1182,20 @@ func (v *PatronVIsitor) VisitInnerWhile(ctx *parser.WhileStmtContext, condition 
 }
 
 func (v *PatronVIsitor) VisitForStmt(ctx *parser.ForStmtContext) interface{} {
-
 	nombreVariable := ctx.ID().GetText()
 	var iterableItem *TipoVector = TipoVectorVacio
 
+	// Evaluar range (opcional)
 	if ctx.Range_() != nil {
 		rangeItem, ok := v.Visit(ctx.Range_()).(*TipoVector)
-
 		if !ok {
 			v.TablaError.NewErrorSemantico(ctx.GetStart(), "El valor del rango debe ser un vector")
 			return nil
 		}
-
 		iterableItem = rangeItem
 	}
 
+	// Evaluar expresión (opcional)
 	if ctx.Expr() != nil {
 		iterableValue := v.Visit(ctx.Expr()).(tiposDeDato.ValorInterno)
 
@@ -1220,39 +1213,34 @@ func (v *PatronVIsitor) VisitForStmt(ctx *parser.ForStmtContext) interface{} {
 		return nil
 	}
 
-	// Push scope outer scope
+	// Crear ámbito externo
 	outerForScope := v.RegistroAmbito.PushAmbito("outer_for")
 
-	// create the associated variable to the iterable
+	// Crear variable del iterador
 	iterableVariable, msg := outerForScope.AgregarVariable(nombreVariable, iterableItem.TipoElemento, iterableItem.Actual(), true, false, ctx.ID().GetSymbol())
-
 	if iterableVariable == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-		log.Fatal("Esto no deberia pasar, variable no creada: " + nombreVariable)
+		v.TablaError.NewErrorSemantico(ctx.ID().GetSymbol(), "No se pudo crear la variable del iterador '"+nombreVariable+"': "+msg)
 		return nil
 	}
 
-	// Push forItem to call stack [breakable, continuable]
-
+	// Preparar estructura de control (break, continue)
 	forItem := &LlamadaFunciones{
 		RetornarValor: tiposDeDato.NuloPorDefecto,
-		Tipo: []string{
-			Detener,
-			Continuar,
-		},
+		Tipo:          []string{Detener, Continuar},
 	}
 
 	v.PilaLlamada.Push(forItem)
 
-	// Push inner for scope
+	// Crear ámbito interno del for
 	innerForScope := v.RegistroAmbito.PushAmbito("inner_for")
 
 	v.VisitInnerFor(ctx, outerForScope, innerForScope, forItem, iterableItem, iterableVariable)
 
+	// Limpiar estado
 	iterableItem.Reset()
-	v.RegistroAmbito.PopAmbito()   // pop inner for scope
-	v.RegistroAmbito.PopAmbito()   // pop outer for scope
-	v.PilaLlamada.Limpiar(forItem) // ? Limpiar item if it's still in call stack
+	v.RegistroAmbito.PopAmbito() // inner_for
+	v.RegistroAmbito.PopAmbito() // outer_for
+	v.PilaLlamada.Limpiar(forItem)
 
 	return nil
 }
@@ -1379,27 +1367,26 @@ func (v *PatronVIsitor) VisitContinueStmt(ctx *parser.ContinueStmtContext) inter
 }
 
 func (v *PatronVIsitor) VisitLlamarFuncion(ctx *parser.LlamarFuncionContext) interface{} {
-
 	canditateName := v.Visit(ctx.PatronId()).(string)
 
-	// PRIMERO: Buscar en funciones nativas
+	// 1. Funciones embebidas
 	if nativeFunc, exists := FuncionesEmbebidas[canditateName]; exists {
 		args := make([]*Argumento, 0)
 		if ctx.Lista_argumentos() != nil {
 			args = v.Visit(ctx.Lista_argumentos()).([]*Argumento)
 		}
 
-		RetornarValor, ok, msg := nativeFunc.Exec(v.GetInstruccionesContexto(), args)
+		ret, ok, msg := nativeFunc.Exec(v.GetInstruccionesContexto(), args)
 		if !ok {
 			if msg != "" {
 				v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
 			}
 			return tiposDeDato.NuloPorDefecto
 		}
-		return RetornarValor
+		return ret
 	}
 
-	// SEGUNDO: Buscar funciones definidas por el usuario
+	// 2. Funciones del usuario o constructores de structs
 	funcObj, msg1 := v.RegistroAmbito.GetFuncion(canditateName)
 	structObj, msg2 := v.RegistroAmbito.AmbitoGlobal.GetEstructura(canditateName)
 
@@ -1413,28 +1400,26 @@ func (v *PatronVIsitor) VisitLlamarFuncion(ctx *parser.LlamarFuncionContext) int
 		args = v.Visit(ctx.Lista_argumentos()).([]*Argumento)
 	}
 
-	// struct has priority over func
+	// Prioridad: struct antes que función
 	if structObj != nil {
 		if ArgumentoValidoEstructura(args) {
 			return NewTipoObjeto(v, canditateName, ctx.PatronId().GetStart(), args, false)
-		} else {
-			v.TablaError.NewErrorSemantico(ctx.GetStart(), "Si bien "+canditateName+" es un struct, no se puede llamar a su constructor con los argumentos especificados. Ni tampoco es una funcion.")
-			return tiposDeDato.NuloPorDefecto
 		}
+		v.TablaError.NewErrorSemantico(ctx.GetStart(),
+			"El struct '"+canditateName+"' no puede ser construido con los argumentos dados, y tampoco es una función válida.")
+		return tiposDeDato.NuloPorDefecto
 	}
 
 	switch funcObj := funcObj.(type) {
 	case *FuncionNativa:
-		RetornarValor, ok, msg := funcObj.Exec(v.GetInstruccionesContexto(), args)
-
+		ret, ok, msg := funcObj.Exec(v.GetInstruccionesContexto(), args)
 		if !ok {
 			if msg != "" {
 				v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
 			}
 			return tiposDeDato.NuloPorDefecto
 		}
-
-		return RetornarValor
+		return ret
 
 	case *Funcion:
 		funcObj.Exec(v, args, ctx.GetStart())
@@ -1445,10 +1430,9 @@ func (v *PatronVIsitor) VisitLlamarFuncion(ctx *parser.LlamarFuncionContext) int
 		return funcObj.RetornarValor
 
 	default:
-		log.Fatal("Tipo de funcion no soportado: ", funcObj)
+		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Tipo de función no soportado para '"+canditateName+"'")
+		return tiposDeDato.NuloPorDefecto
 	}
-
-	return tiposDeDato.NuloPorDefecto
 }
 
 func (v *PatronVIsitor) VisitListaArgumentos(ctx *parser.ListaArgumentosContext) interface{} {
@@ -1617,7 +1601,7 @@ func (v *PatronVIsitor) VisitDeclararStruct(ctx *parser.DeclararStructContext) i
 
 	// Procesar cada campo del struct
 	for _, fieldCtx := range ctx.AllPropiedad_struct() {
-		v.Visit(fieldCtx) 
+		v.Visit(fieldCtx)
 	}
 
 	// Restaurar scope

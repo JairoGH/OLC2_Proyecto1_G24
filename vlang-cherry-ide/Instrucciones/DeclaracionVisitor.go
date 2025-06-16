@@ -1,7 +1,6 @@
 package instrucciones
 
 import (
-	"log"
 	"main/parser"
 	"main/tiposDeDato"
 
@@ -28,15 +27,14 @@ func NewVisitanteDcl(TablaError *TablaError) *VisitanteDcl {
 
 // Visit: método base para visitar nodos del árbol sintáctico
 func (v *VisitanteDcl) Visit(tree antlr.ParseTree) interface{} {
-
 	switch val := tree.(type) {
 	case *antlr.ErrorNodeImpl:
-		log.Fatal(val.GetText())
+		token := val.GetSymbol()
+		v.TablaError.NewErrorSintactico(token.GetLine(), token.GetColumn(), "Error de Análisis: "+val.GetText())
 		return nil
 	default:
 		return tree.Accept(v)
 	}
-
 }
 
 // VisitProgram: procesa el nodo raíz del programa visitando todas las declaraciones

@@ -7,24 +7,23 @@ import (
 )
 
 type Console struct {
-	Container fyne.CanvasObject // CORREGIDO: Cambié *container.Border por fyne.CanvasObject
+	Container fyne.CanvasObject
 	Output    *widget.Entry
 }
 
 func NewConsole() *Console {
-	// Crear área de salida
+
 	output := widget.NewMultiLineEntry()
 	output.SetPlaceHolder("La salida del programa aparecerá aquí...")
-	output.Disable() // Solo lectura
 
-	// Crear etiqueta
+	output.TextStyle = fyne.TextStyle{Monospace: true}
+
 	label := widget.NewLabel("Consola")
 
 	console := &Console{
 		Output: output,
 	}
 
-	// Crear layout
 	scrollOutput := container.NewScroll(output)
 	console.Container = container.NewBorder(
 		label,        // top
@@ -40,8 +39,19 @@ func NewConsole() *Console {
 func (c *Console) AddOutput(text string) {
 	current := c.Output.Text
 	c.Output.SetText(current + text)
+
+	c.Output.CursorRow = len(c.Output.Text)
 }
 
 func (c *Console) ClearOutput() {
 	c.Output.SetText("")
+}
+
+func (c *Console) SetConsoleStyle() {
+
+	c.Output.TextStyle = fyne.TextStyle{
+		Monospace: true,
+		Bold:      false,
+	}
+	c.Output.Refresh()
 }
