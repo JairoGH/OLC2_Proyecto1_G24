@@ -9,6 +9,35 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+// AmbitoFuncionCache: mapa global para cachear ámbitos de funciones
+var AmbitoFuncionCache = make(map[string]*AmbitoBase)
+var recursionErrorReported = false
+
+// Función para resetear el flag de error de recursión
+func ResetRecursionError() {
+	recursionErrorReported = false
+}
+
+// Variable global para controlar si se debe detener la recursión
+var shouldStopRecursion = false
+
+// Función para resetear el flag de detención
+func ResetStopRecursion() {
+	shouldStopRecursion = false
+}
+
+// Estructura para manejar errores de recursión
+type RecursionError struct {
+	Message string
+}
+
+// ResetAllRecursionFlags: resetea todos los flags de recursión antes de cada ejecución
+func ResetAllRecursionFlags() {
+	recursionErrorReported = false
+	shouldStopRecursion = false
+	LimpiarCacheAmbitosFunciones()
+}
+
 // Funcion: representa una función definida por el usuario con sus parámetros,
 // tipo de retorno y contexto de ejecución
 type Funcion struct {
@@ -39,90 +68,138 @@ func (f *Funcion) Copy() tiposDeDato.ValorInterno {
 // Exec: ejecuta la función validando argumentos, manejando el ámbito
 // y controlando el flujo de retorno
 func (f *Funcion) Exec(visitor *PatronVIsitor, args []*Argumento, token antlr.Token) {
-
 	context := visitor.GetInstruccionesContexto()
+
+	//Verificar si se debe detener la recursión globalmente
+	if shouldStopRecursion {
+		f.RetornarValor = tiposDeDato.NuloPorDefecto
+		return
+	}
+
+	// Verificar límite de recursión ANTES de ejecutar
+	if context.PilaLlamada.IncrementRecursion() {
+		if !recursionErrorReported {
+			context.TablaError.NewErrorEjecucion(
+				token.GetLine(),
+				token.GetColumn(),
+				fmt.Sprintf("La función '%s' excedio el limite maximo de llamadas recursivas",
+					f.Nombre))
+			recursionErrorReported = true
+		}
+
+		shouldStopRecursion = true
+		f.RetornarValor = tiposDeDato.NuloPorDefecto
+		context.PilaLlamada.DecrementRecursion()
+		return
+	}
+
+	// Cleanup al final
+	defer func() {
+		context.PilaLlamada.DecrementRecursion()
+
+		if r := recover(); r != nil {
+			if item, ok := r.(*LlamadaFunciones); item != nil && ok {
+				f.ValidarRetorno(context, item.RetornarValor, token)
+				return
+			}
+			panic(r)
+		}
+	}()
 
 	// Validar argumentos
 	argsOk, argsMap := f.ValidarArgumentos(context, args, token)
-
 	if !argsOk {
 		f.RetornarValor = tiposDeDato.NuloPorDefecto
 		return
 	}
 
-	// Crear nuevo ámbito
+	// Solo usar cache para funciones no recursivas (profundidad == 1)
 	initialScope := context.RegistroAmbito.AmbitoActual
+	var funcionScope *AmbitoBase
 
-	if f.AmbitoDefault != nil {
-		context.RegistroAmbito.AmbitoActual = f.AmbitoDefault
+	depth := context.PilaLlamada.GetRecursionDepth()
+
+	if depth == 1 {
+		// Primera llamada - usar cache si existe
+		cacheKey := f.Nombre + "_scope"
+		if cachedScope, exists := AmbitoFuncionCache[cacheKey]; exists {
+			funcionScope = cachedScope
+			funcionScope.ResetVariables()
+		} else {
+			funcionScope = NewAmbitoBase("func_"+f.Nombre, false)
+			funcionScope.Padre = f.AmbitoDeclaro
+			AmbitoFuncionCache[cacheKey] = funcionScope
+		}
 	} else {
-		context.RegistroAmbito.AmbitoActual = f.AmbitoDeclaro
-		context.RegistroAmbito.PushAmbito("func: " + token.GetText())
+		// Llamada recursiva - crear ámbito nuevo siempre
+		funcionScope = NewAmbitoBase("func_"+f.Nombre+"_rec_"+fmt.Sprintf("%d", depth), false)
+		funcionScope.Padre = f.AmbitoDeclaro
 	}
 
-	wasMutating := context.RegistroAmbito.AmbitoActual.EsMutante
-	context.RegistroAmbito.AmbitoActual.EsMutante = f.IsMutating
+	context.RegistroAmbito.AmbitoActual = funcionScope
+
+	wasMutating := funcionScope.EsMutante
+	funcionScope.EsMutante = f.IsMutating
 
 	// Agregar elemento de retorno a la pila de llamadas
 	funcItem := &LlamadaFunciones{
 		RetornarValor: tiposDeDato.NuloPorDefecto,
-		Tipo: []string{
-			Retornar,
-		},
+		Tipo:          []string{Retornar},
 	}
 	context.PilaLlamada.Push(funcItem)
 
-	// Manejar retorno y limpieza del ámbito
-
+	// Cleanup del ámbito al final
 	defer func() {
-
 		context.PilaLlamada.Limpiar(funcItem)
-		context.RegistroAmbito.PopAmbito()
-		context.RegistroAmbito.AmbitoActual.EsMutante = wasMutating
+		funcionScope.EsMutante = wasMutating
 		context.RegistroAmbito.AmbitoActual = initialScope
 
-		if item, ok := recover().(*LlamadaFunciones); item != nil && ok {
-
-			if item != funcItem {
-				context.TablaError.NewErrorSemantico(token, "Return Invalido")
+		if r := recover(); r != nil {
+			if item, ok := r.(*LlamadaFunciones); item != nil && ok {
+				if item != funcItem {
+					context.TablaError.NewErrorEjecucion(token.GetLine(), token.GetColumn(), "Return Invalido")
+				}
+				f.ValidarRetorno(context, item.RetornarValor, token)
+				return
 			}
-
-			f.ValidarRetorno(context, item.RetornarValor, token)
-			return
+			panic(r)
 		}
-
 		f.ValidarRetorno(context, tiposDeDato.NuloPorDefecto, token)
 	}()
 
-	// Agregar argumentos al ámbito
+	// Agregar argumentos al ámbito (siempre crear nuevas variables)
 	for varName, arg := range argsMap {
-
-		// Tratamiento especial para paso por referencia
 		if arg.esReferencia {
-
 			if arg.VariableRef == nil {
-				context.TablaError.NewErrorSemantico(arg.Token, "No es posible pasar por referencia un valor que no este asociado a una variable")
+				context.TablaError.NewErrorEjecucion(arg.Token.GetLine(), arg.Token.GetColumn(),
+					"No es posible pasar por referencia un valor que no este asociado a una variable")
 				f.ValidarRetorno(context, tiposDeDato.NuloPorDefecto, token)
 				return
 			}
 
-			// Crear el puntero
 			pointer := &TipoPuntero{
 				VariableAsociada: arg.VariableRef,
 			}
-
-			context.RegistroAmbito.AmbitoActual.AgregarVariable(varName, tiposDeDato.TIPO_PUNTERO, pointer, false, false, arg.Token)
+			funcionScope.AgregarVariable(varName, tiposDeDato.TIPO_PUNTERO, pointer, false, false, arg.Token)
 			continue
 		}
-
-		context.RegistroAmbito.AmbitoActual.AgregarVariable(varName, arg.Valor.Type(), arg.Valor.Copy(), false, false, arg.Token)
+		//Siempre usar AgregarVariable (no AgregarVariableOActualizar) para recursión
+		funcionScope.AgregarVariable(varName, arg.Valor.Type(), arg.Valor.Copy(), false, false, arg.Token)
 	}
 
 	// Ejecutar cuerpo de la función
 	for _, stmt := range f.Cuerpo {
+		if shouldStopRecursion {
+			f.RetornarValor = tiposDeDato.NuloPorDefecto
+			return
+		}
 		visitor.Visit(stmt)
 	}
+}
 
+// Función para limpiar cache cuando sea necesario
+func LimpiarCacheAmbitosFunciones() {
+	AmbitoFuncionCache = make(map[string]*AmbitoBase)
 }
 
 // ValidarArgumentos: valida que los argumentos pasados coincidan con los parámetros

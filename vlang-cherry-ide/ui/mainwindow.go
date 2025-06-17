@@ -493,6 +493,7 @@ package ui
 
 import (
 	"fmt"
+	instrucciones "main/Instrucciones"
 	"main/api" // Importar el paquete api
 	"strings"
 
@@ -508,7 +509,7 @@ type MainWindow struct {
 	Console   *Console
 	Reports   *Reports
 	MenuBar   *Menus
-	APIClient *api.Client // AGREGAR ESTE CAMPO
+	APIClient *api.Client
 }
 
 func NewMainWindow(myApp fyne.App) *MainWindow {
@@ -520,7 +521,7 @@ func NewMainWindow(myApp fyne.App) *MainWindow {
 	// Crear componentes
 	editor := NewEditor()
 	console := NewConsole()
-	reports := NewReports()
+	reports := NewReports() // ✅ SIN PARÁMETROS
 	menuBar := NewMenus()
 
 	mainWin := &MainWindow{
@@ -530,7 +531,7 @@ func NewMainWindow(myApp fyne.App) *MainWindow {
 		Console:   console,
 		Reports:   reports,
 		MenuBar:   menuBar,
-		APIClient: api.NewClient(), // INICIALIZAR EL CLIENTE
+		APIClient: api.NewClient(),
 	}
 
 	// Configurar menús
@@ -543,6 +544,9 @@ func NewMainWindow(myApp fyne.App) *MainWindow {
 
 	return mainWin
 }
+
+// ...existing code...
+// [El resto del código permanece igual]
 
 func (mw *MainWindow) createLayout() *container.Split {
 	// Panel superior: Editor y Reportes
@@ -580,6 +584,7 @@ func (mw *MainWindow) SaveFile() {
 }
 
 func (mw *MainWindow) ExecuteCode() {
+	instrucciones.ResetAllRecursionFlags()
 	code := mw.Editor.GetCode()
 
 	// Verificar que hay código

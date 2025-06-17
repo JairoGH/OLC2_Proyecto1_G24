@@ -1,1270 +1,588 @@
-/*
 package ui
 
 import (
+    "fmt"
+    "main/models"
+    "os"
+    "os/exec"
+    "path/filepath"
+    "runtime"
+    "strconv"
+    "strings"
+    "time"
 
-	"strconv"
-	"vlang-cherry-ide/models"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
-
-)
-
-	type Reports struct {
-		Container   *container.AppTabs
-		ErrorList   *widget.List
-		SymbolTable *widget.Table
-		ASTContent  *fyne.Container // CORREGIDO: usar fyne.Container
-
-		// Datos
-		errors      []models.ErrorReport
-		symbolTable []models.SymbolEntry
-	}
-
-	func NewReports() *Reports {
-		reports := &Reports{
-			errors:      []models.ErrorReport{},
-			symbolTable: []models.SymbolEntry{},
-		}
-
-		// Crear lista de errores
-		reports.ErrorList = widget.NewList(
-			func() int {
-				return len(reports.errors)
-			},
-			func() fyne.CanvasObject {
-				return container.NewHBox(
-					widget.NewLabel("Línea 0"),
-					widget.NewLabel("Col 0"),
-					widget.NewLabel("Descripción del error"),
-					widget.NewLabel("Tipo"),
-				)
-			},
-			func(id widget.ListItemID, obj fyne.CanvasObject) {
-				if id < len(reports.errors) {
-					error := reports.errors[id]
-					hbox := obj.(*fyne.Container) // CORREGIDO
-					hbox.Objects[0].(*widget.Label).SetText("Línea " + strconv.Itoa(error.Linea))
-					hbox.Objects[1].(*widget.Label).SetText("Col " + strconv.Itoa(error.Columna))
-					hbox.Objects[2].(*widget.Label).SetText(error.Descripcion)
-					hbox.Objects[3].(*widget.Label).SetText(error.Tipo)
-				}
-			},
-		)
-
-		// Crear tabla de símbolos
-		reports.SymbolTable = widget.NewTable(
-			func() (int, int) {
-				return len(reports.symbolTable) + 1, 6 // +1 para header
-			},
-			func() fyne.CanvasObject {
-				return widget.NewLabel("Template")
-			},
-			func(id widget.TableCellID, obj fyne.CanvasObject) {
-				label := obj.(*widget.Label)
-				if id.Row == 0 {
-					// Header
-					headers := []string{"ID", "Tipo", "Tipo de Dato", "Ámbito", "Línea", "Columna"}
-					if id.Col < len(headers) {
-						label.SetText(headers[id.Col])
-						label.TextStyle = fyne.TextStyle{Bold: true}
-					}
-				} else {
-					// Data
-					if id.Row-1 < len(reports.symbolTable) {
-						symbol := reports.symbolTable[id.Row-1]
-						switch id.Col {
-						case 0:
-							label.SetText(symbol.ID)
-						case 1:
-							label.SetText(symbol.SymbolType)
-						case 2:
-							label.SetText(symbol.DataType)
-						case 3:
-							label.SetText(symbol.Scope)
-						case 4:
-							label.SetText(strconv.Itoa(symbol.Line))
-						case 5:
-							label.SetText(strconv.Itoa(symbol.Column))
-						}
-					}
-				}
-			},
-		)
-
-		// Crear contenedor para AST
-		reports.ASTContent = container.NewVBox(
-			widget.NewLabel("No hay AST disponible"),
-		)
-
-		// Crear pestañas
-		reports.Container = container.NewAppTabs(
-			container.NewTabItem("Errores", reports.ErrorList),
-			container.NewTabItem("Tabla de Símbolos", reports.SymbolTable),
-			container.NewTabItem("AST", container.NewScroll(reports.ASTContent)),
-		)
-
-		return reports
-	}
-
-// UpdateErrors actualiza la lista de errores
-
-	func (r *Reports) UpdateErrors(errors []models.ErrorReport) {
-		r.errors = errors
-		r.ErrorList.Refresh()
-	}
-
-// UpdateSymbolTable actualiza la tabla de símbolos
-
-	func (r *Reports) UpdateSymbolTable(symbols []models.SymbolEntry) {
-		r.symbolTable = symbols
-		r.SymbolTable.Refresh()
-	}
-
-// UpdateASTWithSVG actualiza la pestaña AST con contenido SVG (método original)
-
-	func (r *Reports) UpdateASTWithSVG(astText string, svgContent string) {
-		if svgContent != "" {
-			// Crear widget de texto para mostrar el SVG
-			astLabel := widget.NewLabel(astText)
-			svgText := widget.NewEntry()
-			svgText.MultiLine = true
-			svgText.Wrapping = fyne.TextWrapWord
-			svgText.SetText(svgContent)
-			svgText.Resize(fyne.NewSize(400, 300))
-
-			content := container.NewVBox(
-				astLabel,
-				widget.NewSeparator(),
-				svgText,
-			)
-
-			r.ASTContent.Objects = []fyne.CanvasObject{content}
-			r.ASTContent.Refresh()
-		} else {
-			label := widget.NewLabel("No hay AST disponible")
-			r.ASTContent.Objects = []fyne.CanvasObject{label}
-			r.ASTContent.Refresh()
-		}
-	}
-
-// UpdateASTWithPNG actualiza la pestaña AST con una imagen PNG
-
-	func (r *Reports) UpdateASTWithPNG(astText string, pngData []byte) {
-		if len(pngData) > 0 {
-			// Crear resource desde los bytes PNG
-			resource := fyne.NewStaticResource("ast.png", pngData)
-
-			// Crear imagen desde el resource
-			astImage := canvas.NewImageFromResource(resource)
-			astImage.FillMode = canvas.ImageFillContain // Mantener proporciones
-			astImage.SetMinSize(fyne.NewSize(400, 300))
-
-			// Crear scroll container para la imagen
-			scrollContainer := container.NewScroll(astImage)
-			scrollContainer.SetMinSize(fyne.NewSize(400, 300))
-
-			// Crear contenedor con título y imagen
-			content := container.NewVBox(
-				widget.NewLabel("🌳 Árbol Sintáctico Abstracto (AST)"),
-				widget.NewSeparator(),
-				scrollContainer,
-			)
-
-			// Actualizar contenido de la pestaña AST
-			r.ASTContent.Objects = []fyne.CanvasObject{content}
-			r.ASTContent.Refresh()
-		} else {
-			// Si no hay PNG, mostrar mensaje
-			label := widget.NewLabel("No hay AST disponible")
-			label.Alignment = fyne.TextAlignCenter
-
-			r.ASTContent.Objects = []fyne.CanvasObject{label}
-			r.ASTContent.Refresh()
-		}
-	}
-
-// ClearAll limpia todos los reportes
-
-	func (r *Reports) ClearAll() {
-		r.errors = []models.ErrorReport{}
-		r.symbolTable = []models.SymbolEntry{}
-
-		r.ErrorList.Refresh()
-		r.SymbolTable.Refresh()
-
-		// Limpiar AST
-		label := widget.NewLabel("No hay AST disponible")
-		r.ASTContent.Objects = []fyne.CanvasObject{label}
-		r.ASTContent.Refresh()
-	}
-*/
-/*
-package ui
-
-import (
-	"fmt"
-	"image/color" // NUEVO
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
-	"strconv"
-	"time"
-	"vlang-cherry-ide/models"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+    "fyne.io/fyne/v2"
+    "fyne.io/fyne/v2/canvas"
+    "fyne.io/fyne/v2/container"
+    "fyne.io/fyne/v2/widget"
 )
 
 type Reports struct {
-	Container   *container.AppTabs
-	ErrorList   *widget.List
-	SymbolTable *widget.Table
-	ASTContent  *fyne.Container
+    Container   *container.AppTabs
+    ErrorList   *widget.Table
+    SymbolTable *widget.Table
+    ASTContent  *fyne.Container
 
-	// Datos
-	errors      []models.ErrorReport
-	symbolTable []models.SymbolEntry
+    // 🆕 PANELES PARA ERRORES Y SÍMBOLOS
+    ErrorDetails  *widget.Card
+    ErrorPanel    *container.Split
+    SymbolDetails *widget.Card
+    SymbolPanel   *container.Split
+
+    // Datos
+    errors      []models.ErrorReport
+    symbolTable []models.SymbolEntry
 }
 
 func NewReports() *Reports {
-	reports := &Reports{
-		errors:      []models.ErrorReport{},
-		symbolTable: []models.SymbolEntry{},
-	}
+    reports := &Reports{
+        errors:      []models.ErrorReport{},
+        symbolTable: []models.SymbolEntry{},
+    }
 
-	// Crear lista de errores
-	reports.ErrorList = widget.NewList(
-		func() int {
-			return len(reports.errors)
-		},
-		func() fyne.CanvasObject {
-			return container.NewHBox(
-				widget.NewLabel("Línea 0"),
-				widget.NewLabel("Col 0"),
-				widget.NewLabel("Descripción del error"),
-				widget.NewLabel("Tipo"),
-			)
-		},
-		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			if id < len(reports.errors) {
-				error := reports.errors[id]
-				hbox := obj.(*fyne.Container)
-				hbox.Objects[0].(*widget.Label).SetText("Línea " + strconv.Itoa(error.Linea))
-				hbox.Objects[1].(*widget.Label).SetText("Col " + strconv.Itoa(error.Columna))
-				hbox.Objects[2].(*widget.Label).SetText(error.Descripcion)
-				hbox.Objects[3].(*widget.Label).SetText(error.Tipo)
-			}
-		},
-	)
+    // ========== CONFIGURACIÓN ERRORES ==========
+    
+    // 🆕 CREAR PANEL DE DETALLES PARA ERRORES (SIMPLE Y PEQUEÑO)
+    reports.ErrorDetails = widget.NewCard(
+        "Mensaje Completo",
+        "",
+        widget.NewLabel("Selecciona un error para ver el mensaje completo"),
+    )
+    reports.ErrorDetails.Hide() // 🎯 SIEMPRE OCULTO AL INICIO
 
-	// Crear tabla de símbolos
-	reports.SymbolTable = widget.NewTable(
-		func() (int, int) {
-			return len(reports.symbolTable) + 1, 6 // +1 para header
-		},
-		func() fyne.CanvasObject {
-			return widget.NewLabel("Template")
-		},
-		func(id widget.TableCellID, obj fyne.CanvasObject) {
-			label := obj.(*widget.Label)
-			if id.Row == 0 {
-				// Header
-				headers := []string{"-------ID-------", "Tipo", "Tipo de Dato", "Ámbito", "Línea", "Columna"}
-				if id.Col < len(headers) {
-					label.SetText(headers[id.Col])
-					label.TextStyle = fyne.TextStyle{Bold: true}
-				}
-			} else {
-				// Data
-				if id.Row-1 < len(reports.symbolTable) {
-					symbol := reports.symbolTable[id.Row-1]
-					switch id.Col {
-					case 0:
-						label.SetText(symbol.ID)
-					case 1:
-						label.SetText(symbol.SymbolType)
-					case 2:
-						label.SetText(symbol.DataType)
-					case 3:
-						label.SetText(symbol.Scope)
-					case 4:
-						label.SetText(strconv.Itoa(symbol.Line))
-					case 5:
-						label.SetText(strconv.Itoa(symbol.Column))
-					}
-				}
-			}
-		},
-	)
+    // Crear tabla de errores
+    reports.ErrorList = widget.NewTable(
+        func() (int, int) {
+            return len(reports.errors) + 1, 5
+        },
+        func() fyne.CanvasObject {
+            label := widget.NewLabel("Template")
+            return label
+        },
+        func(id widget.TableCellID, obj fyne.CanvasObject) {
+            label := obj.(*widget.Label)
 
-	// Crear contenedor para AST
-	reports.ASTContent = container.NewVBox(
-		widget.NewLabel("No hay AST disponible"),
-	)
+            if id.Row == 0 {
+                // Encabezados
+                headers := []string{"No.", "Descripción", "Línea", "Columna", "Tipo"}
+                if id.Col < len(headers) {
+                    label.SetText(headers[id.Col])
+                    label.TextStyle = fyne.TextStyle{Bold: true}
+                    label.Alignment = fyne.TextAlignCenter
+                }
+            } else {
+                // Datos
+                if id.Row-1 < len(reports.errors) {
+                    error := reports.errors[id.Row-1]
+                    var text string
 
-	// Crear pestañas
-	reports.Container = container.NewAppTabs(
-		container.NewTabItem("Errores", reports.ErrorList),
-		container.NewTabItem("Tabla de Símbolos", reports.SymbolTable),
-		container.NewTabItem("AST", container.NewScroll(reports.ASTContent)),
-	)
+                    switch id.Col {
+                    case 0: // No.
+                        text = strconv.Itoa(id.Row)
+                        label.Alignment = fyne.TextAlignCenter
+                    case 1: // Descripción
+                        text = reports.truncateText(error.Descripcion, 44)
+                        label.Alignment = fyne.TextAlignLeading
+                        if len(error.Descripcion) > 44 {
+                            text = text + " 🔍"
+                        }
+                    case 2: // Línea
+                        text = strconv.Itoa(error.Linea)
+                        label.Alignment = fyne.TextAlignCenter
+                    case 3: // Columna
+                        text = strconv.Itoa(error.Columna)
+                        label.Alignment = fyne.TextAlignCenter
+                    case 4: // Tipo
+                        text = reports.truncateText(error.Tipo, 22)
+                        label.Alignment = fyne.TextAlignCenter
+                        if len(error.Tipo) > 22 {
+                            text = text + " ..."
+                        }
+                    }
 
-	return reports
+                    label.SetText(text)
+                    label.TextStyle = fyne.TextStyle{Bold: false}
+                }
+            }
+        },
+    )
+
+    // 🆕 EVENTO DE SELECCIÓN PARA ERRORES
+    reports.ErrorList.OnSelected = func(id widget.TableCellID) {
+        if id.Row > 0 && id.Row-1 < len(reports.errors) {
+            reports.showErrorMessage(reports.errors[id.Row-1])
+        }
+    }
+
+    // Configurar anchos de tabla de errores
+    reports.ErrorList.SetColumnWidth(0, 35)  // No.
+    reports.ErrorList.SetColumnWidth(1, 300) // Descripción
+    reports.ErrorList.SetColumnWidth(2, 60)  // Línea
+    reports.ErrorList.SetColumnWidth(3, 70)  // Columna
+    reports.ErrorList.SetColumnWidth(4, 150) // Tipo
+
+    // 🆕 CREAR LAYOUT PARA ERRORES
+    reports.ErrorPanel = container.NewVSplit(
+        reports.ErrorList,
+        reports.ErrorDetails,
+    )
+    reports.ErrorPanel.SetOffset(1.0) // 🎯 INICIAR COMPLETAMENTE OCULTO
+
+    // ========== CONFIGURACIÓN TABLA DE SÍMBOLOS ==========
+
+    // 🆕 CREAR PANEL DE DETALLES PARA SÍMBOLOS
+    reports.SymbolDetails = widget.NewCard(
+        "Detalles del Símbolo",
+        "",
+        widget.NewLabel("Selecciona un símbolo para ver los detalles completos"),
+    )
+    reports.SymbolDetails.Hide() // 🎯 SIEMPRE OCULTO AL INICIO
+
+    // Crear tabla de símbolos
+    reports.SymbolTable = widget.NewTable(
+        func() (int, int) {
+            return len(reports.symbolTable) + 1, 6
+        },
+        func() fyne.CanvasObject {
+            return widget.NewLabel("Template")
+        },
+        func(id widget.TableCellID, obj fyne.CanvasObject) {
+            label := obj.(*widget.Label)
+            if id.Row == 0 {
+                headers := []string{"ID", "Tipo", "Tipo de Dato", "Ámbito", "Línea", "Columna"}
+                if id.Col < len(headers) {
+                    label.SetText(headers[id.Col])
+                    label.TextStyle = fyne.TextStyle{Bold: true}
+                    label.Alignment = fyne.TextAlignCenter
+                }
+            } else {
+                if id.Row-1 < len(reports.symbolTable) {
+                    symbol := reports.symbolTable[id.Row-1]
+                    var text string
+
+                    switch id.Col {
+                    case 0: // ID
+                        text = reports.truncateText(symbol.ID, 20)
+                        label.Alignment = fyne.TextAlignLeading
+                        if len(symbol.ID) > 20 {
+                            text = text + " 🔍" // 🆕 INDICADOR PARA ID
+                        }
+                    case 1: // Tipo
+                        text = reports.truncateText(symbol.SymbolType, 12)
+                        label.Alignment = fyne.TextAlignCenter
+                        if len(symbol.SymbolType) > 12 {
+                            text = text + " ..." // 🆕 INDICADOR PARA TIPO
+                        }
+                    case 2: // Tipo de Dato
+                        text = reports.truncateText(symbol.DataType, 20)
+                        label.Alignment = fyne.TextAlignCenter
+                        if len(symbol.DataType) > 20 {
+                            text = text + " ..." // 🆕 INDICADOR PARA TIPO DE DATO
+                        }
+                    case 3: // Ámbito
+                        text = reports.truncateText(symbol.Scope, 20)
+                        label.Alignment = fyne.TextAlignCenter
+                    case 4: // Línea
+                        text = strconv.Itoa(symbol.Line)
+                        label.Alignment = fyne.TextAlignCenter
+                    case 5: // Columna
+                        text = strconv.Itoa(symbol.Column)
+                        label.Alignment = fyne.TextAlignCenter
+                    }
+
+                    label.SetText(text)
+                    label.TextStyle = fyne.TextStyle{Bold: false}
+                }
+            }
+        },
+    )
+
+    // 🆕 EVENTO DE SELECCIÓN PARA SÍMBOLOS
+    reports.SymbolTable.OnSelected = func(id widget.TableCellID) {
+        if id.Row > 0 && id.Row-1 < len(reports.symbolTable) {
+            reports.showSymbolMessage(reports.symbolTable[id.Row-1])
+        }
+    }
+
+    // Configurar anchos de tabla de símbolos
+    reports.SymbolTable.SetColumnWidth(0, 140) // ID
+    reports.SymbolTable.SetColumnWidth(1, 120) // Tipo
+    reports.SymbolTable.SetColumnWidth(2, 95)  // Tipo de Dato
+    reports.SymbolTable.SetColumnWidth(3, 130) // Ámbito
+    reports.SymbolTable.SetColumnWidth(4, 60)  // Línea
+    reports.SymbolTable.SetColumnWidth(5, 70)  // Columna
+
+    // 🆕 CREAR LAYOUT PARA SÍMBOLOS
+    reports.SymbolPanel = container.NewVSplit(
+        reports.SymbolTable,
+        reports.SymbolDetails,
+    )
+    reports.SymbolPanel.SetOffset(1.0) // 🎯 INICIAR COMPLETAMENTE OCULTO
+
+    // ========== CONFIGURACIÓN AST ==========
+
+    // Crear contenedor para AST
+    reports.ASTContent = container.NewVBox(
+        widget.NewLabel("No hay AST disponible"),
+    )
+
+    // 🆕 PESTAÑAS CON PANELES
+    reports.Container = container.NewAppTabs(
+        container.NewTabItem("Errores", reports.ErrorPanel),           // Panel con mensaje para errores
+        container.NewTabItem("Tabla de Símbolos", reports.SymbolPanel), // Panel con detalles para símbolos
+        container.NewTabItem("AST", container.NewScroll(reports.ASTContent)),
+    )
+
+    return reports
+}
+
+// 🆕 FUNCIÓN PARA MOSTRAR MENSAJE DE ERROR (MEJORADA)
+func (r *Reports) showErrorMessage(error models.ErrorReport) {
+    // 🎯 FORMATO MEJORADO COMO PEDISTE
+    messageText := fmt.Sprintf("📝 Mensaje Completo - Línea %d          Tipo: %s\n\n%s", 
+        error.Linea, error.Tipo, error.Descripcion)
+    
+    messageLabel := widget.NewLabel(messageText)
+    messageLabel.Wrapping = fyne.TextWrapWord
+    messageLabel.TextStyle = fyne.TextStyle{Monospace: false}
+
+    // Botón pequeño para cerrar
+    closeBtn := widget.NewButton("Cerrar", func() {
+        r.ErrorDetails.Hide()
+        r.ErrorPanel.SetOffset(1.0) // Volver a ocultar completamente
+    })
+
+    // Contenido simple
+    content := container.NewVBox(
+        messageLabel,
+        closeBtn,
+    )
+
+    // Configurar card
+    r.ErrorDetails.SetTitle("🚨 Error Completo")
+    r.ErrorDetails.SetSubTitle(fmt.Sprintf("Línea %d • Columna %d", error.Linea, error.Columna))
+    r.ErrorDetails.SetContent(content)
+    r.ErrorDetails.Show()
+    r.ErrorPanel.SetOffset(0.85) // 85% tabla, 15% mensaje (PEQUEÑO)
+}
+
+// 🆕 FUNCIÓN PARA MOSTRAR DETALLES DE SÍMBOLO
+func (r *Reports) showSymbolMessage(symbol models.SymbolEntry) {
+    // 🎯 FORMATO SIMILAR AL DE ERRORES
+    detailsText := fmt.Sprintf(`🔍 Detalles del Símbolo - Línea %d
+
+ID: %s
+Tipo: %s  
+Tipo de Dato: %s
+
+Ubicación:
+• Ámbito: %s
+• Línea: %d
+• Columna: %d
+
+💡 Información adicional:
+Este símbolo fue declarado en el ámbito '%s' y es de tipo '%s'`,
+        symbol.Line,
+        symbol.ID,
+        symbol.SymbolType,
+        symbol.DataType,
+        symbol.Scope,
+        symbol.Line,
+        symbol.Column,
+        symbol.Scope,
+        symbol.SymbolType)
+
+    detailsLabel := widget.NewLabel(detailsText)
+    detailsLabel.Wrapping = fyne.TextWrapWord
+    detailsLabel.TextStyle = fyne.TextStyle{Monospace: false}
+
+    // Botón para cerrar
+    closeBtn := widget.NewButton("Cerrar", func() {
+        r.SymbolDetails.Hide()
+        r.SymbolPanel.SetOffset(1.0) // Volver a ocultar completamente
+    })
+
+    // Contenido
+    content := container.NewVBox(
+        detailsLabel,
+        closeBtn,
+    )
+
+    // Configurar card
+    r.SymbolDetails.SetTitle("📋 Símbolo Completo")
+    r.SymbolDetails.SetSubTitle(fmt.Sprintf("%s • %s", symbol.ID, symbol.SymbolType))
+    r.SymbolDetails.SetContent(content)
+    r.SymbolDetails.Show()
+    r.SymbolPanel.SetOffset(0.85) // 85% tabla, 15% detalles (PEQUEÑO)
+}
+
+// 🔧 FUNCIÓN TRUNCATE (mantener igual)
+func (r *Reports) truncateText(text string, maxLength int) string {
+    if len(text) <= maxLength {
+        return text
+    }
+
+    if maxLength <= 3 {
+        return ""
+    }
+
+    return text[:maxLength-3] + "..."
+}
+
+// 🆕 FUNCIÓN PARA OCULTAR TODOS LOS PANELES AL CAMBIAR DE PESTAÑA
+func (r *Reports) HideAllPanels() {
+    // 🎯 OCULTAR PANEL DE ERRORES
+    r.ErrorDetails.Hide()
+    r.ErrorPanel.SetOffset(1.0)
+    
+    // 🎯 OCULTAR PANEL DE SÍMBOLOS
+    r.SymbolDetails.Hide()
+    r.SymbolPanel.SetOffset(1.0)
 }
 
 // UpdateErrors actualiza la lista de errores
 func (r *Reports) UpdateErrors(errors []models.ErrorReport) {
-	r.errors = errors
-	r.ErrorList.Refresh()
+    r.errors = errors
+    r.ErrorList.Refresh()
+    
+    // 🎯 ASEGURAR QUE ESTÉ OCULTO AL ACTUALIZAR
+    r.ErrorDetails.Hide()
+    r.ErrorPanel.SetOffset(1.0)
 }
 
 // UpdateSymbolTable actualiza la tabla de símbolos
 func (r *Reports) UpdateSymbolTable(symbols []models.SymbolEntry) {
-	r.symbolTable = symbols
-	r.SymbolTable.Refresh()
-}
-
-// UpdateASTWithSVG - Versión que funciona: placeholder + navegador
-func (r *Reports) UpdateASTWithSVG(astText string, svgContent string) {
-	if svgContent != "" {
-		// 1. Guardar SVG como archivo
-		svgPath, err := r.saveSVGToFile(svgContent)
-		if err != nil {
-			r.showError("Error guardando SVG: " + err.Error())
-			return
-		}
-
-		// 2. Crear un placeholder visual (ya que Fyne no puede mostrar SVG complejos)
-		placeholderImage := r.createASTPlaceholder()
-
-		// 3. Información del AST
-		infoText := fmt.Sprintf(`🌳 Árbol Sintáctico Abstracto
-
-✅ SVG generado y guardado exitosamente
-📁 Archivo: %s
-📊 Tamaño: %d caracteres
-
-💡 Haz clic en "Abrir en Navegador" para ver el AST completo`,
-			filepath.Base(svgPath),
-			len(svgContent))
-
-		infoLabel := widget.NewLabel(infoText)
-		infoLabel.Wrapping = fyne.TextWrapWord
-
-		// 4. Botón para abrir en navegador (funciona perfecto)
-		openBtn := widget.NewButton("🌐 Abrir en Navegador", func() {
-			r.openFileInBrowser(svgPath)
-		})
-		openBtn.Importance = widget.HighImportance
-
-		// 5. Layout con placeholder + botón
-		content := container.NewVBox(
-			infoLabel,
-			widget.NewSeparator(),
-			openBtn,
-			widget.NewSeparator(),
-			widget.NewLabel("Vista previa (abrir en navegador para ver completo):"),
-			container.NewScroll(placeholderImage),
-		)
-
-		r.ASTContent.Objects = []fyne.CanvasObject{content}
-		r.ASTContent.Refresh()
-
-	} else {
-		r.showError("No hay AST disponible")
-	}
-}
-
-// createASTPlaceholder crea una imagen placeholder que representa un árbol
-func (r *Reports) createASTPlaceholder() *fyne.Container {
-	// Crear un placeholder visual simple que se parece a un árbol
-	treeText := `
-           🌳 AST GENERADO
-         /              \
-     stmt:9           stmt:9
-    /      \         /      \
-func_call:1  print  mut   decl
-    |         |      |      |
-   print   "text"  var   type
-                    |      |
-                  value  int
-
-💡 El AST completo se muestra en el navegador
-   (Fyne no puede renderizar SVG complejos)
-`
-
-	treeLabel := widget.NewLabel(treeText)
-	treeLabel.TextStyle = fyne.TextStyle{Monospace: true}
-
-	// Crear un contenedor con fondo gris claro
-	background := canvas.NewRectangle(&color.RGBA{245, 245, 245, 255})
-
-	content := container.NewStack(
-		background,
-		container.NewPadded(treeLabel),
-	)
-
-	content.Resize(fyne.NewSize(500, 300))
-	return content
-}
-
-// saveSVGToFile guarda el SVG como archivo local
-func (r *Reports) saveSVGToFile(svgContent string) (string, error) {
-	// Crear directorio si no existe
-	outputDir := "generated_asts"
-	os.MkdirAll(outputDir, 0755)
-
-	// Generar nombre único con timestamp
-	timestamp := time.Now().Format("2006-01-02_15-04-05")
-	filename := fmt.Sprintf("ast_%s.svg", timestamp)
-	fullPath := filepath.Join(outputDir, filename)
-
-	// Escribir archivo
-	err := os.WriteFile(fullPath, []byte(svgContent), 0644)
-	if err != nil {
-		return "", err
-	}
-
-	// Obtener ruta absoluta
-	absPath, err := filepath.Abs(fullPath)
-	if err != nil {
-		return fullPath, nil
-	}
-
-	return absPath, nil
-}
-
-// showError muestra un mensaje de error
-func (r *Reports) showError(message string) {
-	label := widget.NewLabel("❌ " + message)
-	label.Alignment = fyne.TextAlignCenter
-	r.ASTContent.Objects = []fyne.CanvasObject{label}
-	r.ASTContent.Refresh()
-}
-
-// UpdateASTWithPNG mantener compatibilidad
-func (r *Reports) UpdateASTWithPNG(astText string, pngData []byte) {
-	// Si tenemos datos PNG, mostrarlos, sino mostrar mensaje
-	if len(pngData) > 0 {
-		// Crear imagen desde bytes
-		resource := fyne.NewStaticResource("ast.png", pngData)
-		astImage := canvas.NewImageFromResource(resource)
-		astImage.FillMode = canvas.ImageFillContain
-		astImage.SetMinSize(fyne.NewSize(400, 300))
-
-		content := container.NewVBox(
-			widget.NewLabel("🌳 AST generado como PNG"),
-			widget.NewSeparator(),
-			container.NewScroll(astImage),
-		)
-
-		r.ASTContent.Objects = []fyne.CanvasObject{content}
-		r.ASTContent.Refresh()
-	} else {
-		label := widget.NewLabel("❌ No hay datos PNG disponibles")
-		label.Alignment = fyne.TextAlignCenter
-		r.ASTContent.Objects = []fyne.CanvasObject{label}
-		r.ASTContent.Refresh()
-	}
+    r.symbolTable = symbols
+    r.SymbolTable.Refresh()
+    
+    // 🎯 ASEGURAR QUE ESTÉ OCULTO AL ACTUALIZAR
+    r.SymbolDetails.Hide()
+    r.SymbolPanel.SetOffset(1.0)
 }
 
 // ClearAll limpia todos los reportes
 func (r *Reports) ClearAll() {
-	r.errors = []models.ErrorReport{}
-	r.symbolTable = []models.SymbolEntry{}
+    r.errors = []models.ErrorReport{}
+    r.symbolTable = []models.SymbolEntry{}
 
-	r.ErrorList.Refresh()
-	r.SymbolTable.Refresh()
+    r.ErrorList.Refresh()
+    r.SymbolTable.Refresh()
 
-	// Limpiar AST
-	label := widget.NewLabel("No hay AST disponible")
-	r.ASTContent.Objects = []fyne.CanvasObject{label}
-	r.ASTContent.Refresh()
+    // 🎯 OCULTAR TODOS LOS PANELES AL LIMPIAR
+    r.HideAllPanels()
+
+    // Limpiar AST
+    label := widget.NewLabel("No hay AST disponible")
+    r.ASTContent.Objects = []fyne.CanvasObject{label}
+    r.ASTContent.Refresh()
 }
 
-// openFileInBrowser abre cualquier archivo en el navegador del sistema
-func (r *Reports) openFileInBrowser(filePath string) {
-	var cmd *exec.Cmd
-
-	switch runtime.GOOS {
-	case "linux":
-		cmd = exec.Command("xdg-open", filePath)
-	case "darwin": // macOS
-		cmd = exec.Command("open", filePath)
-	case "windows":
-		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", filePath)
-	default:
-		r.showError("Sistema operativo no soportado")
-		return
-	}
-
-	if err := cmd.Start(); err != nil {
-		r.showError("Error abriendo archivo: " + err.Error())
-	}
-}
-*/
-/*
-package ui
-
-import (
-	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
-	"strconv"
-	"time"
-	"vlang-cherry-ide/models"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas" // AGREGAR ESTA LÍNEA
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
-)
-
-type Reports struct {
-	Container   *container.AppTabs
-	ErrorList   *widget.List
-	SymbolTable *widget.Table
-	ASTContent  *fyne.Container
-
-	// Datos
-	errors      []models.ErrorReport
-	symbolTable []models.SymbolEntry
-}
-
-func NewReports() *Reports {
-	reports := &Reports{
-		errors:      []models.ErrorReport{},
-		symbolTable: []models.SymbolEntry{},
-	}
-
-	// Crear lista de errores
-	reports.ErrorList = widget.NewList(
-		func() int {
-			return len(reports.errors)
-		},
-		func() fyne.CanvasObject {
-			return container.NewHBox(
-				widget.NewLabel("Línea 0"),
-				widget.NewLabel("Col 0"),
-				widget.NewLabel("Descripción del error"),
-				widget.NewLabel("Tipo"),
-			)
-		},
-		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			if id < len(reports.errors) {
-				error := reports.errors[id]
-				hbox := obj.(*fyne.Container)
-				hbox.Objects[0].(*widget.Label).SetText("Línea " + strconv.Itoa(error.Linea))
-				hbox.Objects[1].(*widget.Label).SetText("Col " + strconv.Itoa(error.Columna))
-				hbox.Objects[2].(*widget.Label).SetText(error.Descripcion)
-				hbox.Objects[3].(*widget.Label).SetText(error.Tipo)
-			}
-		},
-	)
-
-	// Crear tabla de símbolos con columnas más anchas
-	reports.SymbolTable = widget.NewTable(
-		func() (int, int) {
-			return len(reports.symbolTable) + 1, 6 // +1 para header
-		},
-		func() fyne.CanvasObject {
-			return widget.NewLabel("Template")
-		},
-		func(id widget.TableCellID, obj fyne.CanvasObject) {
-			label := obj.(*widget.Label)
-			if id.Row == 0 {
-				// Header
-				headers := []string{"ID", "Tipo", "Tipo de Dato", "Ámbito", "Línea", "Columna"}
-				if id.Col < len(headers) {
-					label.SetText(headers[id.Col])
-					label.TextStyle = fyne.TextStyle{Bold: true}
-				}
-			} else {
-				// Data
-				if id.Row-1 < len(reports.symbolTable) {
-					symbol := reports.symbolTable[id.Row-1]
-					switch id.Col {
-					case 0:
-						label.SetText(symbol.ID)
-					case 1:
-						label.SetText(symbol.SymbolType)
-					case 2:
-						label.SetText(symbol.DataType)
-					case 3:
-						label.SetText(symbol.Scope)
-					case 4:
-						label.SetText(strconv.Itoa(symbol.Line))
-					case 5:
-						label.SetText(strconv.Itoa(symbol.Column))
-					}
-				}
-			}
-		},
-	)
-
-	// Configurar anchos de columna para mejor legibilidad
-	reports.SymbolTable.SetColumnWidth(0, 120) // ID
-	reports.SymbolTable.SetColumnWidth(1, 100) // Tipo
-	reports.SymbolTable.SetColumnWidth(2, 120) // Tipo de Dato
-	reports.SymbolTable.SetColumnWidth(3, 80)  // Ámbito
-	reports.SymbolTable.SetColumnWidth(4, 60)  // Línea
-	reports.SymbolTable.SetColumnWidth(5, 70)  // Columna
-
-	// Crear contenedor para AST
-	reports.ASTContent = container.NewVBox(
-		widget.NewLabel("No hay AST disponible"),
-	)
-
-	// Crear pestañas
-	reports.Container = container.NewAppTabs(
-		container.NewTabItem("Errores", reports.ErrorList),
-		container.NewTabItem("Tabla de Símbolos", reports.SymbolTable),
-		container.NewTabItem("AST", container.NewScroll(reports.ASTContent)),
-	)
-
-	return reports
-}
-
-// UpdateErrors actualiza la lista de errores
-func (r *Reports) UpdateErrors(errors []models.ErrorReport) {
-	r.errors = errors
-	r.ErrorList.Refresh()
-}
-
-// UpdateSymbolTable actualiza la tabla de símbolos
-func (r *Reports) UpdateSymbolTable(symbols []models.SymbolEntry) {
-	r.symbolTable = symbols
-	r.SymbolTable.Refresh()
-}
-
-// UpdateASTWithSVG - Versión que funciona: placeholder + navegador
-func (r *Reports) UpdateASTWithSVG(astText string, svgContent string) {
-	if svgContent != "" {
-		// 1. Guardar SVG como archivo
-		svgPath, err := r.saveSVGToFile(svgContent)
-		if err != nil {
-			r.showError("Error guardando SVG: " + err.Error())
-			return
-		}
-
-		// 2. Crear un placeholder visual (ya que Fyne no puede mostrar SVG complejos)
-		placeholderImage := r.createASTPlaceholder()
-
-		// 3. Información del AST
-		infoText := fmt.Sprintf(`🌳 Árbol Sintáctico Abstracto
-
-✅ SVG generado y guardado exitosamente
-📁 Archivo: %s
-📊 Tamaño: %d caracteres
-
-💡 Haz clic en "Abrir en Navegador" para ver el AST completo`,
-			filepath.Base(svgPath),
-			len(svgContent))
-
-		infoLabel := widget.NewLabel(infoText)
-		infoLabel.Wrapping = fyne.TextWrapWord
-
-		// 4. Botón para abrir en navegador (funciona perfecto)
-		openBtn := widget.NewButton("🌐 Abrir en Navegador", func() {
-			r.openFileInBrowser(svgPath)
-		})
-		openBtn.Importance = widget.HighImportance
-
-		// 5. Layout con placeholder + botón
-		content := container.NewVBox(
-			infoLabel,
-			widget.NewSeparator(),
-			openBtn,
-			widget.NewSeparator(),
-			widget.NewLabel("Vista previa (abrir en navegador para ver completo):"),
-			container.NewScroll(placeholderImage),
-		)
-
-		r.ASTContent.Objects = []fyne.CanvasObject{content}
-		r.ASTContent.Refresh()
-
-	} else {
-		r.showError("No hay AST disponible")
-	}
-}
-
-// createASTPlaceholder crea una imagen placeholder más simple y visible
-func (r *Reports) createASTPlaceholder() *fyne.Container {
-	// Crear texto del árbol más simple y visible
-	treeText := `🌳 AST GENERADO EXITOSAMENTE
-
-        program:1
-       /         \
-   stmt:9       stmt:9
-  /     \      /     \
-print   mut   print  bool
-  |      |     |      |
-"text" var   "val"  type
-
-📊 Información:
-• Árbol sintáctico generado
-• Archivo SVG guardado
-• Usa el botón para ver completo
-
-💡 El SVG completo está en el navegador`
-
-	// Crear label con texto monospace
-	treeLabel := widget.NewLabel(treeText)
-	treeLabel.TextStyle = fyne.TextStyle{Monospace: true}
-	treeLabel.Alignment = fyne.TextAlignCenter
-
-	// Crear contenedor simple SIN fondo (para evitar bloqueos)
-	content := container.NewPadded(treeLabel)
-	return content
-}
-
-// saveSVGToFile guarda el SVG como archivo local
-func (r *Reports) saveSVGToFile(svgContent string) (string, error) {
-	// Crear directorio si no existe
-	outputDir := "generated_asts"
-	os.MkdirAll(outputDir, 0755)
-
-	// Generar nombre único con timestamp
-	timestamp := time.Now().Format("2006-01-02_15-04-05")
-	filename := fmt.Sprintf("ast_%s.svg", timestamp)
-	fullPath := filepath.Join(outputDir, filename)
-
-	// Escribir archivo
-	err := os.WriteFile(fullPath, []byte(svgContent), 0644)
-	if err != nil {
-		return "", err
-	}
-
-	// Obtener ruta absoluta
-	absPath, err := filepath.Abs(fullPath)
-	if err != nil {
-		return fullPath, nil
-	}
-
-	return absPath, nil
-}
-
-// showError muestra un mensaje de error
-func (r *Reports) showError(message string) {
-	label := widget.NewLabel("❌ " + message)
-	label.Alignment = fyne.TextAlignCenter
-	r.ASTContent.Objects = []fyne.CanvasObject{label}
-	r.ASTContent.Refresh()
-}
-
-// UpdateASTWithPNG mantener compatibilidad
-func (r *Reports) UpdateASTWithPNG(astText string, pngData []byte) {
-	// Si tenemos datos PNG, mostrarlos, sino mostrar mensaje
-	if len(pngData) > 0 {
-		// Crear imagen desde bytes
-		resource := fyne.NewStaticResource("ast.png", pngData)
-		astImage := canvas.NewImageFromResource(resource)
-		astImage.FillMode = canvas.ImageFillContain
-		astImage.SetMinSize(fyne.NewSize(400, 300))
-
-		content := container.NewVBox(
-			widget.NewLabel("🌳 AST generado como PNG"),
-			widget.NewSeparator(),
-			container.NewScroll(astImage),
-		)
-
-		r.ASTContent.Objects = []fyne.CanvasObject{content}
-		r.ASTContent.Refresh()
-	} else {
-		label := widget.NewLabel("❌ No hay datos PNG disponibles")
-		label.Alignment = fyne.TextAlignCenter
-		r.ASTContent.Objects = []fyne.CanvasObject{label}
-		r.ASTContent.Refresh()
-	}
-}
-
-// ClearAll limpia todos los reportes
-func (r *Reports) ClearAll() {
-	r.errors = []models.ErrorReport{}
-	r.symbolTable = []models.SymbolEntry{}
-
-	r.ErrorList.Refresh()
-	r.SymbolTable.Refresh()
-
-	// Limpiar AST
-	label := widget.NewLabel("No hay AST disponible")
-	r.ASTContent.Objects = []fyne.CanvasObject{label}
-	r.ASTContent.Refresh()
-}
-
-// openFileInBrowser abre cualquier archivo en el navegador del sistema
-func (r *Reports) openFileInBrowser(filePath string) {
-	var cmd *exec.Cmd
-
-	switch runtime.GOOS {
-	case "linux":
-		cmd = exec.Command("xdg-open", filePath)
-	case "darwin": // macOS
-		cmd = exec.Command("open", filePath)
-	case "windows":
-		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", filePath)
-	default:
-		r.showError("Sistema operativo no soportado")
-		return
-	}
-
-	if err := cmd.Start(); err != nil {
-		r.showError("Error abriendo archivo: " + err.Error())
-	}
-}
-*/
-
-package ui
-
-import (
-	"fmt"
-	"main/models"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
-	"strconv"
-	"strings"
-	"time"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
-)
-
-type Reports struct {
-	Container   *container.AppTabs
-	ErrorList   *widget.List
-	SymbolTable *widget.Table
-	ASTContent  *fyne.Container
-
-	// Datos
-	errors      []models.ErrorReport
-	symbolTable []models.SymbolEntry
-}
-
-func NewReports() *Reports {
-	reports := &Reports{
-		errors:      []models.ErrorReport{},
-		symbolTable: []models.SymbolEntry{},
-	}
-
-	// Crear lista de errores
-	reports.ErrorList = widget.NewList(
-		func() int {
-			return len(reports.errors)
-		},
-		func() fyne.CanvasObject {
-			return container.NewHBox(
-				widget.NewLabel("Línea 0"),
-				widget.NewLabel("Col 0"),
-				widget.NewLabel("Descripción del error"),
-				widget.NewLabel("Tipo"),
-			)
-		},
-		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			if id < len(reports.errors) {
-				error := reports.errors[id]
-				hbox := obj.(*fyne.Container)
-				hbox.Objects[0].(*widget.Label).SetText("Línea " + strconv.Itoa(error.Linea))
-				hbox.Objects[1].(*widget.Label).SetText("Col " + strconv.Itoa(error.Columna))
-				hbox.Objects[2].(*widget.Label).SetText(error.Descripcion)
-				hbox.Objects[3].(*widget.Label).SetText(error.Tipo)
-			}
-		},
-	)
-
-	// Crear tabla de símbolos con columnas más anchas
-	reports.SymbolTable = widget.NewTable(
-		func() (int, int) {
-			return len(reports.symbolTable) + 1, 6 // +1 para header
-		},
-		func() fyne.CanvasObject {
-			return widget.NewLabel("Template")
-		},
-		func(id widget.TableCellID, obj fyne.CanvasObject) {
-			label := obj.(*widget.Label)
-			if id.Row == 0 {
-				// Header
-				headers := []string{"ID", "Tipo", "Tipo de Dato", "Ámbito", "Línea", "Columna"}
-				if id.Col < len(headers) {
-					label.SetText(headers[id.Col])
-					label.TextStyle = fyne.TextStyle{Bold: true}
-				}
-			} else {
-				// Data
-				if id.Row-1 < len(reports.symbolTable) {
-					symbol := reports.symbolTable[id.Row-1]
-					switch id.Col {
-					case 0:
-						label.SetText(symbol.ID)
-					case 1:
-						label.SetText(symbol.SymbolType)
-					case 2:
-						label.SetText(symbol.DataType)
-					case 3:
-						label.SetText(symbol.Scope)
-					case 4:
-						label.SetText(strconv.Itoa(symbol.Line))
-					case 5:
-						label.SetText(strconv.Itoa(symbol.Column))
-					}
-				}
-			}
-		},
-	)
-
-	// Configurar anchos de columna para mejor legibilidad
-	reports.SymbolTable.SetColumnWidth(0, 120) // ID
-	reports.SymbolTable.SetColumnWidth(1, 100) // Tipo
-	reports.SymbolTable.SetColumnWidth(2, 120) // Tipo de Dato
-	reports.SymbolTable.SetColumnWidth(3, 80)  // Ámbito
-	reports.SymbolTable.SetColumnWidth(4, 60)  // Línea
-	reports.SymbolTable.SetColumnWidth(5, 70)  // Columna
-
-	// Crear contenedor para AST
-	reports.ASTContent = container.NewVBox(
-		widget.NewLabel("No hay AST disponible"),
-	)
-
-	// Crear pestañas
-	reports.Container = container.NewAppTabs(
-		container.NewTabItem("Errores", reports.ErrorList),
-		container.NewTabItem("Tabla de Símbolos", reports.SymbolTable),
-		container.NewTabItem("AST", container.NewScroll(reports.ASTContent)),
-	)
-
-	return reports
-}
-
-// UpdateErrors actualiza la lista de errores
-func (r *Reports) UpdateErrors(errors []models.ErrorReport) {
-	r.errors = errors
-	r.ErrorList.Refresh()
-}
-
-// UpdateSymbolTable actualiza la tabla de símbolos
-func (r *Reports) UpdateSymbolTable(symbols []models.SymbolEntry) {
-	r.symbolTable = symbols
-	r.SymbolTable.Refresh()
-}
+// ============ RESTO DE FUNCIONES MANTENER IGUAL ============
+// (UpdateASTWithSVG, convertAndShowAST, etc. - sin cambios)
 
 // UpdateASTWithSVG - Conversión automática SVG a PNG
 func (r *Reports) UpdateASTWithSVG(astText string, svgContent string) {
-	if svgContent != "" {
-		// 1. Guardar SVG como archivo
-		svgPath, err := r.saveSVGToFile(svgContent)
-		if err != nil {
-			r.showError("Error guardando SVG: " + err.Error())
-			return
-		}
-
-		// 2. Intentar convertir SVG a PNG automáticamente
-		r.convertAndShowAST(svgPath, svgContent)
-
-	} else {
-		r.showError("No hay AST disponible")
-	}
+    if svgContent != "" {
+        svgPath, err := r.saveSVGToFile(svgContent)
+        if err != nil {
+            r.showError("Error guardando SVG: " + err.Error())
+            return
+        }
+        r.convertAndShowAST(svgPath, svgContent)
+    } else {
+        r.showError("No hay AST disponible")
+    }
 }
 
-// convertAndShowAST intenta convertir y mostrar, con fallback si falla
 func (r *Reports) convertAndShowAST(svgPath, svgContent string) {
-	// Intentar conversión automática
-	pngPath, pngData, err := r.convertSVGToPNG(svgPath)
+    pngPath, pngData, err := r.convertSVGToPNG(svgPath)
 
-	if err == nil && len(pngData) > 0 {
-		// ✅ ÉXITO: Mostrar PNG real (idéntico al SVG)
-		r.showPNGSuccess(svgPath, pngPath, pngData, svgContent)
-	} else {
-		// ❌ FALLÓ: Mostrar instrucciones + fallback
-		r.showConversionFailed(svgPath, svgContent, err.Error())
-	}
+    if err == nil && len(pngData) > 0 {
+        r.showPNGSuccess(svgPath, pngPath, pngData, svgContent)
+    } else {
+        r.showConversionFailed(svgPath, svgContent, err.Error())
+    }
 }
 
-// convertSVGToPNG convierte usando herramientas del sistema
 func (r *Reports) convertSVGToPNG(svgPath string) (string, []byte, error) {
-	// Generar ruta PNG
-	dir := filepath.Dir(svgPath)
-	base := strings.TrimSuffix(filepath.Base(svgPath), ".svg")
-	pngPath := filepath.Join(dir, base+".png")
+    dir := filepath.Dir(svgPath)
+    base := strings.TrimSuffix(filepath.Base(svgPath), ".svg")
+    pngPath := filepath.Join(dir, base+".png")
 
-	// Herramientas de conversión (en orden de preferencia)
-	converters := [][]string{
-		// Inkscape (mejor calidad)
-		{"inkscape", svgPath, "--export-type=png", "--export-dpi=300", "--export-width=1200", "--export-filename=" + pngPath},
-		// rsvg-convert (muy bueno)
-		{"rsvg-convert", "-a", "-w", "1200", "-h", "900", "-f", "png", "-o", pngPath, svgPath},
-		// ImageMagick
-		{"convert", "-density", "300", "-background", "white", "-resize", "1200x900", svgPath, pngPath},
-		// CairoSVG (si está disponible)
-		{"cairosvg", svgPath, "-o", pngPath, "--output-width", "1200"},
-	}
+    converters := [][]string{
+        {"inkscape", svgPath, "--export-type=png", "--export-dpi=300", "--export-width=1200", "--export-filename=" + pngPath},
+        {"rsvg-convert", "-a", "-w", "1200", "-h", "900", "-f", "png", "-o", pngPath, svgPath},
+        {"convert", "-density", "300", "-background", "white", "-resize", "1200x900", svgPath, pngPath},
+        {"cairosvg", svgPath, "-o", pngPath, "--output-width", "1200"},
+    }
 
-	fmt.Printf("🔄 Intentando convertir SVG a PNG...\n")
+    for _, cmd := range converters {
+        execCmd := exec.Command(cmd[0], cmd[1:]...)
+        if err := execCmd.Run(); err == nil {
+            if pngData, err := os.ReadFile(pngPath); err == nil && len(pngData) > 1000 {
+                return pngPath, pngData, nil
+            }
+        }
+    }
 
-	for i, cmd := range converters {
-		fmt.Printf("   Probando %s (%d/%d)...\n", cmd[0], i+1, len(converters))
-
-		// Ejecutar comando
-		execCmd := exec.Command(cmd[0], cmd[1:]...)
-		if err := execCmd.Run(); err == nil {
-			// Verificar que el archivo se creó correctamente
-			if pngData, err := os.ReadFile(pngPath); err == nil && len(pngData) > 1000 {
-				fmt.Printf("✅ Conversión exitosa con %s\n", cmd[0])
-				return pngPath, pngData, nil
-			}
-		}
-		fmt.Printf("   %s no disponible o falló\n", cmd[0])
-	}
-
-	return "", nil, fmt.Errorf("no se encontró ningún convertidor (inkscape, rsvg-convert, convert, cairosvg)")
+    return "", nil, fmt.Errorf("no se encontró ningún convertidor")
 }
 
-// showPNGSuccess muestra el PNG convertido (imagen real del AST)
 func (r *Reports) showPNGSuccess(svgPath, pngPath string, pngData []byte, svgContent string) {
-	// Crear imagen desde PNG
-	pngResource := fyne.NewStaticResource("ast.png", pngData)
-	astImage := canvas.NewImageFromResource(pngResource)
-	astImage.FillMode = canvas.ImageFillContain
-	astImage.SetMinSize(fyne.NewSize(600, 400))
+    pngResource := fyne.NewStaticResource("ast.png", pngData)
+    astImage := canvas.NewImageFromResource(pngResource)
+    astImage.FillMode = canvas.ImageFillContain
+    astImage.SetMinSize(fyne.NewSize(600, 400))
 
-	// Información de éxito
-	infoText := fmt.Sprintf(`🌳 AST Mostrado Como Imagen Real
+    infoText := fmt.Sprintf(`🌳 AST Mostrado Como Imagen Real
 
 ✅ Conversión exitosa SVG → PNG
 📁 SVG: %s
 🖼️ PNG: %s  
 📊 Tamaño PNG: %d KB
-📐 Resolución: 1200x900px
 
 💡 Esta es la imagen EXACTA del SVG`,
-		filepath.Base(svgPath),
-		filepath.Base(pngPath),
-		len(pngData)/1024)
+        filepath.Base(svgPath),
+        filepath.Base(pngPath),
+        len(pngData)/1024)
 
-	infoLabel := widget.NewLabel(infoText)
-	infoLabel.Wrapping = fyne.TextWrapWord
+    infoLabel := widget.NewLabel(infoText)
+    infoLabel.Wrapping = fyne.TextWrapWord
 
-	// Botones de acción
-	openSVGBtn := widget.NewButton("📄 Abrir SVG Original", func() {
-		r.openFileInBrowser(svgPath)
-	})
+    openSVGBtn := widget.NewButton("📄 Abrir SVG", func() {
+        r.openFileInBrowser(svgPath)
+    })
 
-	openPNGBtn := widget.NewButton("🖼️ Abrir PNG", func() {
-		r.openFileInBrowser(pngPath)
-	})
+    openPNGBtn := widget.NewButton("🖼️ Abrir PNG", func() {
+        r.openFileInBrowser(pngPath)
+    })
 
-	// Layout con imagen real
-	content := container.NewVBox(
-		infoLabel,
-		widget.NewSeparator(),
-		container.NewHBox(openSVGBtn, openPNGBtn),
-		widget.NewSeparator(),
-		widget.NewLabel("🎯 AST Visualizado (imagen exacta):"),
-		container.NewScroll(astImage),
-	)
+    content := container.NewVBox(
+        infoLabel,
+        widget.NewSeparator(),
+        container.NewHBox(openSVGBtn, openPNGBtn),
+        widget.NewSeparator(),
+        widget.NewLabel("🎯 AST Visualizado:"),
+        container.NewScroll(astImage),
+    )
 
-	r.ASTContent.Objects = []fyne.CanvasObject{content}
-	r.ASTContent.Refresh()
+    r.ASTContent.Objects = []fyne.CanvasObject{content}
+    r.ASTContent.Refresh()
 }
 
-// showConversionFailed muestra cuando no se puede convertir
 func (r *Reports) showConversionFailed(svgPath, svgContent string, errorMsg string) {
-	// Información de instalación
-	installText := `🔧 INSTALAR CONVERTIDOR PARA VER AST REAL
+    installText := `🔧 INSTALAR CONVERTIDOR PARA VER AST REAL
 
 Para ver el AST como imagen exacta en el IDE:
 
 🐧 Linux:
-   sudo apt update
    sudo apt install inkscape
 
 🍎 macOS:
    brew install librsvg
-   # o: brew install inkscape
 
 🪟 Windows:
-   Descargar Inkscape: https://inkscape.org
+   Descargar Inkscape: https://inkscape.org`
 
-⚡ Después de instalar, reinicia el IDE`
+    installLabel := widget.NewLabel(installText)
+    installLabel.TextStyle = fyne.TextStyle{Monospace: true}
 
-	installLabel := widget.NewLabel(installText)
-	installLabel.TextStyle = fyne.TextStyle{Monospace: true}
-
-	// Información actual
-	currentInfo := fmt.Sprintf(`📊 Estado Actual:
+    currentInfo := fmt.Sprintf(`📊 Estado Actual:
 
 ❌ Convertidor no encontrado: %s
 📁 SVG guardado: %s
 📊 Tamaño: %d caracteres
 
 🌐 Mientras tanto, usa el botón para ver en navegador:`,
-		errorMsg, filepath.Base(svgPath), len(svgContent))
+        errorMsg, filepath.Base(svgPath), len(svgContent))
 
-	currentLabel := widget.NewLabel(currentInfo)
-	currentLabel.Wrapping = fyne.TextWrapWord
+    currentLabel := widget.NewLabel(currentInfo)
+    currentLabel.Wrapping = fyne.TextWrapWord
 
-	// Botón para navegador
-	openBtn := widget.NewButton("🌐 Abrir en Navegador", func() {
-		r.openFileInBrowser(svgPath)
-	})
-	openBtn.Importance = widget.HighImportance
+    openBtn := widget.NewButton("🌐 Abrir en Navegador", func() {
+        r.openFileInBrowser(svgPath)
+    })
 
-	// Botón para verificar instalación
-	checkBtn := widget.NewButton("🔍 Verificar Instalación", func() {
-		r.checkConverters()
-	})
+    content := container.NewVBox(
+        currentLabel,
+        widget.NewSeparator(),
+        openBtn,
+        widget.NewSeparator(),
+        widget.NewLabel("📋 Instrucciones:"),
+        container.NewScroll(installLabel),
+    )
 
-	// Layout de instalación
-	content := container.NewVBox(
-		currentLabel,
-		widget.NewSeparator(),
-		container.NewHBox(openBtn, checkBtn),
-		widget.NewSeparator(),
-		widget.NewLabel("📋 Instrucciones de instalación:"),
-		container.NewScroll(installLabel),
-	)
-
-	r.ASTContent.Objects = []fyne.CanvasObject{content}
-	r.ASTContent.Refresh()
+    r.ASTContent.Objects = []fyne.CanvasObject{content}
+    r.ASTContent.Refresh()
 }
 
-// checkConverters verifica qué herramientas están disponibles
-func (r *Reports) checkConverters() {
-	tools := []string{"inkscape", "rsvg-convert", "convert", "cairosvg"}
-	results := "🔍 VERIFICACIÓN DE HERRAMIENTAS:\n\n"
-
-	available := 0
-	for _, tool := range tools {
-		if exec.Command("which", tool).Run() == nil || exec.Command("where", tool).Run() == nil {
-			results += fmt.Sprintf("✅ %s - DISPONIBLE\n", tool)
-			available++
-		} else {
-			results += fmt.Sprintf("❌ %s - NO ENCONTRADO\n", tool)
-		}
-	}
-
-	if available > 0 {
-		results += fmt.Sprintf("\n🎉 %d herramienta(s) disponible(s)!\n", available)
-		results += "💡 Reinicia el IDE para usar la conversión automática"
-	} else {
-		results += "\n⚠️ No se encontraron herramientas de conversión\n"
-		results += "📦 Instala al menos una de las herramientas listadas arriba"
-	}
-
-	// Mostrar resultado
-	resultLabel := widget.NewLabel(results)
-	resultLabel.TextStyle = fyne.TextStyle{Monospace: true}
-
-	r.ASTContent.Objects = []fyne.CanvasObject{
-		widget.NewLabel("🔍 Resultado de Verificación"),
-		widget.NewSeparator(),
-		container.NewScroll(resultLabel),
-	}
-	r.ASTContent.Refresh()
-}
-
-// saveSVGToFile guarda el SVG como archivo local
 func (r *Reports) saveSVGToFile(svgContent string) (string, error) {
-	// Crear directorio si no existe
-	outputDir := "generated_asts"
-	os.MkdirAll(outputDir, 0755)
+    outputDir := "generated_asts"
+    os.MkdirAll(outputDir, 0755)
 
-	// Generar nombre único con timestamp
-	timestamp := time.Now().Format("2006-01-02_15-04-05")
-	filename := fmt.Sprintf("ast_%s.svg", timestamp)
-	fullPath := filepath.Join(outputDir, filename)
+    timestamp := time.Now().Format("2006-01-02_15-04-05")
+    filename := fmt.Sprintf("ast_%s.svg", timestamp)
+    fullPath := filepath.Join(outputDir, filename)
 
-	// Escribir archivo
-	err := os.WriteFile(fullPath, []byte(svgContent), 0644)
-	if err != nil {
-		return "", err
-	}
+    err := os.WriteFile(fullPath, []byte(svgContent), 0644)
+    if err != nil {
+        return "", err
+    }
 
-	// Obtener ruta absoluta
-	absPath, err := filepath.Abs(fullPath)
-	if err != nil {
-		return fullPath, nil
-	}
+    absPath, err := filepath.Abs(fullPath)
+    if err != nil {
+        return fullPath, nil
+    }
 
-	return absPath, nil
+    return absPath, nil
 }
 
-// showError muestra un mensaje de error
 func (r *Reports) showError(message string) {
-	label := widget.NewLabel("❌ " + message)
-	label.Alignment = fyne.TextAlignCenter
-	r.ASTContent.Objects = []fyne.CanvasObject{label}
-	r.ASTContent.Refresh()
+    label := widget.NewLabel("❌ " + message)
+    label.Alignment = fyne.TextAlignCenter
+    r.ASTContent.Objects = []fyne.CanvasObject{label}
+    r.ASTContent.Refresh()
 }
 
-// UpdateASTWithPNG mantener compatibilidad
 func (r *Reports) UpdateASTWithPNG(astText string, pngData []byte) {
-	// Si tenemos datos PNG, mostrarlos, sino mostrar mensaje
-	if len(pngData) > 0 {
-		// Crear imagen desde bytes
-		resource := fyne.NewStaticResource("ast.png", pngData)
-		astImage := canvas.NewImageFromResource(resource)
-		astImage.FillMode = canvas.ImageFillContain
-		astImage.SetMinSize(fyne.NewSize(400, 300))
+    if len(pngData) > 0 {
+        resource := fyne.NewStaticResource("ast.png", pngData)
+        astImage := canvas.NewImageFromResource(resource)
+        astImage.FillMode = canvas.ImageFillContain
+        astImage.SetMinSize(fyne.NewSize(400, 300))
 
-		content := container.NewVBox(
-			widget.NewLabel("🌳 AST generado como PNG"),
-			widget.NewSeparator(),
-			container.NewScroll(astImage),
-		)
+        content := container.NewVBox(
+            widget.NewLabel("🌳 AST generado como PNG"),
+            widget.NewSeparator(),
+            container.NewScroll(astImage),
+        )
 
-		r.ASTContent.Objects = []fyne.CanvasObject{content}
-		r.ASTContent.Refresh()
-	} else {
-		label := widget.NewLabel("❌ No hay datos PNG disponibles")
-		label.Alignment = fyne.TextAlignCenter
-		r.ASTContent.Objects = []fyne.CanvasObject{label}
-		r.ASTContent.Refresh()
-	}
+        r.ASTContent.Objects = []fyne.CanvasObject{content}
+        r.ASTContent.Refresh()
+    } else {
+        label := widget.NewLabel("❌ No hay datos PNG disponibles")
+        label.Alignment = fyne.TextAlignCenter
+        r.ASTContent.Objects = []fyne.CanvasObject{label}
+        r.ASTContent.Refresh()
+    }
 }
 
-// ClearAll limpia todos los reportes
-func (r *Reports) ClearAll() {
-	r.errors = []models.ErrorReport{}
-	r.symbolTable = []models.SymbolEntry{}
-
-	r.ErrorList.Refresh()
-	r.SymbolTable.Refresh()
-
-	// Limpiar AST
-	label := widget.NewLabel("No hay AST disponible")
-	r.ASTContent.Objects = []fyne.CanvasObject{label}
-	r.ASTContent.Refresh()
-}
-
-// openFileInBrowser abre cualquier archivo en el navegador del sistema
 func (r *Reports) openFileInBrowser(filePath string) {
-	var cmd *exec.Cmd
+    var cmd *exec.Cmd
 
-	switch runtime.GOOS {
-	case "linux":
-		cmd = exec.Command("xdg-open", filePath)
-	case "darwin": // macOS
-		cmd = exec.Command("open", filePath)
-	case "windows":
-		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", filePath)
-	default:
-		r.showError("Sistema operativo no soportado")
-		return
-	}
+    switch runtime.GOOS {
+    case "linux":
+        cmd = exec.Command("xdg-open", filePath)
+    case "darwin":
+        cmd = exec.Command("open", filePath)
+    case "windows":
+        cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", filePath)
+    default:
+        r.showError("Sistema operativo no soportado")
+        return
+    }
 
-	if err := cmd.Start(); err != nil {
-		r.showError("Error abriendo archivo: " + err.Error())
-	}
+    if err := cmd.Start(); err != nil {
+        r.showError("Error abriendo archivo: " + err.Error())
+    }
 }

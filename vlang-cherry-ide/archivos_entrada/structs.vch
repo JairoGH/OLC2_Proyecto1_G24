@@ -75,15 +75,15 @@ fn main() {
 	puntos += puntos_funciones
 
 	// Tabla resumen
-    println("|═════════════ Tabla de Resultados  ═══════|════════|")
-	println("| Característica                           | Puntos |")
-	println("|__________________________________________|________|")
-	println("| Declaración                              | 1      |")
-	println("| Instanciación                            | 2      |")
-	println("| Asignación propiedades primitivas        | 2      |")
-	println("| Acceso propiedades primitivas            | 2      |")
-	println("| Funciones asociadas                      |",  puntos_funciones ,"     |")
-    println("|__________________________________________|________|")
-	println("| TOTAL                                    | ",   puntos    , "    |")
+    print("|═════════════ Tabla de Resultados  ═══════|════════|")
+	print("| Característica                           | Puntos |")
+	print("|══════════════════════════════════════════|════════|")
+	print("| Declaración                              | 1      |")
+	print("| Instanciación                            | 2      |")
+	print("| Asignación propiedades primitivas        | 2      |")
+	print("| Acceso propiedades primitivas            | 2      |")
+	print("| Funciones asociadas                      |",  puntos_funciones ,"     |")
+    print("|══════════════════════════════════════════|════════|")
+	print("| TOTAL                                    | ",   puntos    , "    |")
     print("|══════════════════════════════════════════|════════|")
 }

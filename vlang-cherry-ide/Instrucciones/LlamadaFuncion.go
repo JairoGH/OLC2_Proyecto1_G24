@@ -6,6 +6,7 @@ const (
 	Detener   = "break"
 	Continuar = "continue"
 	Retornar  = "return"
+	MAX_RECURSION_DEPTH = 15  
 )
 
 // LlamadaFunciones: representa un elemento en la pila de llamadas para controlar
@@ -39,6 +40,7 @@ func (lf *LlamadaFunciones) ResetAccion() {
 // PilaLlamada: estructura de pila para manejar llamadas de funciones y control de flujo
 type PilaLlamada struct {
 	Items []*LlamadaFunciones
+	recursionDepth int
 }
 
 // Push: agrega un elemento al tope de la pila
@@ -129,7 +131,30 @@ func (pl *PilaLlamada) Len() int {
 	return len(pl.Items)
 }
 
+// NUEVOS métodos para control de recursión
+func (pl *PilaLlamada) IncrementRecursion() bool {
+    pl.recursionDepth++
+    return pl.recursionDepth > MAX_RECURSION_DEPTH
+}
+
+func (pl *PilaLlamada) DecrementRecursion() {
+    if pl.recursionDepth > 0 {
+        pl.recursionDepth--
+    }
+}
+
+func (pl *PilaLlamada) GetRecursionDepth() int {
+    return pl.recursionDepth
+}
+
+func (pl *PilaLlamada) ResetRecursion() {
+    pl.recursionDepth = 0
+}
+
 // NuevaLlamadaFuncion: constructor que crea una nueva pila de llamadas vacía
 func NuevaLlamadaFuncion() *PilaLlamada {
-	return &PilaLlamada{Items: []*LlamadaFunciones{}}
+    return &PilaLlamada{
+        Items: []*LlamadaFunciones{}, 
+        recursionDepth: 0, 
+    }
 }

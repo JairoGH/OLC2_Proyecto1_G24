@@ -40,498 +40,160 @@ public interface VGrammarListener extends ParseTreeListener {
 	void exitStmt(VGrammar.StmtContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code DeclararInferenciaMut}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
 	void enterDeclararInferenciaMut(VGrammar.DeclararInferenciaMutContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code DeclararInferenciaMut}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
 	void exitDeclararInferenciaMut(VGrammar.DeclararInferenciaMutContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code DeclararInferencia}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
 	void enterDeclararInferencia(VGrammar.DeclararInferenciaContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code DeclararInferencia}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
 	void exitDeclararInferencia(VGrammar.DeclararInferenciaContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code DeclaraTipoValor}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
 	void enterDeclaraTipoValor(VGrammar.DeclaraTipoValorContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code DeclaraTipoValor}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
 	void exitDeclaraTipoValor(VGrammar.DeclaraTipoValorContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code DeclararTipo}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
 	void enterDeclararTipo(VGrammar.DeclararTipoContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code DeclararTipo}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
 	void exitDeclararTipo(VGrammar.DeclararTipoContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code DeclararSinMutValor}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
 	void enterDeclararSinMutValor(VGrammar.DeclararSinMutValorContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code DeclararSinMutValor}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
 	void exitDeclararSinMutValor(VGrammar.DeclararSinMutValorContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code DeclararSinMutTipo}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * Enter a parse tree produced by the {@code DeclararSlice}
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
-	void enterDeclararSinMutTipo(VGrammar.DeclararSinMutTipoContext ctx);
+	void enterDeclararSlice(VGrammar.DeclararSliceContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code DeclararSinMutTipo}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * Exit a parse tree produced by the {@code DeclararSlice}
+	 * labeled alternative in {@link VGrammar#stmt_declaracion}.
 	 * @param ctx the parse tree
 	 */
-	void exitDeclararSinMutTipo(VGrammar.DeclararSinMutTipoContext ctx);
+	void exitDeclararSlice(VGrammar.DeclararSliceContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code DeclararVector}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * Enter a parse tree produced by the {@code AsignacionSliceItem}
+	 * labeled alternative in {@link VGrammar#stmt_asignar}.
 	 * @param ctx the parse tree
 	 */
-	void enterDeclararVector(VGrammar.DeclararVectorContext ctx);
+	void enterAsignacionSliceItem(VGrammar.AsignacionSliceItemContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code DeclararVector}
-	 * labeled alternative in {@link VGrammar#decl_stmt}.
+	 * Exit a parse tree produced by the {@code AsignacionSliceItem}
+	 * labeled alternative in {@link VGrammar#stmt_asignar}.
 	 * @param ctx the parse tree
 	 */
-	void exitDeclararVector(VGrammar.DeclararVectorContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ListaItemsVector}
-	 * labeled alternative in {@link VGrammar#vector_expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterListaItemsVector(VGrammar.ListaItemsVectorContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ListaItemsVector}
-	 * labeled alternative in {@link VGrammar#vector_expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitListaItemsVector(VGrammar.ListaItemsVectorContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code VectorItem}
-	 * labeled alternative in {@link VGrammar#vector_item}.
-	 * @param ctx the parse tree
-	 */
-	void enterVectorItem(VGrammar.VectorItemContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VectorItem}
-	 * labeled alternative in {@link VGrammar#vector_item}.
-	 * @param ctx the parse tree
-	 */
-	void exitVectorItem(VGrammar.VectorItemContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code PropVector}
-	 * labeled alternative in {@link VGrammar#vector_prop}.
-	 * @param ctx the parse tree
-	 */
-	void enterPropVector(VGrammar.PropVectorContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code PropVector}
-	 * labeled alternative in {@link VGrammar#vector_prop}.
-	 * @param ctx the parse tree
-	 */
-	void exitPropVector(VGrammar.PropVectorContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code FuncionVector}
-	 * labeled alternative in {@link VGrammar#vector_func}.
-	 * @param ctx the parse tree
-	 */
-	void enterFuncionVector(VGrammar.FuncionVectorContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code FuncionVector}
-	 * labeled alternative in {@link VGrammar#vector_func}.
-	 * @param ctx the parse tree
-	 */
-	void exitFuncionVector(VGrammar.FuncionVectorContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link VGrammar#repeating}.
-	 * @param ctx the parse tree
-	 */
-	void enterRepeating(VGrammar.RepeatingContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link VGrammar#repeating}.
-	 * @param ctx the parse tree
-	 */
-	void exitRepeating(VGrammar.RepeatingContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link VGrammar#var_type}.
-	 * @param ctx the parse tree
-	 */
-	void enterVar_type(VGrammar.Var_typeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link VGrammar#var_type}.
-	 * @param ctx the parse tree
-	 */
-	void exitVar_type(VGrammar.Var_typeContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link VGrammar#type}.
-	 * @param ctx the parse tree
-	 */
-	void enterType(VGrammar.TypeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link VGrammar#type}.
-	 * @param ctx the parse tree
-	 */
-	void exitType(VGrammar.TypeContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code VectorSimple}
-	 * labeled alternative in {@link VGrammar#vector_type}.
-	 * @param ctx the parse tree
-	 */
-	void enterVectorSimple(VGrammar.VectorSimpleContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VectorSimple}
-	 * labeled alternative in {@link VGrammar#vector_type}.
-	 * @param ctx the parse tree
-	 */
-	void exitVectorSimple(VGrammar.VectorSimpleContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code MatrizDoble}
-	 * labeled alternative in {@link VGrammar#vector_type}.
-	 * @param ctx the parse tree
-	 */
-	void enterMatrizDoble(VGrammar.MatrizDobleContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code MatrizDoble}
-	 * labeled alternative in {@link VGrammar#vector_type}.
-	 * @param ctx the parse tree
-	 */
-	void exitMatrizDoble(VGrammar.MatrizDobleContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link VGrammar#matrix_type}.
-	 * @param ctx the parse tree
-	 */
-	void enterMatrix_type(VGrammar.Matrix_typeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link VGrammar#matrix_type}.
-	 * @param ctx the parse tree
-	 */
-	void exitMatrix_type(VGrammar.Matrix_typeContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link VGrammar#aux_matrix_type}.
-	 * @param ctx the parse tree
-	 */
-	void enterAux_matrix_type(VGrammar.Aux_matrix_typeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link VGrammar#aux_matrix_type}.
-	 * @param ctx the parse tree
-	 */
-	void exitAux_matrix_type(VGrammar.Aux_matrix_typeContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code AssignVectorItem}
-	 * labeled alternative in {@link VGrammar#assign_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterAssignVectorItem(VGrammar.AssignVectorItemContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code AssignVectorItem}
-	 * labeled alternative in {@link VGrammar#assign_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitAssignVectorItem(VGrammar.AssignVectorItemContext ctx);
+	void exitAsignacionSliceItem(VGrammar.AsignacionSliceItemContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code AsignacionDirecta}
-	 * labeled alternative in {@link VGrammar#assign_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_asignar}.
 	 * @param ctx the parse tree
 	 */
 	void enterAsignacionDirecta(VGrammar.AsignacionDirectaContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code AsignacionDirecta}
-	 * labeled alternative in {@link VGrammar#assign_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_asignar}.
 	 * @param ctx the parse tree
 	 */
 	void exitAsignacionDirecta(VGrammar.AsignacionDirectaContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code AsignacionAritmetica}
-	 * labeled alternative in {@link VGrammar#assign_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_asignar}.
 	 * @param ctx the parse tree
 	 */
 	void enterAsignacionAritmetica(VGrammar.AsignacionAritmeticaContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code AsignacionAritmetica}
-	 * labeled alternative in {@link VGrammar#assign_stmt}.
+	 * labeled alternative in {@link VGrammar#stmt_asignar}.
 	 * @param ctx the parse tree
 	 */
 	void exitAsignacionAritmetica(VGrammar.AsignacionAritmeticaContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code AsignacionVector}
-	 * labeled alternative in {@link VGrammar#assign_stmt}.
+	 * Enter a parse tree produced by the {@code AsignacionSlice}
+	 * labeled alternative in {@link VGrammar#stmt_asignar}.
 	 * @param ctx the parse tree
 	 */
-	void enterAsignacionVector(VGrammar.AsignacionVectorContext ctx);
+	void enterAsignacionSlice(VGrammar.AsignacionSliceContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code AsignacionVector}
-	 * labeled alternative in {@link VGrammar#assign_stmt}.
+	 * Exit a parse tree produced by the {@code AsignacionSlice}
+	 * labeled alternative in {@link VGrammar#stmt_asignar}.
 	 * @param ctx the parse tree
 	 */
-	void exitAsignacionVector(VGrammar.AsignacionVectorContext ctx);
+	void exitAsignacionSlice(VGrammar.AsignacionSliceContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code ID_Patron}
-	 * labeled alternative in {@link VGrammar#id_pattern}.
+	 * Enter a parse tree produced by the {@code ReturnStmt}
+	 * labeled alternative in {@link VGrammar#stmt_transferencia}.
 	 * @param ctx the parse tree
 	 */
-	void enterID_Patron(VGrammar.ID_PatronContext ctx);
+	void enterReturnStmt(VGrammar.ReturnStmtContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code ID_Patron}
-	 * labeled alternative in {@link VGrammar#id_pattern}.
+	 * Exit a parse tree produced by the {@code ReturnStmt}
+	 * labeled alternative in {@link VGrammar#stmt_transferencia}.
 	 * @param ctx the parse tree
 	 */
-	void exitID_Patron(VGrammar.ID_PatronContext ctx);
+	void exitReturnStmt(VGrammar.ReturnStmtContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code IntLiteral}
-	 * labeled alternative in {@link VGrammar#literal}.
+	 * Enter a parse tree produced by the {@code BreakStmt}
+	 * labeled alternative in {@link VGrammar#stmt_transferencia}.
 	 * @param ctx the parse tree
 	 */
-	void enterIntLiteral(VGrammar.IntLiteralContext ctx);
+	void enterBreakStmt(VGrammar.BreakStmtContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code IntLiteral}
-	 * labeled alternative in {@link VGrammar#literal}.
+	 * Exit a parse tree produced by the {@code BreakStmt}
+	 * labeled alternative in {@link VGrammar#stmt_transferencia}.
 	 * @param ctx the parse tree
 	 */
-	void exitIntLiteral(VGrammar.IntLiteralContext ctx);
+	void exitBreakStmt(VGrammar.BreakStmtContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code FloatLiteral}
-	 * labeled alternative in {@link VGrammar#literal}.
+	 * Enter a parse tree produced by the {@code ContinueStmt}
+	 * labeled alternative in {@link VGrammar#stmt_transferencia}.
 	 * @param ctx the parse tree
 	 */
-	void enterFloatLiteral(VGrammar.FloatLiteralContext ctx);
+	void enterContinueStmt(VGrammar.ContinueStmtContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code FloatLiteral}
-	 * labeled alternative in {@link VGrammar#literal}.
+	 * Exit a parse tree produced by the {@code ContinueStmt}
+	 * labeled alternative in {@link VGrammar#stmt_transferencia}.
 	 * @param ctx the parse tree
 	 */
-	void exitFloatLiteral(VGrammar.FloatLiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code StringLiteral}
-	 * labeled alternative in {@link VGrammar#literal}.
-	 * @param ctx the parse tree
-	 */
-	void enterStringLiteral(VGrammar.StringLiteralContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code StringLiteral}
-	 * labeled alternative in {@link VGrammar#literal}.
-	 * @param ctx the parse tree
-	 */
-	void exitStringLiteral(VGrammar.StringLiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code BoolLiteral}
-	 * labeled alternative in {@link VGrammar#literal}.
-	 * @param ctx the parse tree
-	 */
-	void enterBoolLiteral(VGrammar.BoolLiteralContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code BoolLiteral}
-	 * labeled alternative in {@link VGrammar#literal}.
-	 * @param ctx the parse tree
-	 */
-	void exitBoolLiteral(VGrammar.BoolLiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code NilLiteral}
-	 * labeled alternative in {@link VGrammar#literal}.
-	 * @param ctx the parse tree
-	 */
-	void enterNilLiteral(VGrammar.NilLiteralContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code NilLiteral}
-	 * labeled alternative in {@link VGrammar#literal}.
-	 * @param ctx the parse tree
-	 */
-	void exitNilLiteral(VGrammar.NilLiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code LiteralExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterLiteralExp(VGrammar.LiteralExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code LiteralExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitLiteralExp(VGrammar.LiteralExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code StructMethodExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterStructMethodExp(VGrammar.StructMethodExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code StructMethodExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitStructMethodExp(VGrammar.StructMethodExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code StructInitExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterStructInitExp(VGrammar.StructInitExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code StructInitExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitStructInitExp(VGrammar.StructInitExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code RepeatingExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterRepeatingExp(VGrammar.RepeatingExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code RepeatingExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitRepeatingExp(VGrammar.RepeatingExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code StructExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterStructExp(VGrammar.StructExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code StructExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitStructExp(VGrammar.StructExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ExpBinario}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterExpBinario(VGrammar.ExpBinarioContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ExpBinario}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitExpBinario(VGrammar.ExpBinarioContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code VectorPropExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterVectorPropExp(VGrammar.VectorPropExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VectorPropExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitVectorPropExp(VGrammar.VectorPropExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code VectorFuncExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterVectorFuncExp(VGrammar.VectorFuncExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VectorFuncExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitVectorFuncExp(VGrammar.VectorFuncExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ParentecisExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterParentecisExp(VGrammar.ParentecisExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ParentecisExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitParentecisExp(VGrammar.ParentecisExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ExpUnary}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterExpUnary(VGrammar.ExpUnaryContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ExpUnary}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitExpUnary(VGrammar.ExpUnaryContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code IdExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterIdExp(VGrammar.IdExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code IdExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitIdExp(VGrammar.IdExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code FunctionCallExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunctionCallExp(VGrammar.FunctionCallExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code FunctionCallExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunctionCallExp(VGrammar.FunctionCallExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code VectorItemExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterVectorItemExp(VGrammar.VectorItemExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VectorItemExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitVectorItemExp(VGrammar.VectorItemExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code VectorExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterVectorExp(VGrammar.VectorExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code VectorExp}
-	 * labeled alternative in {@link VGrammar#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitVectorExp(VGrammar.VectorExpContext ctx);
+	void exitContinueStmt(VGrammar.ContinueStmtContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code IFstmt}
 	 * labeled alternative in {@link VGrammar#if_stmt}.
@@ -641,243 +303,421 @@ public interface VGrammarListener extends ParseTreeListener {
 	 */
 	void exitRangoNum(VGrammar.RangoNumContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code GuardStmt}
-	 * labeled alternative in {@link VGrammar#guard_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterGuardStmt(VGrammar.GuardStmtContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code GuardStmt}
-	 * labeled alternative in {@link VGrammar#guard_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitGuardStmt(VGrammar.GuardStmtContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ReturnStmt}
-	 * labeled alternative in {@link VGrammar#transfer_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterReturnStmt(VGrammar.ReturnStmtContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ReturnStmt}
-	 * labeled alternative in {@link VGrammar#transfer_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitReturnStmt(VGrammar.ReturnStmtContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code BreakStmt}
-	 * labeled alternative in {@link VGrammar#transfer_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterBreakStmt(VGrammar.BreakStmtContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code BreakStmt}
-	 * labeled alternative in {@link VGrammar#transfer_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitBreakStmt(VGrammar.BreakStmtContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ContinueStmt}
-	 * labeled alternative in {@link VGrammar#transfer_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterContinueStmt(VGrammar.ContinueStmtContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ContinueStmt}
-	 * labeled alternative in {@link VGrammar#transfer_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitContinueStmt(VGrammar.ContinueStmtContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code LlamarFuncion}
-	 * labeled alternative in {@link VGrammar#func_call}.
-	 * @param ctx the parse tree
-	 */
-	void enterLlamarFuncion(VGrammar.LlamarFuncionContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code LlamarFuncion}
-	 * labeled alternative in {@link VGrammar#func_call}.
-	 * @param ctx the parse tree
-	 */
-	void exitLlamarFuncion(VGrammar.LlamarFuncionContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ArgList}
-	 * labeled alternative in {@link VGrammar#arg_list}.
-	 * @param ctx the parse tree
-	 */
-	void enterArgList(VGrammar.ArgListContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ArgList}
-	 * labeled alternative in {@link VGrammar#arg_list}.
-	 * @param ctx the parse tree
-	 */
-	void exitArgList(VGrammar.ArgListContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code FuncionArg}
-	 * labeled alternative in {@link VGrammar#func_arg}.
-	 * @param ctx the parse tree
-	 */
-	void enterFuncionArg(VGrammar.FuncionArgContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code FuncionArg}
-	 * labeled alternative in {@link VGrammar#func_arg}.
-	 * @param ctx the parse tree
-	 */
-	void exitFuncionArg(VGrammar.FuncionArgContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code FuncionDeclerada}
-	 * labeled alternative in {@link VGrammar#func_dcl}.
+	 * labeled alternative in {@link VGrammar#declarar_funcion}.
 	 * @param ctx the parse tree
 	 */
 	void enterFuncionDeclerada(VGrammar.FuncionDecleradaContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code FuncionDeclerada}
-	 * labeled alternative in {@link VGrammar#func_dcl}.
+	 * labeled alternative in {@link VGrammar#declarar_funcion}.
 	 * @param ctx the parse tree
 	 */
 	void exitFuncionDeclerada(VGrammar.FuncionDecleradaContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code MetodoStruct}
-	 * labeled alternative in {@link VGrammar#func_dcl}.
+	 * Enter a parse tree produced by the {@code LlamarFuncion}
+	 * labeled alternative in {@link VGrammar#llamar_funcion}.
 	 * @param ctx the parse tree
 	 */
-	void enterMetodoStruct(VGrammar.MetodoStructContext ctx);
+	void enterLlamarFuncion(VGrammar.LlamarFuncionContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code MetodoStruct}
-	 * labeled alternative in {@link VGrammar#func_dcl}.
+	 * Exit a parse tree produced by the {@code LlamarFuncion}
+	 * labeled alternative in {@link VGrammar#llamar_funcion}.
 	 * @param ctx the parse tree
 	 */
-	void exitMetodoStruct(VGrammar.MetodoStructContext ctx);
+	void exitLlamarFuncion(VGrammar.LlamarFuncionContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code MethodReceiver}
-	 * labeled alternative in {@link VGrammar#method_receiver}.
+	 * Enter a parse tree produced by the {@code ListaParametros}
+	 * labeled alternative in {@link VGrammar#lista_parametros}.
 	 * @param ctx the parse tree
 	 */
-	void enterMethodReceiver(VGrammar.MethodReceiverContext ctx);
+	void enterListaParametros(VGrammar.ListaParametrosContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code MethodReceiver}
-	 * labeled alternative in {@link VGrammar#method_receiver}.
+	 * Exit a parse tree produced by the {@code ListaParametros}
+	 * labeled alternative in {@link VGrammar#lista_parametros}.
 	 * @param ctx the parse tree
 	 */
-	void exitMethodReceiver(VGrammar.MethodReceiverContext ctx);
+	void exitListaParametros(VGrammar.ListaParametrosContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code ParamList}
-	 * labeled alternative in {@link VGrammar#param_list}.
+	 * Enter a parse tree produced by the {@code ParametroFun}
+	 * labeled alternative in {@link VGrammar#parametro_fun}.
 	 * @param ctx the parse tree
 	 */
-	void enterParamList(VGrammar.ParamListContext ctx);
+	void enterParametroFun(VGrammar.ParametroFunContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code ParamList}
-	 * labeled alternative in {@link VGrammar#param_list}.
+	 * Exit a parse tree produced by the {@code ParametroFun}
+	 * labeled alternative in {@link VGrammar#parametro_fun}.
 	 * @param ctx the parse tree
 	 */
-	void exitParamList(VGrammar.ParamListContext ctx);
+	void exitParametroFun(VGrammar.ParametroFunContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code FuncParam}
-	 * labeled alternative in {@link VGrammar#func_param}.
+	 * Enter a parse tree produced by the {@code ListaArgumentos}
+	 * labeled alternative in {@link VGrammar#lista_argumentos}.
 	 * @param ctx the parse tree
 	 */
-	void enterFuncParam(VGrammar.FuncParamContext ctx);
+	void enterListaArgumentos(VGrammar.ListaArgumentosContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code FuncParam}
-	 * labeled alternative in {@link VGrammar#func_param}.
+	 * Exit a parse tree produced by the {@code ListaArgumentos}
+	 * labeled alternative in {@link VGrammar#lista_argumentos}.
 	 * @param ctx the parse tree
 	 */
-	void exitFuncParam(VGrammar.FuncParamContext ctx);
+	void exitListaArgumentos(VGrammar.ListaArgumentosContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code FuncionArg}
+	 * labeled alternative in {@link VGrammar#argumento_fun}.
+	 * @param ctx the parse tree
+	 */
+	void enterFuncionArg(VGrammar.FuncionArgContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code FuncionArg}
+	 * labeled alternative in {@link VGrammar#argumento_fun}.
+	 * @param ctx the parse tree
+	 */
+	void exitFuncionArg(VGrammar.FuncionArgContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code DeclararStruct}
-	 * labeled alternative in {@link VGrammar#strct_dcl}.
+	 * labeled alternative in {@link VGrammar#declarar_struct}.
 	 * @param ctx the parse tree
 	 */
 	void enterDeclararStruct(VGrammar.DeclararStructContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code DeclararStruct}
-	 * labeled alternative in {@link VGrammar#strct_dcl}.
+	 * labeled alternative in {@link VGrammar#declarar_struct}.
 	 * @param ctx the parse tree
 	 */
 	void exitDeclararStruct(VGrammar.DeclararStructContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code StructAttr}
-	 * labeled alternative in {@link VGrammar#struct_prop}.
+	 * Enter a parse tree produced by the {@code PropiedadStruct}
+	 * labeled alternative in {@link VGrammar#propiedad_struct}.
 	 * @param ctx the parse tree
 	 */
-	void enterStructAttr(VGrammar.StructAttrContext ctx);
+	void enterPropiedadStruct(VGrammar.PropiedadStructContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code StructAttr}
-	 * labeled alternative in {@link VGrammar#struct_prop}.
+	 * Exit a parse tree produced by the {@code PropiedadStruct}
+	 * labeled alternative in {@link VGrammar#propiedad_struct}.
 	 * @param ctx the parse tree
 	 */
-	void exitStructAttr(VGrammar.StructAttrContext ctx);
+	void exitPropiedadStruct(VGrammar.PropiedadStructContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code StructFunc}
-	 * labeled alternative in {@link VGrammar#struct_prop}.
+	 * Enter a parse tree produced by the {@code CrearStruct}
+	 * labeled alternative in {@link VGrammar#crear_struct}.
 	 * @param ctx the parse tree
 	 */
-	void enterStructFunc(VGrammar.StructFuncContext ctx);
+	void enterCrearStruct(VGrammar.CrearStructContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code StructFunc}
-	 * labeled alternative in {@link VGrammar#struct_prop}.
+	 * Exit a parse tree produced by the {@code CrearStruct}
+	 * labeled alternative in {@link VGrammar#crear_struct}.
 	 * @param ctx the parse tree
 	 */
-	void exitStructFunc(VGrammar.StructFuncContext ctx);
+	void exitCrearStruct(VGrammar.CrearStructContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code StructVector}
-	 * labeled alternative in {@link VGrammar#struct_vector}.
+	 * Enter a parse tree produced by the {@code ListaParametrosInit}
+	 * labeled alternative in {@link VGrammar#lista_parametros_init}.
 	 * @param ctx the parse tree
 	 */
-	void enterStructVector(VGrammar.StructVectorContext ctx);
+	void enterListaParametrosInit(VGrammar.ListaParametrosInitContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code StructVector}
-	 * labeled alternative in {@link VGrammar#struct_vector}.
+	 * Exit a parse tree produced by the {@code ListaParametrosInit}
+	 * labeled alternative in {@link VGrammar#lista_parametros_init}.
 	 * @param ctx the parse tree
 	 */
-	void exitStructVector(VGrammar.StructVectorContext ctx);
+	void exitListaParametrosInit(VGrammar.ListaParametrosInitContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code StructInit}
-	 * labeled alternative in {@link VGrammar#struct_init}.
+	 * Enter a parse tree produced by the {@code ParametrosInitStruct}
+	 * labeled alternative in {@link VGrammar#parametros_init_struct}.
 	 * @param ctx the parse tree
 	 */
-	void enterStructInit(VGrammar.StructInitContext ctx);
+	void enterParametrosInitStruct(VGrammar.ParametrosInitStructContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code StructInit}
-	 * labeled alternative in {@link VGrammar#struct_init}.
+	 * Exit a parse tree produced by the {@code ParametrosInitStruct}
+	 * labeled alternative in {@link VGrammar#parametros_init_struct}.
 	 * @param ctx the parse tree
 	 */
-	void exitStructInit(VGrammar.StructInitContext ctx);
+	void exitParametrosInitStruct(VGrammar.ParametrosInitStructContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code StructInitList}
-	 * labeled alternative in {@link VGrammar#struct_init_list}.
+	 * Enter a parse tree produced by the {@code ListaSlice}
+	 * labeled alternative in {@link VGrammar#lista_slice}.
 	 * @param ctx the parse tree
 	 */
-	void enterStructInitList(VGrammar.StructInitListContext ctx);
+	void enterListaSlice(VGrammar.ListaSliceContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code StructInitList}
-	 * labeled alternative in {@link VGrammar#struct_init_list}.
+	 * Exit a parse tree produced by the {@code ListaSlice}
+	 * labeled alternative in {@link VGrammar#lista_slice}.
 	 * @param ctx the parse tree
 	 */
-	void exitStructInitList(VGrammar.StructInitListContext ctx);
+	void exitListaSlice(VGrammar.ListaSliceContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code StructMethodCall}
-	 * labeled alternative in {@link VGrammar#struct_method_call}.
+	 * Enter a parse tree produced by the {@code ItemSlice}
+	 * labeled alternative in {@link VGrammar#item_slice}.
 	 * @param ctx the parse tree
 	 */
-	void enterStructMethodCall(VGrammar.StructMethodCallContext ctx);
+	void enterItemSlice(VGrammar.ItemSliceContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code StructMethodCall}
-	 * labeled alternative in {@link VGrammar#struct_method_call}.
+	 * Exit a parse tree produced by the {@code ItemSlice}
+	 * labeled alternative in {@link VGrammar#item_slice}.
 	 * @param ctx the parse tree
 	 */
-	void exitStructMethodCall(VGrammar.StructMethodCallContext ctx);
+	void exitItemSlice(VGrammar.ItemSliceContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code StructInitField}
-	 * labeled alternative in {@link VGrammar#struct_init_field}.
+	 * Enter a parse tree produced by the {@code PropSlice}
+	 * labeled alternative in {@link VGrammar#prop_slice}.
 	 * @param ctx the parse tree
 	 */
-	void enterStructInitField(VGrammar.StructInitFieldContext ctx);
+	void enterPropSlice(VGrammar.PropSliceContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code StructInitField}
-	 * labeled alternative in {@link VGrammar#struct_init_field}.
+	 * Exit a parse tree produced by the {@code PropSlice}
+	 * labeled alternative in {@link VGrammar#prop_slice}.
 	 * @param ctx the parse tree
 	 */
-	void exitStructInitField(VGrammar.StructInitFieldContext ctx);
+	void exitPropSlice(VGrammar.PropSliceContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code FuncionSlice}
+	 * labeled alternative in {@link VGrammar#fun_slice}.
+	 * @param ctx the parse tree
+	 */
+	void enterFuncionSlice(VGrammar.FuncionSliceContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code FuncionSlice}
+	 * labeled alternative in {@link VGrammar#fun_slice}.
+	 * @param ctx the parse tree
+	 */
+	void exitFuncionSlice(VGrammar.FuncionSliceContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VGrammar#tipo}.
+	 * @param ctx the parse tree
+	 */
+	void enterTipo(VGrammar.TipoContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VGrammar#tipo}.
+	 * @param ctx the parse tree
+	 */
+	void exitTipo(VGrammar.TipoContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code VectorSimple}
+	 * labeled alternative in {@link VGrammar#tipos_slices}.
+	 * @param ctx the parse tree
+	 */
+	void enterVectorSimple(VGrammar.VectorSimpleContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code VectorSimple}
+	 * labeled alternative in {@link VGrammar#tipos_slices}.
+	 * @param ctx the parse tree
+	 */
+	void exitVectorSimple(VGrammar.VectorSimpleContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code MatrizDoble}
+	 * labeled alternative in {@link VGrammar#tipos_slices}.
+	 * @param ctx the parse tree
+	 */
+	void enterMatrizDoble(VGrammar.MatrizDobleContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code MatrizDoble}
+	 * labeled alternative in {@link VGrammar#tipos_slices}.
+	 * @param ctx the parse tree
+	 */
+	void exitMatrizDoble(VGrammar.MatrizDobleContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code LiteralExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterLiteralExp(VGrammar.LiteralExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code LiteralExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitLiteralExp(VGrammar.LiteralExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code IdExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdExp(VGrammar.IdExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code IdExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdExp(VGrammar.IdExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code CrearStructExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterCrearStructExp(VGrammar.CrearStructExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CrearStructExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitCrearStructExp(VGrammar.CrearStructExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code UnarioExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterUnarioExp(VGrammar.UnarioExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code UnarioExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitUnarioExp(VGrammar.UnarioExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ItemSliceExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterItemSliceExp(VGrammar.ItemSliceExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ItemSliceExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitItemSliceExp(VGrammar.ItemSliceExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code VectorFuncExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterVectorFuncExp(VGrammar.VectorFuncExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code VectorFuncExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitVectorFuncExp(VGrammar.VectorFuncExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code SliceExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterSliceExp(VGrammar.SliceExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code SliceExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitSliceExp(VGrammar.SliceExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code PropSliceExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterPropSliceExp(VGrammar.PropSliceExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code PropSliceExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitPropSliceExp(VGrammar.PropSliceExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code LlamarFuncionExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterLlamarFuncionExp(VGrammar.LlamarFuncionExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code LlamarFuncionExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitLlamarFuncionExp(VGrammar.LlamarFuncionExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code BinarioExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterBinarioExp(VGrammar.BinarioExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code BinarioExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitBinarioExp(VGrammar.BinarioExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ParentecisExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterParentecisExp(VGrammar.ParentecisExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ParentecisExp}
+	 * labeled alternative in {@link VGrammar#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitParentecisExp(VGrammar.ParentecisExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code IntLiteral}
+	 * labeled alternative in {@link VGrammar#literal}.
+	 * @param ctx the parse tree
+	 */
+	void enterIntLiteral(VGrammar.IntLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code IntLiteral}
+	 * labeled alternative in {@link VGrammar#literal}.
+	 * @param ctx the parse tree
+	 */
+	void exitIntLiteral(VGrammar.IntLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code FloatLiteral}
+	 * labeled alternative in {@link VGrammar#literal}.
+	 * @param ctx the parse tree
+	 */
+	void enterFloatLiteral(VGrammar.FloatLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code FloatLiteral}
+	 * labeled alternative in {@link VGrammar#literal}.
+	 * @param ctx the parse tree
+	 */
+	void exitFloatLiteral(VGrammar.FloatLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code StringLiteral}
+	 * labeled alternative in {@link VGrammar#literal}.
+	 * @param ctx the parse tree
+	 */
+	void enterStringLiteral(VGrammar.StringLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code StringLiteral}
+	 * labeled alternative in {@link VGrammar#literal}.
+	 * @param ctx the parse tree
+	 */
+	void exitStringLiteral(VGrammar.StringLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code BoolLiteral}
+	 * labeled alternative in {@link VGrammar#literal}.
+	 * @param ctx the parse tree
+	 */
+	void enterBoolLiteral(VGrammar.BoolLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code BoolLiteral}
+	 * labeled alternative in {@link VGrammar#literal}.
+	 * @param ctx the parse tree
+	 */
+	void exitBoolLiteral(VGrammar.BoolLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NilLiteral}
+	 * labeled alternative in {@link VGrammar#literal}.
+	 * @param ctx the parse tree
+	 */
+	void enterNilLiteral(VGrammar.NilLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NilLiteral}
+	 * labeled alternative in {@link VGrammar#literal}.
+	 * @param ctx the parse tree
+	 */
+	void exitNilLiteral(VGrammar.NilLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ID_Patron}
+	 * labeled alternative in {@link VGrammar#patronId}.
+	 * @param ctx the parse tree
+	 */
+	void enterID_Patron(VGrammar.ID_PatronContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ID_Patron}
+	 * labeled alternative in {@link VGrammar#patronId}.
+	 * @param ctx the parse tree
+	 */
+	void exitID_Patron(VGrammar.ID_PatronContext ctx);
 }

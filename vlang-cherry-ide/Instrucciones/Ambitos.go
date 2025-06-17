@@ -1,6 +1,7 @@
 package instrucciones
 
 import (
+	"fmt"
 	"main/tiposDeDato"
 	"strings"
 
@@ -125,6 +126,51 @@ func (s *AmbitoBase) GetVariable(name string) *Variable {
 
 	return nil
 }
+// AgregarVariableOActualizar: delegada para agregar o actualizar variable en el ámbito actual
+func (s *RegistroAmbito) AgregarVariableOActualizar(name string, varType string, value tiposDeDato.ValorInterno, isConst bool, allowNil bool, token antlr.Token) (*Variable, string) {
+    return s.AmbitoActual.AgregarVariableOActualizar(name, varType, value, isConst, allowNil, token)
+}
+
+// AgregarVariableOActualizar: agrega una variable o actualiza su valor si ya existe
+func (s *AmbitoBase) AgregarVariableOActualizar(nombre string, tipoVariable string, valor tiposDeDato.ValorInterno, esConstante bool, pudeSerNulo bool, token antlr.Token) (*Variable, string) {
+	// Si la variable ya existe, solo actualizamos el valor
+	if variable, existe := s.Variables[nombre]; existe {
+		// Verificar compatibilidad de tipos
+		if variable.Tipo != tipoVariable {
+			return nil, fmt.Sprintf("No se puede cambiar el tipo de la variable %s de %s a %s", nombre, variable.Tipo, tipoVariable)
+		}
+
+		// Actualizar solo el valor
+		variable.Valor = valor
+		variable.Token = token // Actualizar token para debugging
+		return variable, ""
+	}
+
+	// Si no existe, crear nueva variable (comportamiento normal)
+	return s.AgregarVariable(nombre, tipoVariable, valor, esConstante, pudeSerNulo, token)
+}
+
+// ResetVariables: resetea solo los valores de las variables sin eliminarlas
+func (s *AmbitoBase) ResetVariables() {
+	for _, variable := range s.Variables {
+		// Solo resetear variables no constantes
+		if !variable.esConstante {
+			// Asignar valor por defecto según el tipo
+			switch variable.Tipo {
+			case tiposDeDato.TIPO_ENTERO:
+				variable.Valor = &tiposDeDato.ValorEntero{ValorInterno: 0}
+			case tiposDeDato.TIPO_DECIMAL:
+				variable.Valor = &tiposDeDato.ValorDecimal{InternalValor: 0.0}
+			case tiposDeDato.TIPO_CADENA:
+				variable.Valor = &tiposDeDato.ValorCadena{ValorInterno: ""}
+			case tiposDeDato.TIPO_BOOLEAN:
+				variable.Valor = &tiposDeDato.ValorBool{InternalValor: false}
+			default:
+				variable.Valor = tiposDeDato.NuloPorDefecto
+			}
+		}
+	}
+}
 
 // obj1.obj2.prop1
 func (s *AmbitoBase) buscarVariableObjeto(name string, lastObj tiposDeDato.ValorInterno) *Variable {
@@ -178,13 +224,13 @@ func (s *AmbitoBase) buscarVariableObjeto(name string, lastObj tiposDeDato.Valor
 	return s.buscarVariableObjeto(strings.Join(parts[1:], "."), nextVar.Valor)
 }
 
-func (s *AmbitoBase) AgregarFuncion(name string, function tiposDeDato.ValorInterno) (bool, string) {
+func (s *AmbitoBase) AgregarFuncion(name string, Funcion tiposDeDato.ValorInterno) (bool, string) {
 
 	if _, ok := s.Funciones[name]; ok {
 		return false, "La funcion " + name + " ya existe"
 	}
 
-	s.Funciones[name] = function
+	s.Funciones[name] = Funcion
 
 	return true, ""
 }
@@ -383,8 +429,8 @@ func (s *RegistroAmbito) GetVariable(name string) *Variable {
 }
 
 // AgregarFuncion: delegada para agregar función en el ámbito actual
-func (s *RegistroAmbito) AgregarFuncion(name string, function tiposDeDato.ValorInterno) (bool, string) {
-	return s.AmbitoActual.AgregarFuncion(name, function)
+func (s *RegistroAmbito) AgregarFuncion(name string, funcion tiposDeDato.ValorInterno) (bool, string) {
+	return s.AmbitoActual.AgregarFuncion(name, funcion)
 }
 
 // GetFuncion: delegada para obtener función del ámbito actual

@@ -11,6 +11,7 @@ fn sumar(a int, b int) int {
 	return a + b
 }
 
+//Funciones Recursivas
 fn factorial(n int) int {
     if n <= 1 {
         return 1
@@ -152,18 +153,14 @@ fn main() {
 
     // TOTAL
     puntos = puntos_simples + puntos_param + puntos_recur + puntos_atoi + puntos_parse + puntos_type
-    println("\n=== Tabla de Resultados ===")
-    println("| Funciones con parámetros         | / 2")
-    println(puntos_param)
-    println("| Funciones recursivas             | / 6")
-    println(puntos_recur)
-    println("| Atoi                     | / 1")
-    println(puntos_atoi)
-    println("| ParseFloat               | / 1")
-    println(puntos_parse)
-    println("| typeOf                   | / 1")
-    println(puntos_type)
-    println("| TOTAL                            | / 12")
-    println(puntos)
+    print("|═══════ Tabla de Resultados  ═════|════════|")
+    print("| Funciones con parámetros         | ",puntos_param ,"/ 2 |")
+    print("| Funciones recursivas             | ",puntos_recur,"/ 6 |")
+    print("| Atoi                             | ",puntos_atoi,"/ 1 |")
+    print("| ParseFloat                       | ",puntos_parse,"/ 1 |")
+    print("| typeOf                           | ",puntos_type,"/ 1 |")
+    print("|══════════════════════════════════|════════|")
+    print("| TOTAL                            |",puntos,"/12 |")
+    print("|══════════════════════════════════|════════|")
 }
 

@@ -1367,72 +1367,73 @@ func (v *PatronVIsitor) VisitContinueStmt(ctx *parser.ContinueStmtContext) inter
 }
 
 func (v *PatronVIsitor) VisitLlamarFuncion(ctx *parser.LlamarFuncionContext) interface{} {
-	canditateName := v.Visit(ctx.PatronId()).(string)
+    canditateName := v.Visit(ctx.PatronId()).(string)
 
-	// 1. Funciones embebidas
-	if nativeFunc, exists := FuncionesEmbebidas[canditateName]; exists {
-		args := make([]*Argumento, 0)
-		if ctx.Lista_argumentos() != nil {
-			args = v.Visit(ctx.Lista_argumentos()).([]*Argumento)
-		}
+    // 1. Funciones embebidas
+    if nativeFunc, exists := FuncionesEmbebidas[canditateName]; exists {
+        args := make([]*Argumento, 0)
+        if ctx.Lista_argumentos() != nil {
+            args = v.Visit(ctx.Lista_argumentos()).([]*Argumento)
+        }
 
-		ret, ok, msg := nativeFunc.Exec(v.GetInstruccionesContexto(), args)
-		if !ok {
-			if msg != "" {
-				v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-			}
-			return tiposDeDato.NuloPorDefecto
-		}
-		return ret
-	}
+        ret, ok, msg := nativeFunc.Exec(v.GetInstruccionesContexto(), args)
+        if !ok {
+            if msg != "" {
+                v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
+            }
+            return tiposDeDato.NuloPorDefecto
+        }
+        return ret
+    }
 
-	// 2. Funciones del usuario o constructores de structs
-	funcObj, msg1 := v.RegistroAmbito.GetFuncion(canditateName)
-	structObj, msg2 := v.RegistroAmbito.AmbitoGlobal.GetEstructura(canditateName)
+    // 2. Funciones del usuario o constructores de structs
+    funcObj, msg1 := v.RegistroAmbito.GetFuncion(canditateName)
+    structObj, msg2 := v.RegistroAmbito.AmbitoGlobal.GetEstructura(canditateName)
 
-	if funcObj == nil && structObj == nil {
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), msg1+msg2)
-		return tiposDeDato.NuloPorDefecto
-	}
+    if funcObj == nil && structObj == nil {
+        v.TablaError.NewErrorSemantico(ctx.GetStart(), msg1+msg2)
+        return tiposDeDato.NuloPorDefecto
+    }
 
-	args := make([]*Argumento, 0)
-	if ctx.Lista_argumentos() != nil {
-		args = v.Visit(ctx.Lista_argumentos()).([]*Argumento)
-	}
+    args := make([]*Argumento, 0)
+    if ctx.Lista_argumentos() != nil {
+        args = v.Visit(ctx.Lista_argumentos()).([]*Argumento)
+    }
 
-	// Prioridad: struct antes que función
-	if structObj != nil {
-		if ArgumentoValidoEstructura(args) {
-			return NewTipoObjeto(v, canditateName, ctx.PatronId().GetStart(), args, false)
-		}
-		v.TablaError.NewErrorSemantico(ctx.GetStart(),
-			"El struct '"+canditateName+"' no puede ser construido con los argumentos dados, y tampoco es una función válida.")
-		return tiposDeDato.NuloPorDefecto
-	}
+    // Prioridad: struct antes que función
+    if structObj != nil {
+        if ArgumentoValidoEstructura(args) {
+            return NewTipoObjeto(v, canditateName, ctx.PatronId().GetStart(), args, false)
+        }
+        v.TablaError.NewErrorSemantico(ctx.GetStart(),
+            "El struct '"+canditateName+"' no puede ser construido con los argumentos dados, y tampoco es una función válida.")
+        return tiposDeDato.NuloPorDefecto
+    }
 
-	switch funcObj := funcObj.(type) {
-	case *FuncionNativa:
-		ret, ok, msg := funcObj.Exec(v.GetInstruccionesContexto(), args)
-		if !ok {
-			if msg != "" {
-				v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
-			}
-			return tiposDeDato.NuloPorDefecto
-		}
-		return ret
+    switch funcObj := funcObj.(type) {
+    case *FuncionNativa:
+        ret, ok, msg := funcObj.Exec(v.GetInstruccionesContexto(), args)
+        if !ok {
+            if msg != "" {
+                v.TablaError.NewErrorSemantico(ctx.GetStart(), msg)
+            }
+            return tiposDeDato.NuloPorDefecto
+        }
+        return ret
 
-	case *Funcion:
-		funcObj.Exec(v, args, ctx.GetStart())
-		return funcObj.RetornarValor
+    case *Funcion:
+        // SIMPLIFICAR: Sin manejo especial de panics de recursión
+        funcObj.Exec(v, args, ctx.GetStart())
+        return funcObj.RetornarValor
 
-	case *FuncionNativaObjeto:
-		funcObj.Exec(v, args, ctx.GetStart())
-		return funcObj.RetornarValor
+    case *FuncionNativaObjeto:
+        funcObj.Exec(v, args, ctx.GetStart())
+        return funcObj.RetornarValor
 
-	default:
-		v.TablaError.NewErrorSemantico(ctx.GetStart(), "Tipo de función no soportado para '"+canditateName+"'")
-		return tiposDeDato.NuloPorDefecto
-	}
+    default:
+        v.TablaError.NewErrorSemantico(ctx.GetStart(), "Tipo de función no soportado para '"+canditateName+"'")
+        return tiposDeDato.NuloPorDefecto
+    }
 }
 
 func (v *PatronVIsitor) VisitListaArgumentos(ctx *parser.ListaArgumentosContext) interface{} {
